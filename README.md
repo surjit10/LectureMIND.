@@ -472,50 +472,8 @@ Reports are written to `evaluation/outputs/` in CSV, JSON, and Markdown formats.
 
 ---
 
-## Design Decisions
 
-The following table summarizes the key architectural decisions. See [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) for the full rationale and trade-off analysis.
 
-| Decision | Rationale |
-|---|---|
-| Cloud/Local split | GPU hardware should not be required for student interaction |
-| GraphRAG over vanilla RAG | Relational queries require graph traversal, not just semantic similarity |
-| Two-stage retrieval (bi-encoder + cross-encoder) | Balances retrieval recall (fast ANN) with generation precision (slow cross-encoder) |
-| LangGraph for orchestration | Typed, inspectable state machine; independently testable nodes; evaluation-friendly |
-| Strategy + Factory for LLM backends | Zero-restart provider switching; clean abstraction for Ollama  cloud APIs |
-| Lazy LLM / eager reranker | Reranker is lecture-agnostic and query-critical — load once; LLM config changes at runtime |
-| Decoupled startup | Server must boot cleanly with zero providers configured |
-| SSE streaming | Sub-second perceived latency for student queries |
-| Knowledge Package format | Offline-first, portable, open standards (NumPy, JSON, GraphML, ZIP) |
-
----
-
-## Current Limitations
-
-| Limitation | Impact |
-|---|---|
-| `POST /settings/ollama/download` blocks the event loop | Server becomes unresponsive during model downloads |
-| No file locking on `data/llm_config.json` | Concurrent provider settings updates risk JSON corruption |
-| `answer_similarity` uses Jaccard token overlap | Semantically equivalent answers with different wording score zero |
-| Single-user design (singleton state) | Multi-user deployment is not supported |
-| Each query is stateless (no multi-turn context) | Conversation history is not preserved across queries |
-| No API authentication | Any local network client can access all endpoints |
-| Package sizes of 50–500 MB | Large lectures produce unwieldy distribution packages |
-
----
-
-## Future Improvements
-
-- [ ] Offload Ollama model download to a background thread (`BackgroundTasks`)
-- [ ] Add file locking to `ProviderRegistry` for concurrent write safety
-- [ ] Replace Jaccard similarity with semantic embedding similarity for `answer_similarity`
-- [ ] Implement multi-turn conversation context via `QueryState` accumulation
-- [ ] Add bearer token authentication to FastAPI routes
-- [ ] Quantize embedding storage (int8) to reduce package size 4×
-- [ ] Add a knowledge graph visualization panel to the frontend
-- [ ] Implement live lecture streaming via Kafka ingestion pipeline
-
----
 
 ## Documentation Index
 
