@@ -1,0 +1,22 @@
+# === Chunk 1: Schemas, Config ===
+pydantic==2.9.2
+pydantic-settings==2.5.2
+pytest==8.3.3
+pytest-cov==5.0.0
+
+
+# === Chunk 2: Cloud Ingestion Pipeline (A1–C2) ===
+# These are pinned per spec §3. GPU deps only needed on Kaggle.
+# Do NOT install: torch, numpy, protobuf, cuda-toolkit (use Kaggle defaults).
+
+opencv-python==4.10.0.84
+ffmpeg-python==0.2.0
+faster-whisper==1.0.3
+transformers==4.46.2
+qwen-vl-utils==0.0.8
+accelerate>=0.34.2
+sentencepiece>=0.2
+paddleocr==2.9.1
+paddlepaddle-gpu==2.6.2
+
+# sentence-transformers installed separately in run_kaggle.py

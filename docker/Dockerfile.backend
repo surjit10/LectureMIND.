@@ -1,0 +1,23 @@
+# Backend Dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System deps for numpy, etc.
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code.
+COPY schemas/ schemas/
+COPY config.py .
+COPY local/ local/
+COPY agent/ agent/
+COPY retrieval/ retrieval/
+COPY serving/ serving/
+
+EXPOSE 8000
+
+CMD ["uvicorn", "serving.fastapi.app:app", "--host", "0.0.0.0", "--port", "8000"]

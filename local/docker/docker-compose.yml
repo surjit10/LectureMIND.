@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  neo4j:
+    image: neo4j:5.24-community
+    container_name: lecturemind-neo4j
+    ports:
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+    volumes:
+      - ./local_runtime/neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=none
+      - NEO4J_PLUGINS=["apoc"]
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.11.3
+    container_name: lecturemind-qdrant
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - ./local_runtime/qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:0.4.0
+    container_name: lecturemind-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./local_runtime/models:/root/.ollama/models
+    restart: unless-stopped
+    # GPU support (uncomment if NVIDIA GPU available):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # Kafka is disabled by default — not needed for Chunk 4.
+  # Uncomment for future streaming use cases.
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.6.0
+  #   container_name: lecturemind-kafka
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #   restart: unless-stopped

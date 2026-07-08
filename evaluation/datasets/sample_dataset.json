@@ -1,0 +1,12 @@
+[
+  {
+    "lecture_id": "demo_lecture",
+    "query": "What is the main topic of the lecture?",
+    "ground_truth_answer": "The main topic is introduction to machine learning.",
+    "expected_chunk_ids": ["chunk_001"],
+    "expected_route": "graph+vector",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "introduction"
+  }
+]
