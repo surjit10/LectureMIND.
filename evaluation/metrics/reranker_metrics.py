@@ -22,19 +22,43 @@ def evaluate_ranking_quality(expected_ids: List[str], reranked_results: List[Dic
     return 0.0
 
 def average_cross_encoder_score(reranked_results: List[Dict[str, Any]]) -> float:
-    """Calculates the average cross-encoder score of the returned results."""
+    """Calculates the average cross-encoder score of the returned results.
+
+    The reranker stores its score under ``rerank_score`` (see
+    retrieval/reranker/rerank_service.py).  ``score`` is accepted as a
+    fallback for legacy result dicts.
+    """
     if not reranked_results:
         return 0.0
-    scores = [float(r.get("score", 0.0)) for r in reranked_results if "score" in r]
+    scores = []
+    for r in reranked_results:
+        if "rerank_score" in r:
+            try:
+                scores.append(float(r["rerank_score"]))
+            except (TypeError, ValueError):
+                continue
+        elif "score" in r:
+            try:
+                scores.append(float(r["score"]))
+            except (TypeError, ValueError):
+                continue
     if not scores:
         return 0.0
     return sum(scores) / len(scores)
 
 def score_distribution(reranked_results: List[Dict[str, Any]]) -> Dict[str, float]:
-    """Returns basic stats about the score distribution."""
+    """Returns basic stats about the score distribution (uses rerank_score)."""
     if not reranked_results:
         return {"min": 0.0, "max": 0.0, "mean": 0.0}
-    scores = [float(r.get("score", 0.0)) for r in reranked_results if "score" in r]
+    scores = []
+    for r in reranked_results:
+        raw = r.get("rerank_score", r.get("score"))
+        if raw is None:
+            continue
+        try:
+            scores.append(float(raw))
+        except (TypeError, ValueError):
+            continue
     if not scores:
         return {"min": 0.0, "max": 0.0, "mean": 0.0}
     return {

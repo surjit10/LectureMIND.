@@ -233,6 +233,70 @@ class TestSegmenter:
         with pytest.raises(ValueError, match="zero chunks"):
             segment("lec_001", cloud_settings=cloud_settings)
 
+    def test_fallback_title_keyword_based(self):
+        """Fallback titles derive from repeated technical keywords, not raw speech."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "so we're going to talk about cross validation today",
+             "visual_context": "", "ocr_text": ""},
+            {"transcript": "cross validation splits the data into folds",
+             "visual_context": "", "ocr_text": ""},
+            {"transcript": "with k fold cross validation we train k models",
+             "visual_context": "", "ocr_text": ""},
+        ]
+        title = _generate_title_fallback(chunks)
+        assert "cross" in title.lower()
+        assert "validation" in title.lower()
+        # Raw speech filler must not leak into the title.
+        assert "going" not in title.lower()
+        assert len(title.split()) <= 8
+
+    def test_fallback_title_uses_ocr_heading(self):
+        """Fallback titles prefer a short OCR slide heading."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "so this is the part where we discuss bias variance tradeoff",
+             "visual_context": "", "ocr_text": "Bias-Variance Tradeoff"},
+        ]
+        assert _generate_title_fallback(chunks) == "Bias-Variance Tradeoff"
+
+    def test_fallback_title_ignores_ocr_boilerplate(self):
+        """Fallback must skip channel-branding OCR lines before keyword fallback."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "k fold cross validation evaluates model performance",
+             "visual_context": "", "ocr_text": "Subscribe to this channel"},
+            {"transcript": "each fold trains on k minus one parts",
+             "visual_context": "", "ocr_text": ""},
+        ]
+        title = _generate_title_fallback(chunks)
+        assert "subscribe" not in title.lower()
+        assert "cross" in title.lower()
+
+    def test_fallback_title_skips_markdown_filler_captions(self):
+        """Markdown-prefixed, generic VLM captions must fall through to keywords."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "relational model algebra forms the basis of the course",
+             "visual_context": "### Description The image appears to be a slide about "
+                                "relational algebra and its operators",
+             "ocr_text": ""},
+        ]
+        title = _generate_title_fallback(chunks)
+        assert "description" not in title.lower()
+        assert "image" not in title.lower()
+        assert "relational" in title.lower()
+
+    def test_fallback_title_empty_chunks(self):
+        """Empty chunk list must produce a safe placeholder."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        assert _generate_title_fallback([]) == "Untitled Segment"
+
     def test_cosine_similarity_used(self, cloud_settings, setup_chunks):
         """Verify cosine similarity computation works correctly."""
         from cloud.segmentation.segmenter import _cosine_similarity

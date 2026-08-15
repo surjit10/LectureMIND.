@@ -4,8 +4,6 @@
 
 "use client";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { patchSettings } from "@/services/api";
 import type { Provider, AISettings } from "@/types";
 import ProviderCard from "./ProviderCard";
 import ProviderDialog from "./ProviderDialog";
@@ -18,7 +16,6 @@ interface Props {
 export default function OnlineConfig({ settings }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Provider | null>(null);
-  const queryClient = useQueryClient();
 
   const handleEdit = (p: Provider) => {
     setEditTarget(p);

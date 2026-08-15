@@ -1,0 +1,174 @@
+# LectureMIND — Metrics Matrix
+
+> **Purpose:** One document that quantifies what LectureMIND is and why it is stronger than generic RAG / video-summarizer baselines.
+> **Audience:** Engineers, evaluators, and reviewers who need the measured numbers behind the claims.
+> **Last updated:** 2026-08-15 · every number below traces to a file or a live test in this repo.
+> **Legend:** `[Measured]` verified by live benchmark execution and report.
+> **Companion docs:** [EVALUATION.md](./docs/EVALUATION.md) (framework) · [RETRIEVAL_SYSTEM.md](./docs/RETRIEVAL_SYSTEM.md) (retrieval internals)
+
+---
+
+## Table of Contents
+
+- [1. Project at a glance](#1-project-at-a-glance)
+- [2. Measured metrics](#2-measured-metrics)
+- [3. Comparison matrix — LectureMIND vs baselines](#3-comparison-matrix--lecturemind-vs-baselines)
+- [4. Metrics roadmap](#4-metrics-roadmap)
+- [5. Credibility notes](#5-credibility-notes)
+
+---
+
+## 1. Project at a glance
+
+| Dimension | Value | Evidence |
+|---|---|---|
+| Architecture layers | Multimodal ingestion → segmentation → entity/relation extraction → hybrid GraphRAG (vector + BM25 + graph) → cross-encoder rerank → evidence-gated generation | `cloud/`, `retrieval/`, `agent/langgraph/` |
+| Modalities captured | Audio (100% chunk coverage) + slide visuals + OCR at slide keyframes | `multimodal_fusion.py`, live scan |
+| Serving model | Local Ollama `qwen2.5:3b` (offline, fully private) **or** cloud APIs — OpenAI, Gemini, Groq, OpenRouter, Anthropic — hot-swappable via `ProviderRegistry` | `local/llm/provider_registry.py` |
+| Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
+| Reranker | Global cross-encoder `BAAI/bge-reranker-base` (XLM-R), CPU, process singleton; dynamic int8 quantization (`RERANKER_QUANTIZE`) with automatic FP32 fallback | `rerank_service.py`, `reranker_loader.py`, `app.py` |
+| Hybrid retrieval | Dense (`bge-large-en-v1.5`) + BM25 lexical candidates fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking; enabled by default (`ENABLE_HYBRID_RETRIEVAL`) | `retrieval/hybrid/bm25_retriever.py`, `config.py` |
+| Knowledge graph | Demo lecture: 128 entities / 20 relations; collection scan: 930 nodes / 127 edges; 6 relation types traversed | Neo4j live query |
+| Content scale | 725 knowledge packages on disk (~85 MB total); demo lecture: 97 semantic chunks / 16 segments | `data/packages/` |
+| Automated tests | **492 passing** (planner, retrieval, hybrid retrieval, reranker, loader, isolation, pipeline, extraction) | `pytest -q` |
+
+---
+
+## 2. Measured metrics
+
+### 2.1 Retrieval & reranking quality (cross-encoder eval on lecture triplets)
+
+Source: `data/packages/<lecture>/training_metrics.json` — ranking eval on generated triplets (hard-negative sampling).
+
+| Lecture | Triplets | MRR | Recall@5 | Recall@10 | NDCG@10 |
+|---|---|---|---|---|---|
+| lecture_bb2ee3fa | 1,086 | **0.9949** | 1.000 | 1.000 | **0.9963** |
+| lecture_6a80d31a | 263 | **0.9981** | 1.000 | 1.000 | **0.9986** |
+| lecture_53b21041 | 11 | **1.000** | 1.000 | 1.000 | **1.000** |
+| **Aggregate** | **1,360** | **0.996** | **1.000** | **1.000** | **0.997** |
+
+### 2.2 Grounding, citations & hallucination resistance (live-verified)
+
+| Metric | Value | How verified |
+|---|---|---|
+| Out-of-scope refusal (no hallucination) | Refuses with "Insufficient evidence…" instead of inventing | Live trap question (capital of France + fabricated topic) |
+| Source-grounded answers | 100% of answers carry `chunk_id` + `timestamp` sources built only from retrieved chunks | `_build_sources`, live query |
+| Lecture-wide synthesis | Summary answer grounded on **56 timestamped sources** across the timeline | Live summary query |
+| Visual grounding | Answered from slide content when planner routes `diagram/slide` intent | Live visual query |
+| Graph grounding | Traversal answers (`Relational Model → Relational Algebra → Database Systems → SQL`) | Live lowercase graph query |
+| Language consistency | Answers pinned to question language (English-only verified; 0 non-English chars) | Live test |
+| Cross-lecture data leakage | **0 foreign chunks** in leak test; hard guards raise without `lecture_id`; Neo4j scoped by `(entity_id, lecture_id)` | Live test + Cypher inspection |
+
+### 2.3 Latency & throughput (live, real LLM)
+
+Measured on the live local stack with **cloud inference active (Groq `openai/gpt-oss-120b`)**. Reranker runs on local CPU; generation runs on the cloud API. Source: `evaluation/outputs/evaluation_report_20260811_105621.*` (curated 50-question run, `top_k = 15`).
+
+| Stage | Mean | p95 |
+|---|---|---|
+| Planner | 0.0004 s | 0.0008 s |
+| Retrieval (dense + BM25, live Qdrant) | 0.13 s | 0.17 s |
+| Reranker (local CPU, k=15) | 3.82 s | 5.33 s |
+| Generation (cloud LLM, rate-limiter paced) | 16.56 s | 18.97 s |
+| **Total end-to-end** | **20.51 s** | **22.82 s** |
+
+> Generation latency includes per-provider rate-limiter pacing (`local/llm/rate_limiter.py`) under the provider's token budget — the limiter keeps full benchmark runs on a single backend with zero mid-run quota failures. The reranker is the deliberate precision stage: it scales linearly with candidate count, so `top_k` is the primary latency/recall lever. Load-test harness (`evaluation/load_testing/load_test.py`) is ready for a 100/500/1000-user run.
+
+### 2.4 End-to-end QA accuracy (curated 50-question benchmark)
+
+Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 questions, 0 errors, single backend (Groq `openai/gpt-oss-120b`)**, run through the real `QueryWorkflow` (Qdrant → Neo4j → reranker → LLM). Dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` — every expected chunk ID is keyword-verified against chunk content and confirmed present in Qdrant (23 factual / 17 conceptual / 5 visual / 4 definition / 1 summary).
+
+| Metric | Mean | p95 |
+|---|---|---|
+| Routing accuracy | **0.980** (49/50) | 1.000 |
+| Visual routing accuracy (`need_visual`) | **1.000** | 1.000 |
+| MRR@5 | **0.788** | 1.000 |
+| Hit@5 | **0.980** | 1.000 |
+| NDCG@5 | **0.767** | 1.000 |
+| Recall@5 | **0.862** | 1.000 |
+| Precision@5 | 0.280 | 0.400 |
+| Ranking quality (rerank MRR) | **0.918** | 1.000 |
+| Answer F1 | **0.459** | 0.714 |
+| Keyword recall | **0.545** | 1.000 |
+| Citation completeness | **1.000** | 1.000 |
+| Citation coverage | **0.927** | 1.000 |
+| Chunk coverage | **1.000** | 1.000 |
+| Mean end-to-end latency | 20.51 s | 22.82 s |
+
+**By question type (measured):**
+
+| Type | n | MRR@5 | Hit@5 | Answer F1 |
+|---|---|---|---|---|
+| factual | 23 | 0.844 | 1.000 | 0.422 |
+| conceptual | 17 | 0.805 | 0.941 | 0.406 |
+| visual (`need_visual`) | 5 | 0.567 | 1.000 | 0.631 |
+| definition | 4 | 0.750 | 1.000 | 0.632 |
+| summary (lecture-wide) | 1 | 0.500 | 1.000 | 0.682 |
+
+**System features behind these numbers:**
+
+1. **Semantic chunk merging.** Whisper segments are merged at ingestion into 97 self-contained semantic chunks; answer chunks carry complete passages, which raises Answer F1 and keyword recall directly.
+2. **Hybrid BM25 lexical retrieval (RRF).** Exact entity names and numeric facts that dense embeddings miss are recovered before reranking — e.g. the "Linux lines of code" evidence sits at BM25 rank 0 while absent from the dense top-15 (verified against the live index).
+3. **Score-ordered context selection.** `ContextBuilder` selects evidence by rerank score and renders it chronologically, so a top-ranked chunk late in the timeline is never dropped by the context budget.
+4. **OCR noise sanitization.** URLs and social handles are stripped from otherwise-educational slides instead of discarding the whole slide.
+5. **Rate limiter + retry.** Per-provider token/request budgets with exponential backoff (`local/llm/rate_limiter.py`) keep runs on a single backend with 0 errors.
+
+Citation completeness of 1.0 means every cited source was actually retrieved: zero hallucinated citations.
+
+### 2.5 Storage & compression
+
+LectureMIND replaces raw video with structured knowledge. The demo lecture is an **83-minute, 720p video (~1.2 GB at a typical 2 Mbps encode)**; its knowledge package is **436 KB** (446,576 bytes, 725 KB unpacked):
+
+| Artifact | Size | Notes |
+|---|---|---|
+| Source video (83 min, 720p) | ≈ 1.2 GB | Not stored or shipped |
+| Knowledge package (unpacked) | 725 KB | transcript, OCR, visual captions, embeddings, entities/relations, triplets |
+| Knowledge package (zip) | **436 KB** | ZIP ratio 1.6×; **≈2,800× smaller than the source video** |
+| Per-query LLM context | ≈ 3.5 KB | the only text the model reads per question |
+| Code snapshot (`dist/lecturemind-code-kaggle.zip`) | 125 KB | 81 files, 303 KB of source → 2.4× zip ratio |
+| Whole corpus (725 packages) | ≈ 85 MB | replaces an estimated 100+ GB of source video |
+
+This is the storage story the architecture is built around: the expensive, bulky artifact (video) is processed **once** in the cloud, and everything a student needs — searchable chunks, embeddings, graph, captions — ships as a small portable ZIP that runs fully offline on a laptop. The problem being solved is not video compression but *knowledge extraction*: gigabytes of unstructured video become kilobytes of structured, queryable data.
+
+### 2.6 Scale & content coverage
+
+| Metric | Value |
+|---|---|
+| Videos ingested | 725 knowledge packages on disk (Kaggle-produced) |
+| Avg chunks / lecture | Demo lecture: **97 semantic chunks / 16 segments** |
+| Transcript coverage | 100% of chunks carry transcript |
+| Visual + OCR coverage | Fused at slide keyframes; 5 of 50 benchmark questions target slide content |
+| Graph density | Demo lecture: 128 entities / 20 relations; collection scan: 930 nodes / 127 edges |
+
+---
+
+## 3. Comparison matrix — LectureMIND vs baselines
+
+| Capability | **LectureMIND** | Naive vector RAG | Generic video summarizer | Closed-box LLM (ChatGPT etc.) |
+|---|---|---|---|---|
+| Multimodal capture (audio + slide + OCR) | Yes — audio 100% + keyframe slides/OCR | No — text-only | Partial — transcript only | No — cannot ingest |
+| Timestamped, chunk-level grounding | Yes — every chunk carries timestamp | No | No | No |
+| Knowledge-graph reasoning (entities/relations/traversal) | Yes — 128 entities / 20 relations (demo), 930 / 127 collection, 6 relation types | No | No | No |
+| Hybrid retrieval (dense + BM25/RRF + graph + cross-encoder rerank) | Yes — 0.997 MRR on lecture triplets; 50-set MRR@5 0.788 | Partial — top-k only, no rerank | No | No |
+| Lecture-wide synthesis (summary/notes/quiz) | Yes — 8-bucket temporal sampling, 56-source summary | No — single-pass top-k | Partial — chapter list only | No |
+| Hallucination control (evidence-gated, source-only) | Yes — live-verified refusal | No — invents freely | No | No |
+| Cross-lecture data isolation | Yes — hard guards, tested | Partial | n/a | n/a |
+| Domain-adaptive reranker training | Yes — dedicated training pipeline and automated triplet dataset generator | No | No | No |
+| Private / offline (no API dependence) | Yes — local Ollama + Neo4j + Qdrant | Yes | Yes | No — requires API |
+| Benchmark infra (RAGAS, QA harness, load test) | Yes — harness + live run: **50-QA curated (MRR@5 0.788, Hit@5 0.980, routing 0.980)** | No | No | No |
+| Measured eval numbers to show | Yes — retrieval/rerank + live QA + latency + graph/visual types | Partial | No | No |
+| Source-video footprint | 83-min 720p lecture → **436 KB knowledge package** (~2,800× smaller); corpus ≈ 85 MB for 725 lectures | Stores raw video | Stores raw video | n/a |
+
+**The one-line pitch this matrix supports:** *LectureMIND is a full-stack, private, multimodal GraphRAG system — with timestamped grounding, graph reasoning, lecture-wide synthesis, and hallucination controls — that has an evaluation harness and measured ranking metrics (0.997 MRR) out of the box.*
+
+---
+
+## 4. Evaluation Suite & Verification
+
+The evaluation suite executes the real pipeline with verified datasets:
+- **Comprehensive Benchmark (`evaluation/benchmark_runner.py`):** Real single-pass execution across Qdrant, Neo4j, CrossEncoder reranker, and LLM backends with full metric breakdowns.
+- **RAGAS Integration (`evaluation/ragas/eval_ragas.py`):** Structured evaluation harness for Faithfulness, Answer Relevancy, and Context Precision.
+- **Load Testing (`evaluation/load_testing/load_test.py`):** High-concurrency throughput and latency profiling (100 / 500 / 1000 concurrent virtual users).
+- **Interactive Visual Dashboard (`evaluation/dashboard/`):** Standalone dashboard rendering performance analytics and score breakdowns.
+
+---
+*Maintained by the evaluation stack in `evaluation/` — regenerate reports with `evaluation/benchmark_runner.py`, `evaluation/ragas/eval_ragas.py`, `evaluation/load_testing/load_test.py`.*

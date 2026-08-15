@@ -36,6 +36,7 @@ class TestVectorRetriever:
             qdrant_client=mock_client,
             embedding_model=mock_model,
             top_k=5,
+            lecture_id="lec_001",
         )
 
         assert len(results) == 1
@@ -54,7 +55,10 @@ class TestVectorRetriever:
         mock_response.points = [mock_hit]
         mock_client.query_points.return_value = mock_response
 
-        results = retrieve_vectors("test", qdrant_client=mock_client, embedding_model=mock_model)
+        results = retrieve_vectors(
+            "test", qdrant_client=mock_client, embedding_model=mock_model,
+            lecture_id="lec_001",
+        )
 
         for r in results:
             assert "vector" not in r
@@ -65,4 +69,17 @@ class TestVectorRetriever:
         mock_client = MagicMock()
 
         with pytest.raises(ValueError, match="1024"):
-            retrieve_vectors("test", qdrant_client=mock_client, embedding_model=mock_model)
+            retrieve_vectors(
+                "test", qdrant_client=mock_client, embedding_model=mock_model,
+                lecture_id="lec_001",
+            )
+
+    def test_missing_lecture_id_raises(self):
+        """Missing lecture_id must fail loudly, never search across lectures."""
+        mock_model = self._make_mock_model()
+        mock_client = MagicMock()
+
+        with pytest.raises(ValueError, match="lecture_id is required"):
+            retrieve_vectors(
+                "test", qdrant_client=mock_client, embedding_model=mock_model,
+            )

@@ -55,6 +55,11 @@ def valid_package(cloud_settings):
     (lecture_dir / "manifest.json").write_text(json.dumps(manifest))
     (lecture_dir / "chunk_segment_map.json").write_text(json.dumps({"lec_001_chunk_000001": "seg_1"}))
     np.save(str(lecture_dir / "embeddings.npy"), np.random.randn(1, 1024).astype(np.float32))
+    # Triplets carry the reranker training data — now part of the package.
+    (lecture_dir / "triplets.json").write_text(json.dumps(
+        [{"query": "What is BFS?", "positive": "BFS explores level by level",
+          "negative": "DFS explores depth first"}]
+    ))
 
     # Also create excluded files that must NOT end up in the zip.
     (lecture_dir / "vlm_output.jsonl").write_text('{"test": true}\n')
@@ -84,7 +89,7 @@ class TestExporter:
         assert zip_path.name == "lec_001_knowledge_package.zip"
 
     def test_zip_contains_required_files(self, cloud_settings, valid_package, tmp_path):
-        """Zip must contain all required package files."""
+        """Zip must contain all required package files, at the ZIP ROOT."""
         transfer_dir = tmp_path / "transfer"
         zip_path = export_package(
             "lec_001", cloud_settings=cloud_settings,
@@ -94,13 +99,16 @@ class TestExporter:
         with zipfile.ZipFile(zip_path, "r") as zf:
             names = zf.namelist()
 
-        assert any("manifest.json" in n for n in names)
-        assert any("multimodal_chunks.json" in n for n in names)
-        assert any("segments.json" in n for n in names)
-        assert any("entities.json" in n for n in names)
-        assert any("embeddings.npy" in n for n in names)
-        assert any("embedding_ids.json" in n for n in names)
-        assert any("chunk_segment_map.json" in n for n in names)
+        # Exact top-level names — the local importer validates/extracts
+        # top-level files, so a subfolder prefix would break local import.
+        required = {
+            "manifest.json", "multimodal_chunks.json", "segments.json",
+            "entities.json", "embeddings.npy", "embedding_ids.json",
+            "chunk_segment_map.json", "triplets.json", "metadata.json",
+        }
+        assert required.issubset(set(names)), f"Missing files: {required - set(names)}"
+        # No subfolder prefix anywhere.
+        assert all("/" not in n for n in names), f"Expected flat layout, got: {names}"
         # reranker_model/ must NOT be present in the package.
         assert not any("reranker_model" in n for n in names), "reranker_model/ must not be exported"
 
@@ -116,7 +124,7 @@ class TestExporter:
             names = zf.namelist()
 
         for excluded in ["vlm_output.jsonl", "ocr_output.jsonl", "transcript.json",
-                         "metadata.json", "frames.json", "triplets.json"]:
+                         "frames.json", "training_metrics.json"]:
             assert not any(excluded in n for n in names), f"{excluded} should not be in zip"
 
         assert not any("/frames/" in n for n in names), "frames/ dir should not be in zip"

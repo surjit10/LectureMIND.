@@ -14,8 +14,17 @@ import logging
 import threading
 from typing import Any, Dict, List, Optional
 
+from config import LocalSettings
 from local.services.reranker_service import RerankerService
-from retrieval.context_builder import ContextBuilder, _build_passage_text
+from retrieval.context_builder import (
+    ContextBuilder,
+    _build_graph_context,
+    _build_passage_text,
+    _CHUNK_SEPARATOR,
+)
+
+# Hybrid retrieval (BM25 + RRF) — opt-in, off by default.
+from retrieval.hybrid.bm25_retriever import bm25_search, rrf_fuse
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +96,15 @@ def rerank(
     is_lecture_wide: bool = False,
     need_visual: bool = False,
     char_budget: Optional[int] = None,
+    lecture_id: Optional[str] = None,
+    enable_hybrid: Optional[bool] = None,
 ) -> tuple:
     """
     Fuse, deduplicate, and rerank results.
+
+    Hybrid retrieval: when enable_hybrid=True and lecture_id is given, BM25
+    lexical retrieval runs alongside the dense vector search and results are
+    fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking.
 
     Args:
         query: User query string.
@@ -99,6 +114,10 @@ def rerank(
         reranker_model: Raw CrossEncoder model (creates service if needed).
         is_lecture_wide: When True, ContextBuilder samples across timeline.
         need_visual: When True, visual context is included.
+        char_budget: Character budget for context (overrides default).
+        lecture_id: Runtime lecture ID for BM25 index scope.
+        enable_hybrid: When True, run BM25 + RRF fusion. If None, falls
+            back to LocalSettings.ENABLE_HYBRID_RETRIEVAL (default False).
 
     Returns:
         (reranked_results, final_context) tuple.
@@ -108,12 +127,56 @@ def rerank(
     # Combine and deduplicate.
     combined = _extract_passages(graph_results, vector_results)
 
+    # ── Hybrid retrieval: BM25 + RRF fusion ──
+    # When enabled, augment the dense vector candidates with lexical BM25
+    # results fused via Reciprocal Rank Fusion. This catches entity names,
+    # numeric facts, and exact-phrase matches that dense embeddings may miss.
+    if enable_hybrid is None:
+        enable_hybrid = LocalSettings().ENABLE_HYBRID_RETRIEVAL
+    if enable_hybrid and lecture_id:
+        try:
+            bm25_retrieved = bm25_search(query, lecture_id, top_k=15)
+            if bm25_retrieved:
+                combined = rrf_fuse(vector_results, bm25_retrieved, top_k=15)
+                logger.info(
+                    "E3: Hybrid retrieval — BM25 contributed %d candidates, "
+                    "RRF fused to %d total.",
+                    len(bm25_retrieved), len(combined),
+                )
+        except Exception as exc:
+            logger.warning(
+                "E3: Hybrid retrieval failed (fallback to dense only): %s", exc,
+            )
+
+    # Render graph paths as labelled context. Graph results carry entity
+    # names + relation types (not chunk payloads), so they never enter the
+    # rerank pool — there is no passage text to score. They are, however,
+    # the core evidence for relationship questions, so they are appended to
+    # final_context directly (budget reserved below).
+    # Cap the graph section at half the budget so a broad graph hit can
+    # never starve the transcript evidence.
+    graph_budget = min(2000, max(0, effective_budget // 2))
+    graph_context = _build_graph_context(graph_results, char_budget=graph_budget)
+
     if not combined:
+        if graph_context:
+            logger.info(
+                "E3: No vector passages; graph context only (%d chars).",
+                len(graph_context),
+            )
+            return [], graph_context
         logger.info("E3: No passages to rerank.")
         return [], ""
 
-    # Build passage texts.
-    passages = [_build_passage_text(r) for r in combined]
+    # Build passage texts with the SAME visibility the LLM context will use:
+    # visual context is only included when need_visual=True.  Previously the
+    # reranker scored passages with visual_context always included, so chunks
+    # whose relevance came from slide descriptions were ranked high but the
+    # LLM never saw those visuals (need_visual=False) — starving genuinely
+    # relevant transcript evidence (diagnosed: "course materials" ranked the
+    # visual-boosted "What is an OS?" / "Societal Scale" slides above the
+    # textbook chunk that names the actual course materials).
+    passages = [_build_passage_text(r, need_visual=need_visual) for r in combined]
 
     global _GLOBAL_RERANKER_SERVICE
     # Allow test injection via function arguments.
@@ -152,13 +215,32 @@ def rerank(
     # Build final_context via ContextBuilder.
     # ContextBuilder handles dedup, merge, chronological order,
     # OCR noise filtering, and lecture-wide temporal sampling.
+    # Reserve budget for the graph section first so relationship evidence
+    # is never squeezed out by transcript chunks.
     global _CONTEXT_BUILDER
+    vector_budget = effective_budget
+    if graph_context:
+        vector_budget = max(
+            0, effective_budget - len(graph_context) - len(_CHUNK_SEPARATOR)
+        )
+
     final_context = _CONTEXT_BUILDER.build(
         reranked,
         is_lecture_wide=is_lecture_wide,
         need_visual=need_visual,
-        char_budget=effective_budget,
+        char_budget=vector_budget,
     )
 
-    logger.info("E3: Reranked %d passages, context=%d chars.", len(reranked), len(final_context))
+    # Prepend the graph section: relationship paths are the primary
+    # evidence for relationship questions, so they lead the context.
+    if graph_context:
+        if final_context:
+            final_context = graph_context + _CHUNK_SEPARATOR + final_context
+        else:
+            final_context = graph_context
+
+    logger.info(
+        "E3: Reranked %d passages, graph=%d chars, context=%d chars.",
+        len(reranked), len(graph_context), len(final_context),
+    )
     return reranked, final_context

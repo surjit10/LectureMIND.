@@ -17,6 +17,8 @@ class BenchmarkSample:
     question_type: str
     difficulty: str
     topic: str
+    keywords: List[str] = None  # optional: key terms expected in the answer
+    need_visual: bool = False   # optional: query requires visual context (planner need_visual)
 
 class DatasetLoader:
     def __init__(self, dataset_path: str):
@@ -48,3 +50,9 @@ class DatasetLoader:
         missing = required_fields - item.keys()
         if missing:
             raise ValueError(f"Sample missing required fields: {missing}. Sample: {item.get('query', 'Unknown')}")
+        # Optional keywords field must be a list if present.
+        if "keywords" in item and not isinstance(item["keywords"], list):
+            raise ValueError(f"Sample 'keywords' must be a list. Sample: {item.get('query', 'Unknown')}")
+        # Optional need_visual field must be a bool if present.
+        if "need_visual" in item and not isinstance(item["need_visual"], bool):
+            raise ValueError(f"Sample 'need_visual' must be a bool. Sample: {item.get('query', 'Unknown')}")

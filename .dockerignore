@@ -1,0 +1,28 @@
+# Heavyweight / environment-specific — never ship into image build context.
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Runtime data (packages, models, caches) — mounted as volumes in compose.
+data/
+local_runtime/
+cloud_runtime/
+transfer/
+
+# Cloud-only ingestion code — not needed by backend/frontend images.
+cloud/
+scripts/
+docs/
+tests/
+0-zip data/
+0-not-required/
+
+# Local secrets and misc.
+.env
+.git/
+.github/
+*.log
+.DS_Store

@@ -32,3 +32,7 @@ class QueryResponse(BaseModel):
     answer: str
     sources: List[Dict[str, Any]] = []
     graph_path: List[str] = []
+    # Additive pipeline trace for Developer Mode. Defaults to {} so every
+    # existing caller is unaffected. Populated by the /query route from
+    # workflow state — no recomputation, no new retrieval.
+    debug: Dict[str, Any] = {}

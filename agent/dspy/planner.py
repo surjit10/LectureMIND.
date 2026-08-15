@@ -24,6 +24,19 @@ from agent.dspy.query_plan import QueryPlan
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
+# Retrieval candidate pool sizes (consumed by vector_retriever_node via
+# QueryPlan.top_k).
+#
+# NORMAL_TOP_K=15: a diagnostic found 19/28 retrieval misses had the correct
+# chunk at cosine rank 6-46 with a mean score of 0.652, but the reranker can
+# only recover candidates that enter its pool. A larger pool feeds the
+# RERANKER; the final LLM context budget (context_budget) and evidence gating are
+# unchanged. Lecture-wide retrieval keeps its existing behavior.
+# ---------------------------------------------------------------------------
+NORMAL_TOP_K = 15
+LECTURE_WIDE_TOP_K = 15
+
+# ---------------------------------------------------------------------------
 # Keyword patterns — compiled for efficiency
 # ---------------------------------------------------------------------------
 
@@ -65,6 +78,9 @@ VECTOR_PATTERNS = [
 
 
 # Summary / lecture-wide patterns.  These trigger is_lecture_wide=True.
+# "is"/"does" are optional so common informal phrasings match:
+#   "what explained in this lecture", "what's explained...",
+#   "what is this lecture explaining", "explain what is in this lecture".
 SUMMARY_PATTERNS = [
     r"\bsummar(y|ize|ization|ise)\b",
     r"\brecap\b",
@@ -78,9 +94,14 @@ SUMMARY_PATTERNS = [
     r"\bkey\s+points?\b",
     r"\bmain\s+(points?|ideas?|topics?)\b",
     r"\bexplain\s+(the|this|today'?s?)\s+lecture\b",
-    r"\bwhat\s+is\s+(the|this|today'?s?)\s+lecture\s+about\b",
+    r"\bexplain\w*\s+what\s+(is\s+)?in\s+(this|the)\s+lecture\b",
+    r"\bwhat(?:'?s|\s+is)?\s+(?:explain\w*|covered|taught|discussed)\s+in\s+(this|the)\s+lecture\b",
+    r"\bwhat(?:'?s|\s+is)?\s+(the|this|today'?s?)\s+lecture\s+(about|on|covering|explain\w*)\b",
+    r"\bwhat\s+does\s+(this|the)\s+lecture\s+(cover|explain|teach|discuss|contain)\b",
+    r"\blecture\s+(covers|explains|teaches|discusses|is\s+about)\b",
     r"\bkey\s+(concepts|takeaways)\b",
     r"\btopics\s+(are\s+)?covered\b",
+    r"\bwhat\s+(topics|concepts|ideas)\s+(are\s+)?(covered|discussed|taught|explained)\b",
     r"\bwhat\s+did\s+we\s+learn\b",
     r"\boverview\s+of\s+(the|this|today'?s?)\s+lecture\b",
 ]
@@ -251,7 +272,7 @@ class QueryPlanner:
         vector_weight = round(1.0 - graph_weight, 2)
 
         # --- top_k and context_budget by scope ---
-        top_k = 15 if is_lecture_wide else 5
+        top_k = LECTURE_WIDE_TOP_K if is_lecture_wide else NORMAL_TOP_K
         context_budget = 6000 if is_lecture_wide else 4000
 
         # --- need_visual ---

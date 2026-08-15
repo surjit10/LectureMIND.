@@ -9,7 +9,13 @@ import json
 import logging
 from pathlib import Path
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    # cv2 is a cloud-only dependency (Kaggle). Importing it at module level
+    # made the module unimportable in local/CI environments, which broke the
+    # test mock target resolution. Tests patch this module attribute.
+    cv2 = None  # type: ignore[assignment]
 
 from config import CloudSettings
 from schemas.metadata import VideoMetadata
@@ -42,6 +48,11 @@ def extract_metadata(
 
     if not video_path.exists():
         raise FileNotFoundError(f"Video file not found: {video_path}")
+
+    if cv2 is None:
+        raise RuntimeError(
+            "cv2 (opencv-python) is required for metadata extraction but is not installed."
+        )
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():

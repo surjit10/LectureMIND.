@@ -2,6 +2,8 @@
 // User-friendly error display — never exposes stack traces.
 "use client";
 
+import { AlertTriangle } from "lucide-react";
+
 interface Props { message: string; onRetry?: () => void }
 
 export default function ErrorMessage({ message, onRetry }: Props) {
@@ -26,7 +28,7 @@ export default function ErrorMessage({ message, onRetry }: Props) {
   return (
     <div className="error-card bg-red-900/20 border border-red-500/30 p-4 rounded-xl flex flex-col items-start">
       <div className="flex items-start gap-3">
-        <span className="text-red-500 mt-0.5">⚠️</span>
+        <AlertTriangle className="text-red-500 mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
         <p className="error-text text-red-200 text-sm font-medium">{friendly}</p>
       </div>
       {onRetry && <button className="mt-3 ml-7 px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded text-sm transition-colors" onClick={onRetry}>Retry</button>}

@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from config import local_settings
 from retrieval.reranker import rerank_service
@@ -18,6 +18,10 @@ router = APIRouter(prefix="/api/reranker", tags=["Reranker"])
 
 
 class RerankerStatusResponse(BaseModel):
+    """Status payload for the global reranker."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
     status: str
     model_name: str
     custom_model: bool
@@ -26,6 +30,7 @@ class RerankerStatusResponse(BaseModel):
     last_updated: str
     max_upload_size_mb: float
     backend: str
+    precision: str
 
 
 class RerankerSettingsPatch(BaseModel):
@@ -41,9 +46,12 @@ def _get_dir_size_mb(path: Path) -> float:
 def _safe_extract(zip_path: Path, extract_dir: Path):
     """Extract zip safely, mitigating ZipSlip."""
     with zipfile.ZipFile(zip_path, "r") as zf:
+        # is_relative_to (not startswith) so sibling paths like
+        # "<root>_evil/file" cannot bypass the check.
+        extract_root = extract_dir.resolve()
         for member in zf.namelist():
             member_path = (extract_dir / member).resolve()
-            if not str(member_path).startswith(str(extract_dir.resolve())):
+            if not member_path.is_relative_to(extract_root):
                 raise ValueError("ZipSlip detected: Invalid path in zip file.")
         zf.extractall(extract_dir)
 
@@ -146,12 +154,18 @@ async def get_reranker_status():
             disk_size_mb=0.0,
             last_updated="N/A",
             max_upload_size_mb=max_size,
-            backend="CrossEncoder"
+            backend="CrossEncoder",
+            precision="fp32",
         )
     
     size_mb = _get_dir_size_mb(global_dir)
     is_custom = (global_dir / "config.json").exists()
-    
+
+    # Report the active model's precision (int8_dynamic when quantized).
+    active_service = rerank_service._GLOBAL_RERANKER_SERVICE
+    active_model = getattr(active_service, "_model", None)
+    precision = getattr(active_model, "_precision", "fp32")
+
     import datetime
     last_updated_ts = global_dir.stat().st_mtime
     last_updated_str = datetime.datetime.fromtimestamp(last_updated_ts).strftime('%B %d, %Y %I:%M %p')
@@ -164,7 +178,8 @@ async def get_reranker_status():
         disk_size_mb=round(size_mb, 2),
         last_updated=last_updated_str,
         max_upload_size_mb=max_size,
-        backend="CrossEncoder"
+        backend="CrossEncoder",
+        precision=precision,
     )
 
 

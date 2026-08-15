@@ -9,10 +9,15 @@ cloud_runtime/
 local_runtime/
 transfer/
 
+# Freebuff desktop app database (local chat/agent state — never push)
+.freebuff/
+
 # ------------------------------------------------------------
 # Generated lecture/package data
 # ------------------------------------------------------------
 data/packages/
+# Provider config contains plaintext API keys — never commit
+data/llm_config.json
 
 # ------------------------------------------------------------
 # Local backups & reports
@@ -177,7 +182,13 @@ Thumbs.db
 .pyre/
 
 # ------------------------------------------------------------
-# Documentation & Temp
+# Temp / scratch (unwanted files are parked here, never committed)
 # ------------------------------------------------------------
-docs/
 00_temp/
+
+# ------------------------------------------------------------
+# Archived dev tooling (Kaggle runners, notebooks, stale docs,
+# superseded reports) — kept on disk for reference, never committed.
+# Delete this folder once the archive is no longer needed.
+# ------------------------------------------------------------
+0-not-required/

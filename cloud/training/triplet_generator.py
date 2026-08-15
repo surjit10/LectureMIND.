@@ -19,6 +19,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from config import CloudSettings
 from schemas.triplet import RerankerTriplet
+from cloud.utils.diagnostics import ExtractionStats
+from cloud.utils.json_repair import parse_json_array
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +101,7 @@ def _synthesize_queries_batch(
     segment_infos: List[Dict[str, str]],
     llm: Any,
     num_questions: int = 4,
+    stats: Optional[ExtractionStats] = None,
 ) -> List[List[str]]:
     """
     Batch synthesize student questions for multiple segments using the LLM backend.
@@ -107,6 +110,7 @@ def _synthesize_queries_batch(
         segment_infos: List of dicts with 'title' and 'content' keys.
         llm: LLM backend instance (TransformersBackend or compatible).
         num_questions: Number of questions to generate per segment (3-5).
+        stats: Optional ExtractionStats to record parse/accept counters.
 
     Returns:
         List of question lists (one per segment).
@@ -129,74 +133,46 @@ def _synthesize_queries_batch(
 
     all_queries: List[List[str]] = []
     for raw_text in outputs:
-        queries = _parse_queries_json(raw_text)
+        queries = _parse_queries_json(raw_text, stats=stats)
         all_queries.append(queries)
 
     return all_queries
 
 
-def _parse_queries_json(raw_text: str) -> List[str]:
+def _parse_queries_json(
+    raw_text: str,
+    stats: Optional[ExtractionStats] = None,
+) -> List[str]:
     """
     Parse LLM output into a list of query strings.
 
-    Handles common JSON formatting issues from LLM output.
+    Uses the shared json_repair pipeline (fences -> balanced array -> strict
+    load -> safe escape repair). When JSON cannot be parsed even after
+    repair, falls back to regex string extraction (preserving the
+    pre-centralization recovery behavior for partially-malformed output).
     """
-    text = (
-        raw_text.strip()
-        .replace("```json", "")
-        .replace("```", "")
-    )
+    import re
 
-    start = text.find("[")
-    if start == -1:
-        logger.warning("B1: Could not find JSON array in LLM output: %s", text[:200])
-        logger.warning("B1 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
+    parsed, status = parse_json_array(raw_text)
+    if stats is not None:
+        stats.requests += 1
+        stats.record_parse(status)
 
-    depth = 0
-    in_string = False
-    escape = False
-    end = -1
-
-    for i in range(start, len(text)):
-        char = text[i]
-        if escape:
-            escape = False
-            continue
-        if char == '\\':
-            escape = True
-            continue
-        if char == '"':
-            in_string = not in_string
-            continue
-        if not in_string:
-            if char == '[':
-                depth += 1
-            elif char == ']':
-                depth -= 1
-                if depth == 0:
-                    end = i
-                    break
-
-    if end == -1:
-        logger.warning("B1: Unclosed JSON array in LLM output: %s", text[:200])
-        logger.warning("B1 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
-
-    json_str = text[start:end + 1]
-
-    try:
-        parsed = json.loads(json_str)
-    except json.JSONDecodeError as exc:
-        logger.warning("B1: JSON parse error: %s — text: %s", exc, json_str[:200])
-        logger.warning("B1 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
+    if parsed is None:
+        logger.warning("B1: JSON parse %s; falling back to regex string extraction: %s", status, raw_text[:200])
+        extracted = re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', raw_text)
+        queries = [s.replace('\\\\', '\\').strip() for s in extracted if s.strip()]
+        if stats is not None:
+            stats.accepted += len(queries)
+        return queries
 
     if not isinstance(parsed, list):
         return []
 
     # Filter to valid non-empty strings.
     queries = [str(q).strip() for q in parsed if isinstance(q, str) and str(q).strip()]
+    if stats is not None:
+        stats.accepted += len(queries)
     return queries
 
 
@@ -252,6 +228,9 @@ def generate_triplets(
     seg_title_map = {s["segment_id"]: s.get("title", "") for s in segments}
     all_chunks_by_seg = {sid: chunks_list for sid, chunks_list in seg_chunks.items()}
 
+    # Extraction diagnostics (pure logging — never affects pipeline output).
+    stats = ExtractionStats()
+
     # Generate queries.
     if query_generator is not None:
         # Legacy per-chunk query generator.
@@ -290,7 +269,7 @@ def generate_triplets(
                 ordered_seg_ids.append(seg_id)
 
             batch_queries = _synthesize_queries_batch(
-                segment_infos, llm, num_questions=questions_per_segment,
+                segment_infos, llm, num_questions=questions_per_segment, stats=stats,
             )
 
             segment_queries = {}
@@ -357,6 +336,8 @@ def generate_triplets(
                 negative=neg_text,
             )
             triplets.append(triplet)
+
+    logger.info(stats.report("B1"))
 
     if not triplets:
         raise ValueError("B1: Generated zero triplets.")

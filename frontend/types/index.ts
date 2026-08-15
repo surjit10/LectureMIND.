@@ -34,6 +34,27 @@ export interface QueryResponse {
   answer: string;
   sources: Source[];
   graph_path: string[];
+  debug?: QueryDebug;
+}
+
+// Pipeline trace surfaced by the backend in Developer Mode.
+export interface QueryDebug {
+  retrieval_route: string;
+  plan?: {
+    intent?: string;
+    is_lecture_wide?: boolean;
+    answer_style?: string;
+    top_k?: number;
+    context_budget?: number;
+    need_visual?: boolean;
+  };
+  telemetry?: Record<string, number>;
+  stage_counts?: { vector: number; graph: number; reranked: number };
+  vector_results?: { chunk_id: string; score: number }[];
+  graph_results?: { start: string; related: string; rel_types: string[]; hops: number }[];
+  reranked_results?: { chunk_id: string; rerank_score: number }[];
+  final_context_chars?: number;
+  graph_path?: string[];
 }
 
 export interface Source {

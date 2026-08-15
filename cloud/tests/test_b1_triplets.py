@@ -87,6 +87,45 @@ class TestTripletGenerator:
         with pytest.raises(Exception):
             RerankerTriplet(query="", positive="text", negative="text")
 
+    def test_fenced_json_parsed(self):
+        """Fenced ```json ... ``` responses must parse to query strings."""
+        from cloud.training.triplet_generator import _parse_queries_json
+
+        raw = '```json\n["What is BFS?", "Explain DFS traversal"]\n```'
+        queries = _parse_queries_json(raw)
+        assert queries == ["What is BFS?", "Explain DFS traversal"]
+
+    def test_invalid_escapes_repaired(self):
+        r"""Invalid escapes (W\_q, O\(V\)) must be repaired, not discarded."""
+        from cloud.training.triplet_generator import _parse_queries_json
+
+        # Single backslashes in the JSON literal are invalid escapes.
+        raw = '["What is W\\_q?", "Explain O\\(V\\)"]'
+        queries = _parse_queries_json(raw)
+        assert len(queries) == 2
+        assert queries[0] == "What is W\\_q?"
+        assert queries[1] == "Explain O\\(V\\)"
+
+    def test_malformed_json_falls_back_to_regex(self):
+        """Unparseable JSON falls back to regex string extraction, not crash."""
+        from cloud.training.triplet_generator import _parse_queries_json
+
+        queries = _parse_queries_json("the questions are: \"What is BFS?\" and \"What is DFS?\"")
+        assert queries == ["What is BFS?", "What is DFS?"]
+
+    def test_query_diagnostics_counters(self):
+        """ExtractionStats records request/valid/accepted for query parsing."""
+        from cloud.training.triplet_generator import _parse_queries_json
+        from cloud.utils.diagnostics import ExtractionStats
+
+        stats = ExtractionStats()
+        queries = _parse_queries_json('["What is BFS?"]', stats=stats)
+        assert queries == ["What is BFS?"]
+        assert stats.requests == 1
+        assert stats.valid == 1
+        assert stats.accepted == 1
+        assert "B1 EXTRACTION QUALITY REPORT" in stats.report("B1")
+
     def test_missing_segments_raises(self, cloud_settings):
         """Missing segments.json raises FileNotFoundError."""
         from cloud.training.triplet_generator import generate_triplets

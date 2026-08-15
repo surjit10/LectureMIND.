@@ -14,6 +14,7 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
@@ -22,11 +23,22 @@ from schemas.chunk import MultimodalChunk
 from schemas.segment import LectureSegment
 from schemas.entity import Entity
 from schemas.enums import EntityType
+from cloud.utils.diagnostics import ExtractionStats
+from cloud.utils.json_repair import parse_json_array
 
 logger = logging.getLogger(__name__)
 
 # Allowed entity types for validation.
 ALLOWED_ENTITY_TYPES = {t.value for t in EntityType}
+
+# Known LLM-emitted type aliases -> canonical EntityType value.
+# Variable: generic CS term ("the variable x") — a real Concept.
+# TextElement: slide/OCR artifact name — has no dedicated type, preserved as
+# a Concept rather than dropped (the A8 contract never discards information).
+_ENTITY_TYPE_ALIASES = {
+    "variable": "Concept",
+    "textelement": "Concept",
+}
 
 # Entity extraction prompt for Qwen2.5-7B-Instruct.
 ENTITY_EXTRACTION_PROMPT = (
@@ -69,9 +81,30 @@ def _load_llm() -> Any:
     return backend
 
 
+def normalize_entity_type(raw_type: str) -> str:
+    """Map an LLM-emitted type string onto the closed EntityType ontology.
+
+    Deterministic normalization order:
+    1. Exact canonical match -> unchanged.
+    2. Case/whitespace variant of a canonical type -> canonical form.
+    3. Known semantic alias (Variable, TextElement) -> Concept.
+    4. Anything else -> Concept (A8 contract: invalid types are mapped, never
+       dropped, so no entity information is lost).
+    """
+    t = raw_type.strip()
+    if t in ALLOWED_ENTITY_TYPES:
+        return t
+    lower = t.lower()
+    for allowed in ALLOWED_ENTITY_TYPES:
+        if allowed.lower() == lower:
+            return allowed
+    return _ENTITY_TYPE_ALIASES.get(lower, "Concept")
+
+
 def _extract_entities_batch(
     segment_prompts: List[str],
     llm: Any,
+    stats: Optional[ExtractionStats] = None,
 ) -> List[List[Dict[str, str]]]:
     """
     Batch extract entities from multiple segments using the LLM backend.
@@ -79,6 +112,7 @@ def _extract_entities_batch(
     Args:
         segment_prompts: List of formatted extraction prompts.
         llm: LLM backend instance (TransformersBackend or compatible).
+        stats: Optional ExtractionStats to record parse/accept counters.
 
     Returns:
         List of entity lists (one list per segment).
@@ -92,69 +126,44 @@ def _extract_entities_batch(
 
     all_entities: List[List[Dict[str, str]]] = []
     for raw_text in outputs:
-        entities = _parse_entity_json(raw_text)
+        entities = _parse_entity_json(raw_text, stats=stats)
         all_entities.append(entities)
 
     return all_entities
 
 
-def _parse_entity_json(raw_text: str) -> List[Dict[str, str]]:
+def _parse_entity_json(
+    raw_text: str,
+    stats: Optional[ExtractionStats] = None,
+) -> List[Dict[str, str]]:
     """
     Parse LLM output into a list of entity dicts.
 
-    Handles common LLM JSON formatting issues:
-    - Extracts JSON array from surrounding text.
-    - Validates entity types against allowed enum values.
-    - Filters out malformed entries.
+    Uses the shared json_repair pipeline (fences -> balanced array -> strict
+    load -> safe escape repair, so e.g. W\\_q no longer discards a segment's
+    entities). When JSON cannot be parsed even after repair, falls back to
+    regex {name, type} extraction so recoverable content is never dropped.
     """
-    # Try to extract JSON array from the response.
-    text = raw_text.strip()
-    text = text.replace("```json", "").replace("```", "")
+    parsed, status = parse_json_array(raw_text)
+    if stats is not None:
+        stats.requests += 1
+        stats.record_parse(status)
 
-    start = text.find("[")
-    if start == -1:
-        logger.warning("A8: Could not find JSON array in LLM output: %s", text[:200])
-        logger.warning("A8 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
-
-    depth = 0
-    in_string = False
-    escape = False
-    end = -1
-
-    for i in range(start, len(text)):
-        char = text[i]
-        if escape:
-            escape = False
-            continue
-        if char == '\\':
-            escape = True
-            continue
-        if char == '"':
-            in_string = not in_string
-            continue
-        if not in_string:
-            if char == '[':
-                depth += 1
-            elif char == ']':
-                depth -= 1
-                if depth == 0:
-                    end = i
-                    break
-
-    if end == -1:
-        logger.warning("A8: Unclosed JSON array in LLM output: %s", text[:200])
-        logger.warning("A8 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
-
-    json_str = text[start:end + 1]
-
-    try:
-        parsed = json.loads(json_str)
-    except json.JSONDecodeError as exc:
-        logger.warning("A8: JSON parse error: %s — text: %s", exc, json_str[:200])
-        logger.warning("A8 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
+    if parsed is None:
+        logger.warning("A8: JSON parse %s; falling back to regex extraction: %s", status, raw_text[:200])
+        # Preserve the pre-centralization regex fallback: pull {name, type} pairs.
+        entities: List[Dict[str, str]] = []
+        for match in re.finditer(
+            r'\{[^{}]*"name"\s*:\s*"([^"]+)"\s*,\s*"type"\s*:\s*"([^"]+)"[^{}]*\}',
+            raw_text,
+        ):
+            entities.append({"name": match.group(1), "type": normalize_entity_type(match.group(2))})
+        if not entities:
+            logger.warning("A8 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
+            return []
+        if stats is not None:
+            stats.accepted += len(entities)
+        return entities
 
     if not isinstance(parsed, list):
         logger.warning("A8: Expected list, got %s", type(parsed).__name__)
@@ -171,18 +180,23 @@ def _parse_entity_json(raw_text: str) -> List[Dict[str, str]]:
         if not name or not entity_type:
             continue
 
-        # Validate entity type.
-        if entity_type not in ALLOWED_ENTITY_TYPES:
-            logger.warning("A8: Skipping entity with invalid type: %s (%s)", name, entity_type)
-            continue
+        # Deterministic type normalization (unknown -> Concept, never dropped).
+        normalized = normalize_entity_type(entity_type)
+        if normalized != entity_type:
+            if stats is not None:
+                stats.normalized += 1
+            logger.warning("A8: Normalized entity type %r -> %r (%s)", entity_type, normalized, name)
 
-        valid_entities.append({"name": name, "type": entity_type})
+        valid_entities.append({"name": name, "type": normalized})
 
+    if stats is not None:
+        stats.accepted += len(valid_entities)
     return valid_entities
 
 
 def _deduplicate_entities(
     raw_entities: List[Dict[str, str]],
+    stats: Optional[ExtractionStats] = None,
 ) -> List[Dict[str, str]]:
     """Deduplicate entities by normalized name, keeping first occurrence."""
     seen: Set[str] = set()
@@ -192,6 +206,8 @@ def _deduplicate_entities(
         if normalized and normalized not in seen:
             seen.add(normalized)
             unique.append(ent)
+        elif stats is not None:
+            stats.duplicates += 1
     return unique
 
 
@@ -252,6 +268,9 @@ def extract_entities(
                 combined += c["transcript"] + " " + c["visual_context"] + " " + c["ocr_text"] + " "
         segment_texts.append((segment_title, combined.strip()))
 
+    # Extraction diagnostics (pure logging — never affects pipeline output).
+    stats = ExtractionStats()
+
     # Extract entities.
     raw_entities: List[Dict[str, str]] = []
 
@@ -260,10 +279,7 @@ def extract_entities(
         for title, text in segment_texts:
             extracted = extractor_fn(text, title)
             for name, etype in extracted:
-                if etype in ALLOWED_ENTITY_TYPES:
-                    raw_entities.append({"name": name, "type": etype})
-                else:
-                    raw_entities.append({"name": name, "type": "Concept"})
+                raw_entities.append({"name": name, "type": normalize_entity_type(etype)})
     else:
         # Use LLM batch extraction.
         if llm_loader is not None:
@@ -282,7 +298,7 @@ def extract_entities(
         ]
 
         # Batch extract.
-        batch_results = _extract_entities_batch(prompts, llm)
+        batch_results = _extract_entities_batch(prompts, llm, stats=stats)
         for entities_list in batch_results:
             raw_entities.extend(entities_list)
 
@@ -291,7 +307,9 @@ def extract_entities(
         raw_entities.append({"name": seg["title"], "type": EntityType.LectureSegment.value})
 
     # Deduplicate.
-    unique_entities = _deduplicate_entities(raw_entities)
+    unique_entities = _deduplicate_entities(raw_entities, stats=stats)
+
+    logger.info(stats.report("A8"))
 
     if not unique_entities:
         raise ValueError("A8: Entity extraction produced zero entities.")

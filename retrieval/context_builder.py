@@ -42,6 +42,27 @@ _NOISE_PATTERNS = [
 # Minimum word count for OCR text to be considered educational.
 _MIN_OCR_WORDS = 5
 
+# Noise patterns whose matches are REMOVED from OCR text rather than
+# discarding the whole slide. A single URL or social handle embedded in an
+# otherwise educational slide must not destroy the content (diagnosed: the
+# "Increasing Software Complexity" slide's OCR — Linux 2.2 / Firefox / Windows
+# ranking — was dropped entirely because it contained one informationisbeautiful.net
+# URL, so the LLM could never name the systems).
+_LOCALIZED_NOISE_PATTERNS = [
+    re.compile(r"(?:https?://|www\.)\S+"),
+    re.compile(r"\b@[A-Za-z0-9_]+\b"),
+]
+
+
+def _sanitize_ocr(text: str) -> str:
+    """Remove localized noise (URLs, handles) from OCR text, keep the rest."""
+    if not text:
+        return ""
+    cleaned = text
+    for pattern in _LOCALIZED_NOISE_PATTERNS:
+        cleaned = pattern.sub(" ", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
 # Separator used between context chunks.
 _CHUNK_SEPARATOR = "\n\n---\n\n"
 
@@ -85,13 +106,82 @@ def _build_passage_text(result: Dict[str, Any], need_visual: bool = True) -> str
     if transcript:
         parts.append(f"[Transcript] {transcript}")
 
-    if ocr_text and not _is_ocr_noise(ocr_text):
-        parts.append(f"[OCR] {ocr_text}")
+    if ocr_text:
+        # Strip localized noise (URLs, handles) first — an educational slide
+        # containing one URL must keep its content.
+        clean_ocr = _sanitize_ocr(ocr_text)
+        if clean_ocr and not _is_ocr_noise(clean_ocr):
+            parts.append(f"[OCR] {clean_ocr}")
 
     if visual_context and need_visual:
         parts.append(f"[Visual] {visual_context}")
 
     return " ".join(parts) if parts else str(payload)
+
+
+def _build_graph_context(
+    graph_results: List[Dict[str, Any]],
+    char_budget: int = 2000,
+) -> str:
+    """
+    Render graph retrieval results as labelled entity-relation paths.
+
+    Graph results carry entity names and relation types (no transcript):
+        {"start_name": "Operating System Diagram", "related_name": "Network Diagram",
+         "rel_types": ["DERIVED_FROM"], "hops": 1}
+
+    Renders as:
+        [Graph] Operating System Diagram -DERIVED_FROM-> Network Diagram
+
+    Isolated start nodes (no related_name) render as a plain entity line.
+    Duplicate paths are dropped; short (fewer-hop) paths are preferred;
+    output is capped at char_budget so a broad graph hit (e.g. entity
+    substring match) can never blow the final context budget.
+    Empty results return "".
+    """
+    if not graph_results:
+        return ""
+
+    # Prefer direct (1-hop) relations first, then longer paths.
+    ordered = sorted(
+        graph_results,
+        key=lambda gr: (
+            (gr.get("related_name") or "").strip() == "",  # isolated last
+            int(gr.get("hops") or 0),
+        ),
+    )
+
+    lines: List[str] = []
+    seen: set = set()
+    total_chars = 0
+    for gr in ordered:
+        start = (gr.get("start_name") or "").strip()
+        related = (gr.get("related_name") or "").strip()
+        if not start:
+            continue
+        if related:
+            rels = gr.get("rel_types") or []
+            rel_str = ",".join(rels) if rels else "RELATED"
+            line = f"[Graph] {start} -{rel_str}-> {related}"
+        else:
+            line = f"[Graph] {start}"
+        if line in seen:
+            continue
+        if total_chars + len(line) + 1 > char_budget:
+            break
+        seen.add(line)
+        lines.append(line)
+        total_chars += len(line) + 1
+
+    return "\n".join(lines)
+
+
+def _block_score(result: Dict[str, Any]) -> float:
+    """Best available rerank score for a (possibly merged) block."""
+    try:
+        return float(result.get("rerank_score") or result.get("score") or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def _get_timestamp(result: Dict[str, Any]) -> float:
@@ -151,6 +241,12 @@ def _merge_adjacent(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     current_payload[field] = f"{a_text} {b_text}"
                 elif b_text:
                     current_payload[field] = b_text
+            # Keep the highest rerank score from the group, so score-based
+            # selection treats the merged block as its best constituent.
+            cur_score = float(current.get("rerank_score") or 0.0)
+            nxt_score = float(nxt.get("rerank_score") or 0.0)
+            if nxt_score > cur_score:
+                current["rerank_score"] = nxt.get("rerank_score")
             # Keep the earliest timestamp.
             if _get_timestamp(nxt) < _get_timestamp(current):
                 current_payload["timestamp"] = nxt_payload.get("timestamp", 0)
@@ -272,12 +368,26 @@ class ContextBuilder:
         if is_lecture_wide:
             merged = _sample_lecture_wide(merged, n_buckets=8)
 
-        # 5. Build text for each chunk, filter by OCR noise.
-        context_parts: List[str] = []
+        # 5. Selection order.
+        #    Normal queries: iterate by rerank score so the budget favours the
+        #    strongest evidence.  Previously the pool was cut chronologically,
+        #    so a top-ranked chunk late in the lecture timeline was silently
+        #    dropped and the LLM answered "Insufficient evidence" despite the
+        #    evidence being retrieved (measured on the benchmark: 25/50
+        #    refusals before score-ordered selection, 0 after).
+        #    Lecture-wide queries keep chronological selection — timeline
+        #    coverage is the point, and sampling already spread the blocks.
+        if is_lecture_wide:
+            order = merged
+        else:
+            order = sorted(merged, key=_block_score, reverse=True)
+
+        # 6. Build text for each chunk, filter by OCR noise.
+        selected: List[Any] = []  # (entry, text) pairs in selection order
         seen_texts: set = set()
         total_chars = 0
 
-        for entry in merged:
+        for entry in order:
             text = _build_passage_text(entry, need_visual=need_visual)
             if not text.strip():
                 continue
@@ -299,15 +409,21 @@ class ContextBuilder:
                     if boundary > budget // 2:
                         # Enough content before the boundary — cut cleanly.
                         truncated = truncated[: boundary + 1]
-                    context_parts.append(truncated)
+                    selected.append((entry, truncated))
                     logger.debug(
                         "ContextBuilder: First chunk truncated from %d to %d chars "
                         "(budget=%d).",
                         len(text), len(truncated), budget,
                     )
                 break
-            context_parts.append(text)
+            selected.append((entry, text))
             total_chars += len(text) + len(_CHUNK_SEPARATOR)
+
+        # 7. Render the selected evidence chronologically so the narrative
+        #    flow is preserved even though selection prioritised rerank score.
+        if not is_lecture_wide:
+            selected.sort(key=lambda pair: _get_timestamp(pair[0]))
+        context_parts = [text for _, text in selected]
 
         final = _CHUNK_SEPARATOR.join(context_parts)
         logger.info(

@@ -128,8 +128,8 @@ class TestMultimodalFusion:
         for item in data:
             MultimodalChunk(**item)
 
-    def test_no_extra_fields_in_output(self, cloud_settings, setup_fusion_inputs):
-        """Output chunks must NOT contain segment_id or any field outside the schema."""
+    def test_output_has_all_schema_fields(self, cloud_settings, setup_fusion_inputs):
+        """Output chunks must contain all MultimodalChunk schema fields (including V2 provenance)."""
         from cloud.ingestion.fusion.multimodal_fusion import fuse
 
         fuse("lec_001", cloud_settings=cloud_settings)
@@ -137,9 +137,13 @@ class TestMultimodalFusion:
         output_path = Path(cloud_settings.lecture_dir("lec_001")) / "multimodal_chunks.json"
         data = json.loads(output_path.read_text())
 
-        allowed_keys = {"lecture_id", "chunk_id", "timestamp", "transcript", "visual_context", "ocr_text"}
+        expected_keys = {
+            "lecture_id", "chunk_id", "timestamp", "transcript",
+            "visual_context", "ocr_text",
+            "start_time", "end_time", "segment_ids",
+        }
         for item in data:
-            assert set(item.keys()) == allowed_keys
+            assert set(item.keys()) == expected_keys, f"Got keys: {set(item.keys())}"
 
     def test_fusion_missing_transcript_raises(self, cloud_settings):
         """Missing transcript.json must raise FileNotFoundError."""
@@ -175,3 +179,130 @@ class TestMultimodalFusion:
         assert len(records) == 2
         assert records[0]["frame_id"] == 1
         path.unlink()
+
+    def test_merge_segments_merges_short_atoms(self, cloud_settings, setup_fusion_inputs):
+        """With merge_segments=True, short transcript atoms are merged into semantic chunks."""
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings, merge_segments=True)
+
+        # 3 short atoms (~55 chars total) → 1 merged chunk.
+        assert len(chunks) == 1
+        assert chunks[0].segment_ids == [1, 2, 3]
+        assert chunks[0].start_time == 10.0
+        assert chunks[0].end_time == 55.0
+        assert "BFS" in chunks[0].transcript
+        assert "DFS" in chunks[0].transcript
+
+    def test_merge_preserves_visual_from_first_atom(self, cloud_settings, setup_fusion_inputs):
+        """Merged chunk takes visual_context and ocr_text from the first atom's aligned frame."""
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings, merge_segments=True)
+
+        assert chunks[0].visual_context == "BFS traversal diagram"
+        assert "Breadth First Search" in chunks[0].ocr_text
+
+    def test_merge_keeps_lecture_id(self, cloud_settings, setup_fusion_inputs):
+        """Merged chunks must carry the correct lecture_id."""
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings, merge_segments=True)
+        assert chunks[0].lecture_id == "lec_001"
+        assert "lec_001_chunk" in chunks[0].chunk_id
+
+    def test_merge_no_extra_fields(self, cloud_settings, setup_fusion_inputs):
+        """Merged chunks must NOT contain fields outside the schema."""
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings, merge_segments=True)
+
+        expected_keys = {
+            "lecture_id", "chunk_id", "timestamp", "transcript",
+            "visual_context", "ocr_text",
+            "start_time", "end_time", "segment_ids",
+        }
+        for c in chunks:
+            assert set(c.model_dump().keys()) == expected_keys
+
+
+class TestMergeAtoms:
+
+    def test_empty_atoms(self):
+        """Empty atom list returns empty groups."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms
+        assert _merge_atoms([]) == []
+
+    def test_single_atom(self):
+        """Single atom returns one group of one."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms
+        atoms = [{"segment_id": 1, "start": 0.0, "end": 2.0, "text": "Hello world."}]
+        groups = _merge_atoms(atoms)
+        assert len(groups) == 1
+        assert len(groups[0]) == 1
+
+    def test_merge_below_min_absorbed(self):
+        """Atoms below MIN_CHUNK_CHARS merge into one group."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms
+        atoms = [
+            {"segment_id": 1, "start": 0.0, "end": 1.0, "text": "Short A."},
+            {"segment_id": 2, "start": 1.5, "end": 2.5, "text": "Short B."},
+        ]
+        groups = _merge_atoms(atoms)
+        assert len(groups) == 1
+        assert len(groups[0]) == 2
+
+    def test_sentence_boundary_at_target_triggers_break(self):
+        """A sentence-ending atom at or above TARGET chars breaks into a new group."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms, TARGET_CHUNK_CHARS
+
+        # Build text long enough to exceed TARGET_CHUNK_CHARS.
+        long_sentence = "This is a very long sentence that exceeds the target chunk characters threshold. " * 15
+        assert len(long_sentence) >= TARGET_CHUNK_CHARS, f"Need {TARGET_CHUNK_CHARS}, got {len(long_sentence)}"
+
+        atoms = [
+            {"segment_id": 1, "start": 0.0, "end": 3.0, "text": long_sentence},
+            {"segment_id": 2, "start": 3.5, "end": 6.0, "text": "Next topic sentence here."},
+        ]
+        groups = _merge_atoms(atoms)
+        assert len(groups) == 2
+
+    def test_silence_gap_triggers_break(self):
+        """A long silence gap with enough content triggers a boundary."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms, SILENCE_GAP_THRESHOLD
+
+        atoms = [
+            {"segment_id": 1, "start": 0.0, "end": 2.0,
+             "text": "This is a segment with enough content to satisfy the minimum. " * 5},
+            {"segment_id": 2, "start": 2.0 + SILENCE_GAP_THRESHOLD + 0.5,
+             "end": 7.0, "text": "After a long pause."},
+        ]
+        groups = _merge_atoms(atoms)
+        assert len(groups) == 2
+
+    def test_no_boundary_keeps_growing(self):
+        """Absent any boundary signal, atoms keep accumulating."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms
+
+        atoms = [
+            {"segment_id": 1, "start": 0.0, "end": 1.0, "text": "Word."},
+            {"segment_id": 2, "start": 1.5, "end": 2.5, "text": "More."},
+            {"segment_id": 3, "start": 3.0, "end": 4.0, "text": "Still."},
+            {"segment_id": 4, "start": 4.5, "end": 5.5, "text": "Going."},
+        ]
+        groups = _merge_atoms(atoms)
+        assert len(groups) == 1
+        assert len(groups[0]) == 4
+
+    def test_deterministic(self):
+        """Same input always produces the same output."""
+        from cloud.ingestion.fusion.multimodal_fusion import _merge_atoms
+
+        base = [
+            {"segment_id": 1, "start": 0.0, "end": 1.0, "text": "A. "},
+            {"segment_id": 2, "start": 1.5, "end": 2.5, "text": "B. "},
+            {"segment_id": 3, "start": 3.0, "end": 4.0, "text": "C. "},
+        ]
+        r1 = _merge_atoms(base)
+        r2 = _merge_atoms(base)
+        assert r1 == r2

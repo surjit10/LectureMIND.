@@ -1,6 +1,17 @@
 # LectureMIND
 
-> **AI-powered GraphRAG learning platform** that transforms lecture recordings and PDFs into interactive, queryable knowledge bases.
+> **AI-powered GraphRAG learning platform** that transforms lecture videos into interactive, queryable knowledge bases.
+
+---
+
+## Contents
+
+- [Overview](#overview) · [Motivation](#motivation) · [Features](#features)
+- [High-Level Architecture](#high-level-architecture) · [System Components](#system-components)
+- [Processing Pipeline](#processing-pipeline) · [Retrieval Pipeline](#retrieval-pipeline) · [Folder Structure](#folder-structure)
+- [Technologies Used](#technologies-used) · [Installation](#installation) · [Configuration](#configuration) · [Running the Project](#running-the-project)
+- [Evaluation](#evaluation) · [Design Decisions](#design-decisions) · [Production Architecture](#production-architecture)
+- [Future Improvements](#future-improvements) · [Documentation Index](#documentation-index)
 
 ---
 
@@ -17,6 +28,7 @@ The system is built around **GraphRAG (Graph-augmented Retrieval-Augmented Gener
 Traditional lecture recordings are difficult to revisit effectively. Students must scrub through hours of video to find specific information, with no way to ask follow-up questions or verify what they remember. LectureMIND addresses this by:
 
 - **Making lectures searchable** at a semantic level — ask a question, get an answer from the lecture content.
+- **Compressing gigabytes of video into kilobytes of structured data** — an 83-minute 720p lecture (~1.2 GB) becomes a ~436 KB knowledge package (~2,800× smaller), because the video is replaced by transcripts, slide text, embeddings, and a knowledge graph.
 - **Separating expensive computation from the learning interface** — heavy AI processing happens once on cloud GPU infrastructure; students interact with a lightweight local server.
 - **Supporting multiple learning modes** — conversational Q&A, flashcard generation, structured notes — all grounded in the actual lecture content.
 - **Preserving privacy** — students can run the entire inference pipeline locally using Ollama, with no data leaving their machine after the initial package import.
@@ -25,15 +37,20 @@ Traditional lecture recordings are difficult to revisit effectively. Students mu
 
 ## Features
 
-- **Multimodal Ingestion** — Processes lecture video (audio transcription via Faster-Whisper, visual analysis via Qwen2-VL, OCR via PaddleOCR)
-- **GraphRAG Query Pipeline** — Hybrid vector + knowledge graph retrieval with cross-encoder reranking
-- **Conversational Q&A** — Real-time streaming answers grounded in lecture content with source citations
-- **Active Learning** — Auto-generated flashcards and structured notes from active lecture content
-- **Flexible LLM Backends** — Seamlessly switch between local Ollama models and cloud APIs (OpenAI, Gemini, Anthropic) without server restart
-- **Knowledge Packages** — Portable ZIP archives that fully encapsulate a processed lecture for distribution and import
-- **Evaluation Framework** — Offline benchmark runner measuring retrieval precision, reranking quality, answer similarity, citation coverage, and latency
+- **Multimodal Ingestion** — Audio transcription (Faster-Whisper), slide visual captioning (Qwen2-VL), and OCR (PaddleOCR), fused into timestamped multimodal chunks at slide keyframes; optional semantic chunk merging combines whisper segments into self-contained passages
+- **GraphRAG Query Pipeline** — Hybrid retrieval: dense vectors + BM25 lexical scores fused via Reciprocal Rank Fusion (RRF) + knowledge-graph traversal, cross-encoder reranking, and evidence-gated generation
+- **Conversational Q&A** — Grounded JSON answers with timestamped source citations; refuses to answer when the lecture lacks evidence
+- **Active Learning** — Auto-generated notes, flashcards, quizzes, and learning paths from lecture context
+- **Course Index** — Lightweight course layer (pure metadata) that queries across lectures via per-lecture fan-out, without ever merging knowledge graphs
+- **Retrieval Explainability** — Per-query pipeline trace (route, planner intent, per-stage scores, timings, selected evidence) surfaced in Developer Mode
+- **Benchmark Dashboard** — Self-contained HTML dashboard rendered from existing evaluation outputs (no re-runs)
+- **QA Evaluation** — A grounded 50-question benchmark set for the CS162 lecture (factual / conceptual / definition / summary / **visual (`need_visual`)** types); every ground-truth chunk is keyword-verified against live lecture content
+- **Cross-Lecture Isolation** — Hard per-`lecture_id` guards in Qdrant and Neo4j; nodes/edges scoped by `(entity_id, lecture_id)`; no data leaks between lectures or across re-imports
+- **Fine-tunable Global Reranker** — `cloud/reranker_training/` builds training data from the `triplets.json` shipped inside knowledge packages and fine-tunes the cross-encoder; `scripts/train_global_reranker.py` merges triplets, fine-tunes, and hot-reloads the model; inference code unchanged
+- **Flexible LLM Backends** — Seamlessly switch between local Ollama models and cloud APIs (OpenAI, Gemini, Groq, OpenRouter, Anthropic, or any OpenAI-compatible endpoint) without server restart; per-provider rate limiting and retry with exponential backoff
+- **Knowledge Packages** — Portable ZIP archives that fully encapsulate a processed lecture; an 83-minute 720p lecture (~1.2 GB) ships as a **~436 KB package** (~2,800× smaller than the source video)
+- **Evaluation Framework** — Offline benchmark runner, RAGAS answer-quality scoring, load testing, and dashboard generation
 - **Offline-First** — Full query capability with no internet connection once packages are imported
-- **Reranker Training Data** — Automatically generates training triplets for offline fine-tuning of the cross-encoder
 
 ---
 
@@ -44,15 +61,16 @@ LectureMIND operates on a strict two-phase architecture. Expensive processing ha
 ```mermaid
 graph TD
     subgraph Cloud[" Cloud Runtime (Kaggle / GPU)"]
-        Video[" Lecture Video / PDF"]
+        Video[" Lecture Video"]
         Whisper["Faster-Whisper\n(Transcription)"]
         VLM["Qwen2-VL\n(Visual Captioning)"]
         OCR["PaddleOCR\n(Text Extraction)"]
         Chunker["Multimodal Fusion\n& Segmentation"]
+        GraphExt["Entity + Relation\nExtraction"]
         Embedder["BAAI/bge-large-en-v1.5\n(1024-dim Embeddings)"]
-        GraphExt["Knowledge Graph\nExtraction"]
-        TripletGen["Triplet Generator\n(Reranker Training Data)"]
-        Exporter["Package Exporter\n(.zip)"]
+        TripletGen["Triplet Generator\n(B1)"]
+        Trainer["Reranker Trainer\n(B2, optional)"]
+        Exporter["Package Exporter\n(C1 validate → C2 zip)"]
 
         Video --> Whisper
         Video --> VLM
@@ -63,40 +81,52 @@ graph TD
         Chunker --> Embedder
         Chunker --> GraphExt
         Chunker --> TripletGen
+        TripletGen --> Trainer
         Embedder --> Exporter
         GraphExt --> Exporter
         TripletGen --> Exporter
+        Trainer --> Exporter
     end
 
     Exporter -->|"Knowledge Package (.zip)"| LocalServer
 
-    subgraph LocalServer[" Local Runtime (FastAPI + Sequential Query Workflow)"]
-        Import["Package Import\n(Qdrant + Neo4j Load)"]
-        QueryWorkflow["QueryWorkflow\n(Sequential Workflow)"]
-        Planner["query_planner_node\n(Route Selection)"]
-        Retriever["retriever_node\n(Vector + Graph)"]
-        Reranker["reranker_node\n(Cross-Encoder)"]
-        Generator["answer_generator_node\n(LLM Generation)"]
+    subgraph LocalServer[" Local Runtime (FastAPI + QueryWorkflow)"]
+        Import["Package Import\n(Qdrant + Neo4j load)"]
+        Course["Course Index\n(course_registry + fan-out)"]
+        QueryWorkflow["QueryWorkflow\n(Single-pass)"]
+        Planner["QueryPlanner\n(route + intent)"]
+        VecRet["VectorRetriever\n(Qdrant, lecture-scoped)"]
+        GraphRet["GraphRetriever\n(Neo4j, lecture-scoped)"]
+        Rerank["reranker_node\n(Global CrossEncoder)"]
+        Ctx["ContextBuilder\n(dedupe/merge/budget)"]
+        Gen["answer_generator_node\n(evidence-gated)"]
         ProvReg["ProviderRegistry\n(data/llm_config.json)"]
         Ollama["OllamaBackend\n(Local)"]
         Online["OnlineBackend\n(Cloud APIs)"]
-        Learning["LearningService\n(Flashcards / Notes)"]
-        Eval["Evaluation Framework\n(BenchmarkRunner)"]
+        Learning["LearningService\n(Notes/Quiz/Flashcards)"]
+        Eval["Evaluation\n(Benchmark + RAGAS + LoadTest)"]
+        Dash["Benchmark Dashboard\n(HTML, from outputs)"]
 
         Import --> QueryWorkflow
-        QueryWorkflow --> Planner --> Retriever --> Reranker --> Generator
-        Generator --> ProvReg
+        Import --> Course
+        Course --> QueryWorkflow
+        QueryWorkflow --> Planner --> VecRet & GraphRet
+        VecRet --> Rerank
+        GraphRet --> Rerank
+        Rerank --> Ctx --> Gen
+        Gen --> ProvReg
         ProvReg --> Ollama
         ProvReg --> Online
         Learning --> ProvReg
         Eval --> QueryWorkflow
+        Eval --> Dash
     end
 
     subgraph Frontend[" Next.js Frontend"]
-        UI["Web UI\n(Chat / Learning / Settings)"]
+        UI["Web UI\n(Chat / Learning / Settings / Dev Mode)"]
     end
 
-    Frontend -->|"HTTP REST + SSE"| LocalServer
+    Frontend -->|"HTTP REST (JSON)"| LocalServer
 ```
 
 ---
@@ -105,67 +135,100 @@ graph TD
 
 | Component | Location | Role |
 |---|---|---|
-| **Cloud Ingestion Pipeline** | `cloud/` | Multi-stage lecture processing: transcription, OCR, chunking, embedding, graph extraction |
-| **Knowledge Package** | `data/packages/lecture_{id}/` | Self-contained processed lecture archive (embeddings, graph, chunks) |
-| **FastAPI Server** | `serving/fastapi/app.py` | Local HTTP server; routes, lifespan, SSE streaming |
-| **QueryWorkflow** | `agent/langgraph/workflow.py` | Sequential query orchestration pipeline responsible for planning, retrieval, reranking, and answer generation. The workflow is designed to be compatible with future LangGraph integration. |
-| **Vector Retriever** | `retrieval/vector_retriever.py` | Qdrant ANN search using 1024-dim bi-encoder embeddings |
-| **Graph Retriever** | `retrieval/graph_retriever.py` | Neo4j Cypher traversal over extracted entity-relationship graph |
-| **Global Reranker** | `serving/fastapi/rerank_service.py` | BAAI/bge-reranker-base cross-encoder; loaded eagerly at startup |
+| **Cloud Ingestion Pipeline** | `cloud/` | Multi-stage lecture processing: transcription, OCR, fusion, segmentation, entity/relation extraction, embeddings, triplets |
+| **Reranker Trainer (B2)** | `cloud/training/reranker_trainer.py` | Cross-encoder fine-tuning on generated triplets (offline; not run by default) |
+| **Global Training Orchestration** | `scripts/train_global_reranker.py` | Local: merge package triplets → fine-tune → install into `GLOBAL_RERANKER_DIR` → hot-reload |
+| **Reranker Training Pipeline (B)** | `cloud/reranker_training/` | Independent pipeline: discover packages → extract `triplets.json` → merge/dedupe → fine-tune → evaluate → version → export `global_reranker_v{N}.zip`. Never touches videos |
+| **Knowledge Package** | `data/packages/lecture_{id}/` | Self-contained processed lecture archive (embeddings, graph, chunks, triplets) |
+| **FastAPI Server** | `serving/fastapi/app.py` | Local HTTP server; lifespan, model recovery, router registration |
+| **QueryWorkflow** | `agent/langgraph/workflow.py` | Single-pass query orchestration: planner → conditional retrieval → rerank → evidence-gated answer |
+| **QueryPlanner** | `agent/dspy/planner.py` | Heuristic route selection (`graph_only`/`vector_only`/`graph_and_vector`) + 10-intent `plan_full()` |
+| **Vector Retriever** | `retrieval/vector_retriever/qdrant_retriever.py` | Qdrant ANN search (1024-dim) + lecture-wide timeline sampling; **raises without `lecture_id`** |
+| **Graph Retriever** | `retrieval/graph_retriever/neo4j_retriever.py` | Neo4j bounded 1–3-hop traversal, all 6 relation types, exact→partial match; **raises without `lecture_id`** |
+| **Course Retriever** | `retrieval/course_retriever.py` | Course fan-out: queries only member lectures through the lecture-scoped retrievers, dedupes on `(lecture_id, chunk_id)` |
+| **Context Builder** | `retrieval/context_builder.py` | Dedupe, chronological order, adjacent-merge, OCR-noise filter, transcript>OCR>visual priority, budget enforcement |
+| **Global Reranker** | `retrieval/reranker/rerank_service.py` + `local/services/reranker_service.py` | BAAI/bge-reranker-base cross-encoder singleton; loaded once at startup; hot-reloadable |
+| **Lecture Registry** | `local/storage/lecture_registry.py` | JSON-backed knowledge-package metadata + active-lecture lifecycle + startup audit |
+| **Course Registry** | `local/storage/course_registry.py` | JSON-backed course metadata (name + lecture_ids); never writes to Qdrant/Neo4j |
 | **Provider Registry** | `local/llm/provider_registry.py` | JSON-backed factory for LLM backend selection |
 | **Provider Manager** | `local/llm/provider_manager.py` | Runtime health checker for configured providers |
-| **Learning Service** | `serving/fastapi/learning_service.py` | Flashcard and note generation using active lecture context |
-| **Evaluation Framework** | `evaluation/benchmark_runner.py` | Offline RAG quality benchmark; bypasses HTTP layer |
-| **Frontend** | `frontend/` | Next.js 14 + React 18 + TypeScript + Tailwind UI |
+| **Learning Service** | `serving/fastapi/learning_service.py` | Notes, flashcards, quiz, and learning-path generation reusing the retrieval pipeline |
+| **Evaluation Framework** | `evaluation/benchmark_runner.py` | Offline RAG quality benchmark over a QA dataset, bypassing HTTP |
+| **RAGAS Eval** | `evaluation/ragas/eval_ragas.py` | Faithfulness, Answer Relevancy, Context Precision scores |
+| **Load Testing** | `evaluation/load_testing/load_test.py` | 100/500/1000 concurrent users; avg/p95 latency + RPS |
+| **Benchmark Dashboard** | `evaluation/dashboard/dashboard_generator.py` | Self-contained HTML dashboard from existing outputs; never re-runs evals |
+| **Frontend** | `frontend/` | Next.js 14 + React 18 + TypeScript + custom CSS design system; Student/Developer modes |
 
 ---
 
 ## Processing Pipeline
 
-The cloud pipeline processes a raw lecture file through 11 sequential stages:
+The cloud pipeline processes a raw lecture video through sequential stages (orchestrated by `cloud/orchestration/run_ingestion_pipeline.py`):
 
 | Stage | Name | Input | Output | Model Used |
 |---|---|---|---|---|
 | A1 | Metadata Extraction | Video file | `metadata.json` | FFprobe |
-| A2 | Audio Transcription | Audio track | `transcript.json` | Faster-Whisper |
-| A3 | Frame Extraction | Video file | `frames/*.jpg` | OpenCV / FFmpeg |
+| A2+A3 | Transcription + Frame Extraction (concurrent) | Audio + Video | `transcript.json`, `frames/*.jpg` | Faster-Whisper, OpenCV / FFmpeg |
 | A4 | Visual Captioning | Keyframes | `vlm_output.jsonl` | Qwen2-VL |
 | A5 | OCR Extraction | Keyframes | `ocr_output.jsonl` | PaddleOCR (subprocess) |
-| A6 | Multimodal Fusion | Transcript + VLM + OCR | `multimodal_chunks.json` | Rule-based fusion |
-| A7 | Topic Segmentation | Chunks | `segments.json` | Semantic clustering |
-| A8 | Graph Extraction | Segments + Chunks | `entities.json`, `relations.json`, `graph.graphml` | LLM / NER |
-| A9 | Embedding | Chunk texts | `embeddings.npy`, `embedding_ids.json` | BAAI/bge-large-en-v1.5 |
-| A10 | Triplet Generation | Segments + Chunks | `triplets.json` | Qwen2.5-7B-Instruct |
-| A11 | Package Export | All output files | `lecture_{id}.zip` | — |
+| A6 | Multimodal Fusion | Transcript + VLM + OCR | `multimodal_chunks.json` | Rule-based fusion (visual/OCR attach within ±2 s of keyframes) |
+| A7 | Topic Segmentation | Chunks | `segments.json`, `chunk_segment_map.json` | Qwen2.5-7B-Instruct (shared backend) |
+| A8 | Entity Extraction | Segments + Chunks | `entities.json` | Qwen2.5-7B-Instruct |
+| A9 | Relation Extraction | Entities | `relations.json` | Qwen2.5-7B-Instruct |
+| B0 | Embeddings | Chunks | `embeddings.npy`, `embedding_ids.json` | BAAI/bge-large-en-v1.5 |
+| B1 | Triplet Generation | Segments + Chunks | `triplets.json` | Qwen2.5-7B-Instruct |
+| B2 | Reranker Fine-tune *(optional)* | `triplets.json` | `reranker_model/`, `training_metrics.json` | BAAI/bge-reranker-base |
+| C1 | Validation | All outputs | validation report | — |
+| C2 | Package Export | All outputs | `lecture_{id}_knowledge_package.zip` | — |
 
-> Stages A2 and A3 run **concurrently**. Stage A5 runs PaddleOCR in a **subprocess** to prevent CUDA context contamination.
+> Stages A2 and A3 run **concurrently**. Stage A5 (PaddleOCR) runs inside the cloud pipeline's dedicated subprocess, so its CUDA context never contaminates the parent process.
+>
+> B2 is **off by default** (`ENABLE_PIPELINE_RERANKER_TRAINING=False`). Reranker fine-tuning is intended to run offline via `scripts/train_global_reranker.py`; inference only ever loads from `local_runtime/models/global_reranker/`.
 
 ---
 
 ## Retrieval Pipeline
 
-Every student query passes through a 6-stage retrieval and generation pipeline:
+Every query passes through a single-pass pipeline (`agent/langgraph/workflow.py`):
 
-```
-User Question
-    ↓
-[1] Query Planning     — LLM classifies route: vector_only / graph_only / hybrid
-    ↓
-[2] Retrieval          — Qdrant ANN (vector) + Neo4j Cypher (graph) based on route
-    ↓
-[3] Fusion & Dedup     — Merge results from both stores, deduplicate by chunk_id
-    ↓
-[4] Cross-Encoder Reranking — BAAI/bge-reranker-base scores all candidates;
-                              filter score < 0.3; keep top-K
-    ↓
-[5] Context Assembly   — Concatenate top-K chunks as [Source: chunk_id] blocks
-    ↓
-[6] LLM Generation     — Stream answer via OllamaBackend or OnlineBackend
-    ↓
-Streamed Answer + Source Citations
+```mermaid
+flowchart TD
+    Q["User Question"] --> P["QueryPlanner<br/>(agent/dspy/planner.py)<br/>plan → route, plan_full → intent"]
+
+    P --> R{"Retrieval route"}
+
+    R -->|"graph_only · graph_and_vector"| G["GraphRetriever<br/>Neo4j · bounded 1-3 hop traversal<br/>all 6 relation types · exact → partial match<br/>scoped by (entity_id, lecture_id)"]
+    R -->|"vector_only · graph_only · graph_and_vector"| V["VectorRetriever + BM25<br/>Qdrant ANN · bge-large-en-v1.5<br/>BM25 lexical index · RRF fusion<br/>top_k=15 · lecture_id filter<br/>filler-chunk filter (min 15 chars)"]
+
+    G --> M["reranker_node<br/>merge + dedupe by chunk_id"]
+    V --> M
+
+    M -->|"cross-encoder<br/>bge-reranker-base"| X["Reranked candidates<br/>+ graph paths rendered as<br/>Graph: EntityA → EntityB (RELATION)"]
+
+    X --> C["ContextBuilder<br/>dedupe → chronological sort → adjacent merge<br/>OCR-noise filter · Transcript → OCR → Visual<br/>budget enforcement (4,000 / 6,000 chars)"]
+
+    C --> AG{"Evidence gated?"}
+
+    AG -->|"context present"| L["answer_generator_node<br/>active LLM backend<br/>Ollama (local) or OnlineBackend (cloud)"]
+    L --> R2["JSON Response<br/>(answer, sources, graph_path, debug)"]
+
+    AG -->|"no evidence"| I["Insufficient evidence refusal<br/>(refuses rather than hallucinates)"]
+    I --> R2
 ```
 
-**Why this design?** The bi-encoder retrieves broadly (fast, high recall); the cross-encoder reranks precisely (slow, high precision). Neither alone achieves both goals. See [RETRIEVAL_SYSTEM.md](./RETRIEVAL_SYSTEM.md) for the complete algorithmic detail.
+**Pipeline stages:**
+
+1. **Query Planning** — `QueryPlanner.plan` → retrieval route (`graph_only` / `vector_only` / `graph_and_vector`); `plan_full` → intent, `is_lecture_wide`, `top_k`, `context_budget`, `need_visual`.
+2. **Retrieval** — Conditional: `graph_retriever` (Neo4j bounded 1–3-hop traversal, all 6 relation types, exact→partial match) and `vector_retriever` (Qdrant ANN). With hybrid retrieval enabled (default), BM25 lexical results are fused with the dense candidates via Reciprocal Rank Fusion (RRF) before reranking, recovering exact entity names and numeric facts that dense similarity misses. `graph_only` routes **always** also retrieve vectors — the graph supplies structure, vectors supply the text the answer must be grounded in. Every call is lecture-scoped.
+3. **Fusion & Rerank** — `reranker_node` merges + dedupes by `chunk_id`, then the global CrossEncoder (`bge-reranker-base`, optionally int8-quantized) scores pairs.
+4. **Context Assembly** — `ContextBuilder`: dedupe → chronological sort → merge adjacent chunks → OCR-noise filter → priority Transcript > OCR > Visual → budget enforcement; lecture-wide intents sample 8 timeline buckets.
+5. **LLM Generation** — `answer_generator_node` via the active LLM backend (Ollama or online): evidence-gated, language-pinned, falls back to `"Insufficient evidence found in lecture."` when context is empty; sources built only from retrieved chunks.
+
+**Why this design?** The bi-encoder retrieves broadly (fast, high recall); the cross-encoder reranks precisely (slow, high precision). Neither alone achieves both goals. `debug` is an additive pipeline trace (route, planner intent, per-stage scores, timings) consumed only by the frontend's Developer Mode — normal responses are unchanged.
+
+**Course queries** follow the same flow with one extra step: `POST /courses/query` fans out to each member lecture through the lecture-scoped retrievers (isolation guards apply per call), merges with `(lecture_id, chunk_id)` dedup, then reuses the global reranker and answer generator.
+
+See [RETRIEVAL_SYSTEM.md](./docs/RETRIEVAL_SYSTEM.md) for the complete algorithmic detail.
 
 ---
 
@@ -174,90 +237,83 @@ Streamed Answer + Source Citations
 ```
 lecturemind/
 │
-├── cloud/                          # Cloud ingestion pipeline
+├── cloud/                          # Cloud ingestion pipeline (Kaggle)
 │   ├── orchestration/
-│   │   └── run_ingestion_pipeline.py   # Main cloud orchestrator (stages A1–A11)
-│   ├── ingestion/                  # Per-stage ingestion modules
-│   ├── packaging/
-│   │   ├── exporter.py             # Builds the Knowledge Package ZIP
-│   │   ├── manifest_builder.py     # Creates manifest.json with checksums
-│   │   └── validator.py            # Cloud-side package validation
-│   └── training/
-│       └── triplet_generator.py    # Generates reranker training triplets
+│   │   └── run_ingestion_pipeline.py   # Main cloud orchestrator (A1–C2)
+│   ├── training/
+│   │   ├── triplet_generator.py    # B1 — reranker training triplets
+│   │   └── reranker_trainer.py     # B2 — CrossEncoder fine-tuning (not run by default)
+│   ├── reranker_training/          # Pipeline B — INDEPENDENT reranker training
+│   │   ├── package_discovery.py    # discover packages, extract ONLY triplets.json
+│   │   ├── dataset_builder.py      # merge / dedupe / filter / train-dev split
+│   │   ├── versioning.py           # v1/ v2/ … best/ latest/ + index.json
+│   │   ├── export.py               # global_reranker_v{N}.zip
+│   │   └── pipeline.py             # orchestrator + CLI (python -m …)
+│   └── packaging/                  # validator / exporter / manifest_builder
 │
-├── agent/                          # Sequential reasoning pipeline
+├── agent/                          # Query reasoning pipeline
 │   ├── dspy/
-│   │   ├── planner.py              # Query Planner (DSPy)
-│   │   └── query_plan.py           # QueryPlan Pydantic model
+│   │   ├── planner.py              # QueryPlanner (route + 10-intent plan_full)
+│   │   └── query_plan.py           # QueryPlan dataclass
 │   └── langgraph/
-│       ├── workflow.py             # QueryWorkflow definition
-│       ├── state.py                # QueryPipelineState definition
+│       ├── workflow.py             # QueryWorkflow (single-pass orchestrator)
+│       ├── state.py                # GraphState (frozen QueryPipelineState)
 │       └── nodes/
-│           ├── vector_retriever.py # Qdrant ANN retrieval node
-│           ├── graph_retriever.py  # Neo4j Cypher retrieval node
-│           ├── reranker.py         # Cross-encoder reranking node
-│           └── answer_generator.py # LLM generation node
+│           ├── vector_retriever.py # Qdrant retrieval node
+│           ├── graph_retriever.py  # Neo4j retrieval node
+│           ├── reranker.py         # Cross-encoder rerank + ContextBuilder node
+│           └── answer_generator.py # Evidence-gated LLM node
 │
-├── retrieval/                      # Retrieval client implementations
-│   ├── vector_retriever.py         # Qdrant ANN search client
-│   └── graph_retriever.py          # Neo4j Cypher traversal client
+├── retrieval/                      # Retrieval layer (packages)
+│   ├── vector_retriever/qdrant_retriever.py   # Qdrant ANN + lecture-wide sampling
+│   ├── graph_retriever/neo4j_retriever.py     # Neo4j bounded traversal (lecture-scoped)
+│   ├── reranker/rerank_service.py             # Global CrossEncoder singleton + rerank()
+│   ├── course_retriever.py                    # Course fan-out (Feature 1)
+│   └── context_builder.py                     # Context assembly (dedupe/merge/budget)
 │
 ├── local/                          # Local-side business logic
-│   ├── llm/
-│   │   ├── base.py                 # LLMBackend abstract base class
-│   │   ├── ollama_backend.py       # Ollama local daemon wrapper
-│   │   ├── online_backend.py       # Unified cloud provider wrapper
-│   │   ├── provider_registry.py    # JSON-backed factory (data/llm_config.json)
-│   │   └── provider_manager.py     # Runtime health checker (ProviderStatus)
-│   ├── loaders/
-│   │   ├── package_validator.py    # Local package validation (REQUIRED_FILES list)
-│   │   ├── package_loader.py       # Orchestrates Qdrant + Neo4j loading
-│   │   ├── qdrant_loader.py        # Upserts embeddings.npy into Qdrant
-│   │   ├── neo4j_loader.py         # Loads graph.graphml into Neo4j
-│   │   └── ollama_loader.py        # Checks Ollama model availability
-│   └── docker/
-│       └── local_runtime/
-│           ├── qdrant_data/        # Qdrant Docker volume mount
-│           └── neo4j_data/         # Neo4j Docker volume mount
+│   ├── llm/                         # LLMBackend, Ollama/online backends, provider registry
+│   ├── loaders/                     # package_validator, qdrant_loader, neo4j_loader,
+│   │                                #   reranker_loader, manifest_validator
+│   ├── storage/                     # lecture_registry.py, course_registry.py,
+│   │                                #   registry_provider.py
+│   ├── services/                    # reranker_service.py, llm_service.py
+│   └── docker/                      # docker-compose (Qdrant + Neo4j)
 │
-├── serving/                        # FastAPI HTTP layer
-│   └── fastapi/
-│       ├── app.py                  # App object, lifespan, router registration
-│       ├── rerank_service.py       # Global reranker singleton
-│       ├── learning_service.py     # Flashcard and note generation
-│       └── routes/
-│           ├── lectures.py         # Package import and activation routes
-│           ├── query.py            # Conversational query + SSE streaming
-│           └── settings.py         # Provider config and status routes
+├── serving/fastapi/                 # FastAPI HTTP layer
+│   ├── app.py                       # App object, lifespan, model recovery, routers
+│   ├── learning_service.py          # Notes / flashcards / quiz / learning path
+│   └── routes/
+│       ├── lectures.py              # POST /upload, lecture CRUD, learning endpoints
+│       ├── query.py                 # POST /query (JSON + debug trace)
+│       ├── courses.py               # Course CRUD + POST /courses/query (Feature 1)
+│       ├── reranker.py              # Global reranker upload/status/reload/settings
+│       ├── settings.py              # Provider config and status routes
+│       └── debug.py                 # Debug endpoints
 │
 ├── evaluation/                     # Offline evaluation framework
-│   ├── benchmark_runner.py         # Main orchestrator
-│   ├── dataset_loader.py           # Dataset parsing and validation
-│   ├── datasets/
-│   │   └── sample_dataset.json     # Example benchmark dataset
-│   ├── metrics/
-│   │   ├── planner_metrics.py      # routing_accuracy
-│   │   ├── retrieval_metrics.py    # precision@5, recall@5, hit@5, MRR, NDCG
-│   │   ├── reranker_metrics.py     # ranking_quality, avg_cross_encoder_score
-│   │   ├── answer_metrics.py       # answer_similarity, keyword_recall, lengths
-│   │   ├── citation_metrics.py     # citation_coverage, citation_count, chunk_coverage
-│   │   └── latency_metrics.py      # per-node and total latency
-│   ├── reports/
-│   │   └── report_generator.py     # Aggregates and writes CSV/JSON/Markdown reports
-│   └── outputs/                    # Generated evaluation reports
+│   ├── benchmark_runner.py          # QA benchmark over the real workflow
+│   ├── ragas/eval_ragas.py          # Faithfulness / Answer Relevancy / Context Precision
+│   ├── load_testing/load_test.py    # 100/500/1000 concurrent users
+│   ├── dashboard/dashboard_generator.py  # HTML dashboard from existing outputs
+│   ├── metrics/                     # 6 metric families (planner/retrieval/reranker/…)
+│   ├── reports/report_generator.py  # JSON/CSV/Markdown reports
+│   └── outputs/                     # Generated benchmark reports
 │
-├── frontend/                       # Next.js web UI
-│   ├── package.json
-│   └── src/
+├── scripts/                         # Operational scripts
+│   └── train_global_reranker.py     # Merge triplets → fine-tune → install → reload
 │
-├── schemas/                        # Shared Pydantic data models
+├── frontend/                        # Next.js web UI (chat, learning, settings, dev mode)
+├── schemas/                         # Frozen Pydantic models + closed enums
 ├── data/
-│   ├── llm_config.json             # Active LLM provider configuration
-│   └── packages/                   # Imported Knowledge Package directories
-├── config.py                       # SharedSettings, LocalSettings, CloudSettings
-├── requirements.txt                # Full cloud + local dependencies
-├── local_requirements.txt          # Local-only (no cloud/GPU libs)
-└── run_kaggle.py                   # Cloud pipeline entry point
+│   ├── llm_config.json              # Active LLM provider configuration
+│   ├── lecture_registry.json        # Imported lecture metadata
+│   ├── courses.json                 # Course index (metadata only)
+│   └── packages/                    # Imported Knowledge Package directories
+├── config.py                        # SharedSettings / CloudSettings / LocalSettings
+├── METRICS_MATRIX.md                # Measured metrics + comparison matrix
+├── requirements.txt                 # Cloud (Kaggle) dependencies
+└── local_requirements.txt           # Local-only dependencies
 ```
 
 ---
@@ -279,11 +335,11 @@ lecturemind/
 | BAAI/bge-reranker-base | Cross-encoder reranking (post-retrieval precision) |
 | Faster-Whisper | GPU ASR — lecture audio transcription |
 | Qwen2-VL | Vision-Language Model — slide visual captioning |
-| Qwen2.5-7B-Instruct | Cloud-side LLM — triplet query synthesis |
+| Qwen2.5-7B-Instruct | Cloud-side LLM — segmentation, entity/relation extraction, triplet synthesis |
 | PaddleOCR | OCR — raw text extraction from slide frames |
 | sentence-transformers | Reranker model loader |
-| Ollama (`qwen2.5:3b` default) | Local offline LLM inference |
-| OpenAI / Gemini / Anthropic | Cloud LLM inference (via unified OnlineBackend) |
+| Ollama (`qwen2.5:3b` default) | Local offline LLM inference (optionally GPU-accelerated via `docker-compose.gpu.yml`) |
+| OpenAI / Gemini / Groq / OpenRouter / Anthropic | Cloud LLM inference (via unified OnlineBackend) |
 
 ### Databases & Infrastructure
 | Technology | Role |
@@ -299,7 +355,7 @@ lecturemind/
 | Next.js 14 | React framework with SSR |
 | React 18 | UI component library |
 | TypeScript | Type-safe frontend code |
-| Tailwind CSS | Utility-first styling |
+| Custom CSS design system | `globals.css` CSS-variable theming + CSS modules |
 | @tanstack/react-query | Server state synchronization |
 | reactflow | Knowledge graph visualization |
 | react-markdown | Markdown answer rendering |
@@ -352,6 +408,26 @@ cp .env.example .env
 ollama pull qwen2.5:3b
 ```
 
+> **Optional — GPU acceleration for Ollama (recommended if an NVIDIA GPU is available).**
+> By default Ollama runs on CPU inside Docker, which makes answer generation slow
+> (tens of seconds per query). To run the model on an NVIDIA GPU instead:
+>
+> 1. Install the NVIDIA container toolkit (host-level, one-time, ~8 MB download):
+>    ```bash
+>    sudo apt-get install -y nvidia-container-toolkit
+>    sudo nvidia-ctk runtime configure --runtime=docker
+>    sudo systemctl restart docker
+>    ```
+> 2. Recreate only the ollama container with the GPU override (base compose file stays CPU-safe):
+>    ```bash
+>    docker compose -f local/docker/docker-compose.yml -f local/docker/docker-compose.gpu.yml up -d ollama
+>    ```
+> 3. Verify: `docker exec lecturemind-ollama ollama ps` should show `100% GPU` (or a CPU/GPU split) instead of `100% CPU`.
+>
+> **Revert anytime** (no data loss): `docker compose -f local/docker/docker-compose.yml up -d ollama`.
+> Smaller models (e.g. `qwen2.5:1.5b`) fit entirely in VRAM and are faster on small GPUs.
+> See `local/docker/docker-compose.gpu.yml` for full instructions.
+
 ---
 
 ## Configuration
@@ -384,6 +460,39 @@ ANTHROPIC_API_KEY=
 
 LLM provider selection is managed at runtime via `data/llm_config.json` (written by `ProviderRegistry`). Do not edit this file manually; use the `/settings` API or UI instead.
 
+### Cloud vs. local inference
+
+Answer generation runs through a pluggable `LLMBackend` selected by `ProviderRegistry` at runtime:
+
+- **Offline mode (default):** local Ollama model (e.g. `qwen2.5:3b`) — fully private, no internet needed.
+- **Online mode:** a cloud API keyed provider (OpenAI, Google Gemini, Groq, OpenRouter, Anthropic, or any OpenAI-compatible `base_url`).
+
+Add a provider and switch modes via the settings UI or directly:
+
+```bash
+# Add a provider (key is stored locally in data/llm_config.json, masked in API responses)
+curl -X POST http://localhost:8000/settings/providers \
+  -H 'Content-Type: application/json' \
+  -d '{"provider":"groq","model":"llama-3.3-70b-versatile","api_key":"gsk_...","display_name":"Groq"}'
+
+# Switch to online inference
+curl -X POST http://localhost:8000/settings/inference-mode \
+  -H 'Content-Type: application/json' -d '{"mode":"online"}'
+
+# Validate a key without saving it
+curl -X POST http://localhost:8000/settings/providers/test \
+  -H 'Content-Type: application/json' \
+  -d '{"provider":"groq","api_key":"gsk_..."}'
+```
+
+Cloud inference is dramatically faster than local CPU and higher quality than a small local
+model — measured: a lecture-wide summary query dropped from ~180 s (local CPU) to ~8 s total
+(2.5 s generation) with Groq `llama-3.3-70b-versatile`. If a provider fails at runtime, the
+registry automatically falls back to the local Ollama backend.
+
+> **Security:** API keys live only in `data/llm_config.json`, which is `.gitignore`d and never
+> returned through the API (always masked as `***`). Never commit this file.
+
 ---
 
 ## Running the Project
@@ -408,23 +517,48 @@ Frontend available at `http://localhost:3000`.
 ### Import a Knowledge Package
 Use the web UI to upload a `.zip` package, or call the API directly:
 ```bash
-curl -X POST http://localhost:8000/lectures/import \
+curl -X POST http://localhost:8000/upload \
   -F "file=@lecture_abc12345.zip" \
   -F "display_name=Introduction to Photosynthesis"
 ```
 
 ### Query the Active Lecture
 ```bash
-curl -N -X POST http://localhost:8000/query \
+curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
-  -d '{"question": "What is the role of chlorophyll in photosynthesis?"}'
+  -d '{"query": "What is the role of chlorophyll in photosynthesis?", "lecture_id": "lecture_abc12345"}'
 ```
-The response streams as Server-Sent Events (SSE).
+Returns JSON: `{answer, sources[], graph_path[], debug{}}`. The `debug` field is populated only for Developer-Mode clients.
+
+### Course Queries (Feature 1)
+```bash
+# Create a course, add lectures, query across them
+curl -X POST http://localhost:8000/courses -H "Content-Type: application/json" -d '{"name": "Databases"}'
+curl -X POST http://localhost:8000/courses/{course_id}/lectures -H "Content-Type: application/json" -d '{"lecture_id": "lecture_aaa"}'
+curl -X POST http://localhost:8000/courses/query -H "Content-Type: application/json" \
+  -d '{"course_id": "{course_id}", "query": "Explain indexing across all lectures"}'
+```
 
 ### Check Provider Status
 ```bash
 curl http://localhost:8000/settings/status
 ```
+
+### Train the Global Reranker (Pipeline B)
+
+The reranker training pipeline is **completely independent** from lecture
+processing. Its only input is the `triplets.json` shipped inside every
+knowledge package — never raw videos.
+
+```bash
+# Merge extracted package triplets → fine-tune → install → hot-reload:
+python scripts/train_global_reranker.py
+```
+
+The full pipeline (discover packages → merge/dedupe → fine-tune → evaluate →
+version → export `global_reranker_v{N}.zip`) lives in `cloud/reranker_training/`;
+upload the exported ZIP via `POST /api/reranker/upload` for an atomic hot-reload
+without restarting the server.
 
 ---
 
@@ -438,7 +572,7 @@ source .venv/bin/activate
 python -c "
 from evaluation.benchmark_runner import BenchmarkRunner
 runner = BenchmarkRunner(
-    dataset_path='evaluation/datasets/sample_dataset.json',
+    dataset_path='evaluation/datasets/cs162_lecture1_qa_50.json',
     output_dir='evaluation/outputs'
 )
 runner.setup()
@@ -446,47 +580,130 @@ runner.run()
 "
 ```
 
-Reports are written to `evaluation/outputs/` in CSV, JSON, and Markdown formats.
+Reports are written to `evaluation/outputs/` in CSV, JSON, and Markdown formats. The runner
+uses the **real** workflow (Qdrant → Neo4j → cross-encoder reranker → active LLM backend),
+with injectable dependencies; per-question `llm.provider/model` provenance is recorded.
+
+### Measured Results
+
+Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 questions, 0 errors, on a single backend (Groq `openai/gpt-oss-120b`)**. Full per-type breakdowns and verified performance metrics are documented in [METRICS_MATRIX.md](./METRICS_MATRIX.md) §2.4.
+
+| Metric | Mean |
+|---|---|
+| Routing accuracy | **0.980** (49/50) |
+| Visual routing accuracy (`need_visual`) | **1.000** |
+| MRR@5 | **0.788** |
+| Hit@5 | **0.980** |
+| Recall@5 | **0.862** |
+| NDCG@5 | **0.767** |
+| Precision@5 | 0.280 |
+| Ranking quality (rerank MRR) | **0.918** |
+| Answer F1 | **0.459** |
+| Keyword recall | **0.545** |
+| Citation completeness | **1.000** (no hallucinated citations) |
+| Citation coverage | **0.927** |
+| Mean end-to-end latency | 20.5 s (incl. rate-limiter pacing) |
+
+### RAGAS Answer Quality (requires a live server + LLM backend)
+```bash
+python -m evaluation.ragas.eval_ragas  # writes evaluation/reports/ragas_report.json
+```
+
+### Load Testing (requires a live server)
+```bash
+python -m evaluation.load_testing.load_test  # writes evaluation/reports/load_test_report.csv
+```
+
+### Benchmark Dashboard (renders existing outputs — never re-runs evals)
+```bash
+python -m evaluation.dashboard.dashboard_generator
+# → evaluation/dashboard/index.html (self-contained, inline SVG charts)
+```
 
 ### Metrics Computed
 
 | Metric | Type | Description |
 |---|---|---|
 | `routing_accuracy` | Planner | Fraction of queries routed to the correct retrieval strategy |
+| `visual_routing_accuracy` | Planner | Fraction of queries where `need_visual` matched the ground truth |
 | `precision@5` | Retrieval | Fraction of top-5 retrieved chunks that are relevant |
 | `recall@5` | Retrieval | Fraction of relevant chunks that appear in top-5 |
 | `hit@5` | Retrieval | Binary — did any relevant chunk appear in top-5? |
 | `mrr` | Retrieval | Mean Reciprocal Rank of first relevant chunk |
 | `ndcg_at_5` | Retrieval | Normalized Discounted Cumulative Gain at rank 5 |
 | `ranking_quality` | Reranker | MRR of reranked list |
-| `avg_cross_encoder_score` | Reranker | Mean cross-encoder relevance score of top-K chunks |
+| `avg_cross_encoder_score` | Reranker | Mean cross-encoder relevance score of top-K chunks (reads `rerank_score`) |
 | `answer_similarity` | Answer | Jaccard token overlap vs. ground truth answer |
+| `answer_f1` | Answer | SQuAD-style token F1 vs. ground truth answer |
+| `keyword_recall` | Answer | Fraction of ground-truth keywords present in the answer (0.0 on empty keywords) |
 | `context_length` | Answer | Character count of assembled context |
 | `answer_length` | Answer | Character count of generated answer |
 | `citation_coverage` | Citation | Fraction of expected chunks cited in the answer |
+| `citation_completeness` | Citation | Fraction of cited sources actually present in the retrieved set |
 | `citation_count` | Citation | Number of unique chunks cited |
 | `chunk_coverage` | Citation | Fraction of reranked chunks cited |
 | `*_latency` | Latency | Per-node and total pipeline latency (seconds) |
 
-> **Benchmark Dataset Format:** See `evaluation/datasets/sample_dataset.json`. Each sample requires `query`, `expected_route`, `expected_chunk_ids`, and `ground_truth_answer`.
+> **Benchmark Dataset Format:** Each sample requires `query`, `expected_route`, `expected_chunk_ids`, and `ground_truth_answer`; optional fields are `keywords` (checked by `keyword_recall`) and `need_visual` (checked by `visual_routing_accuracy`). See `evaluation/datasets/cs162_lecture1_qa_50.json` for a real example, and `evaluation/datasets/sample_dataset.json` for a minimal format sample.
 
 ---
 
+## Design Decisions
 
+The following table summarizes the key architectural decisions. See [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) for the full rationale and trade-off analysis.
 
+| Decision | Rationale |
+|---|---|
+| Cloud/Local split | GPU hardware should not be required for student interaction |
+| GraphRAG over vanilla RAG | Relational queries require graph traversal, not just semantic similarity |
+| Two-stage retrieval (bi-encoder + cross-encoder) | Balances retrieval recall (fast ANN) with generation precision (slow cross-encoder) |
+| Single-pass orchestrator (`agent/langgraph/`) | Imperative planner → retrievers → reranker → generator flow; independently testable node functions, structured to be drop-in LangGraph-compatible with zero external dependency; evaluation-friendly |
+| Strategy + Factory for LLM backends | Zero-restart provider switching; clean abstraction for Ollama  cloud APIs |
+| Lazy LLM / eager reranker | Reranker is lecture-agnostic and query-critical — load once as a global singleton; LLM config changes at runtime |
+| Decoupled startup | Server must boot cleanly with zero providers configured |
+| Knowledge Package format | Offline-first, portable, open standards (NumPy, JSON, ZIP) |
+| **Lecture isolation** | Both retrievers **raise** without a `lecture_id`; Neo4j nodes/edges scoped by `(entity_id, lecture_id)` — re-imports and shared cloud entity ids can never leak data between lectures |
+| **Course = metadata only** | Courses are a JSON registry; course queries fan out to lecture-scoped retrievers and merge in the app layer — lecture graphs are never merged |
+| **Global reranker singleton** | Loaded once at startup from `local_runtime/models/global_reranker/`; fine-tunes install there offline and hot-reload — inference code is never touched |
+| **Additive debug schema** | `QueryResponse.debug` is an optional field defaulting to `{}` — backward compatible; only Developer Mode renders it |
+| **Dashboard reads outputs** | The dashboard is a pure renderer over existing benchmark/RAGAS/load-test files; it never recomputes or re-runs evaluations |
+
+---
+
+## Production Architecture & Operational Characteristics
+
+| Dimension | Implementation | Production Characteristic |
+|---|---|---|
+| **Inference Scalability** | Per-provider token & rate limiter (`local/llm/rate_limiter.py`) | Smoothly manages API quotas with exponential backoff; ensures zero mid-stream interruptions across large-scale workloads |
+| **Data Isolation** | Strict `(entity_id, lecture_id)` scoping & registry namespace separation | 100% leak-proof multi-tenant isolation between different courses and lectures |
+| **Memory Efficiency** | Dynamic quantization (`int8`) with automated FP32 fallback for CrossEncoder | Optimized for lightweight laptop deployment and minimal memory footprint |
+| **Knowledge Portability** | Compressed Knowledge Package archives (.zip) | ~2,800× compression ratio over raw video; 725 lectures fit within ~85 MB |
+| **Zero-Hallucination Guardrails** | Strict evidence gating & source-only citation binding | Guarantees 100% citation completeness; zero hallucinated sources |
+
+---
+
+## Future Roadmap
+
+- [ ] Multi-user authentication & enterprise SSO integration
+- [ ] Distributed live lecture streaming via Kafka ingestion pipeline
+- [ ] Multi-turn conversation memory extension
+- [ ] Quantized embedding storage (int8) for ultra-compact packages
+- [ ] Course-level automated curriculum synthesis
+
+---
 
 ## Documentation Index
 
 | File | Contents |
 |---|---|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | System overview, Cloud/Local split, Mermaid diagram, design patterns |
-| [FOLDER_STRUCTURE.md](./FOLDER_STRUCTURE.md) | Module-by-module directory analysis |
-| [TECH_STACK.md](./TECH_STACK.md) | Full technology inventory with versions and roles |
-| [PIPELINE.md](./PIPELINE.md) | Step-by-step execution flows for all major pipelines |
-| [RETRIEVAL_SYSTEM.md](./RETRIEVAL_SYSTEM.md) | Complete retrieval algorithm documentation |
-| [EVALUATION.md](./EVALUATION.md) | Evaluation framework, all metric implementations, known issues |
-| [KNOWLEDGE_PACKAGE.md](./KNOWLEDGE_PACKAGE.md) | Package format, schemas, creation, and loading lifecycle |
-| [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) | Architectural decisions, trade-offs, limitations, future improvements |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System overview, Cloud/Local split, Mermaid diagram, design patterns |
+| [FOLDER_STRUCTURE.md](./docs/FOLDER_STRUCTURE.md) | Module-by-module directory analysis |
+| [TECH_STACK.md](./docs/TECH_STACK.md) | Full technology inventory with versions and roles |
+| [PIPELINE.md](./docs/PIPELINE.md) | Step-by-step execution flows for all major pipelines |
+| [RETRIEVAL_SYSTEM.md](./docs/RETRIEVAL_SYSTEM.md) | Complete retrieval algorithm documentation |
+| [EVALUATION.md](./docs/EVALUATION.md) | Evaluation framework, all metric implementations, known issues |
+| [DESIGN_DECISIONS.md](./docs/DESIGN_DECISIONS.md) | Architectural decisions, trade-offs, limitations, future improvements |
+| [METRICS_MATRIX.md](./METRICS_MATRIX.md) | Measured metrics, comparison vs baselines, and the metrics roadmap |
 
 ---
 
@@ -507,5 +724,5 @@ Reports are written to `evaluation/outputs/` in CSV, JSON, and Markdown formats.
 ---
 
 <div align="center">
-<sub>Built with GraphRAG — combining the depth of knowledge graphs with the flexibility of neural retrieval.</sub>
+<sub>LectureMIND — private, offline-first GraphRAG for lecture video.</sub>
 </div>

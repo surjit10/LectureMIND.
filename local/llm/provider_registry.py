@@ -280,12 +280,19 @@ class ProviderRegistry:
             if pid:
                 entry = self.get_provider_raw(pid)
                 if entry:
+                    # Optional per-provider rate budgets: set
+                    # tokens_per_minute / requests_per_minute on the provider
+                    # entry in data/llm_config.json to match the provider
+                    # plan actually in use; otherwise the limiter uses its
+                    # documented defaults.
                     return OnlineBackend(
                         provider=entry["provider"],
                         model=entry["model"],
                         api_key=entry["api_key"],
                         base_url=entry.get("base_url"),
                         display_name=entry.get("display_name"),
+                        tokens_per_minute=entry.get("tokens_per_minute"),
+                        requests_per_minute=entry.get("requests_per_minute"),
                     )
             logger.warning(
                 "[llm_config] Online mode selected but no active provider configured. "

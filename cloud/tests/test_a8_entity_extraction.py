@@ -159,8 +159,9 @@ class TestEntityExtractor:
         assert len(segment_entities) >= 1
         assert any(e.name == "Graph Traversal" for e in segment_entities)
 
-    def test_invalid_entity_type_filtered(self, cloud_settings, setup_a8_inputs):
-        """LLM output with invalid entity types must be filtered out."""
+    def test_invalid_entity_type_mapped_to_concept(self, cloud_settings, setup_a8_inputs):
+        """LLM output with invalid entity types is preserved and mapped to Concept
+        (A8 fix: invalid types are no longer dropped, so no entity information is lost)."""
         from cloud.extraction.entity_extractor import _parse_entity_json
 
         raw = json.dumps([
@@ -168,8 +169,10 @@ class TestEntityExtractor:
             {"name": "Invalid", "type": "FakeType"},
         ])
         entities = _parse_entity_json(raw)
-        assert len(entities) == 1
-        assert entities[0]["name"] == "Valid"
+        assert len(entities) == 2
+        assert {e["name"] for e in entities} == {"Valid", "Invalid"}
+        invalid = next(e for e in entities if e["name"] == "Invalid")
+        assert invalid["type"] == "Concept"
 
     def test_malformed_json_handled(self, cloud_settings, setup_a8_inputs):
         """Malformed JSON from LLM must not crash."""
@@ -177,6 +180,62 @@ class TestEntityExtractor:
 
         result = _parse_entity_json("not json at all")
         assert result == []
+
+    def test_invalid_escapes_repaired(self, cloud_settings, setup_a8_inputs):
+        r"""LaTeX-style invalid escapes (W\_q, O\(V\)) must be repaired, not dropped."""
+        from cloud.extraction.entity_extractor import _parse_entity_json
+
+        # Single backslashes in the JSON literal ("W\_q") are invalid escapes.
+        raw = '[{"name": "W\\_q", "type": "Formula"}, {"name": "O\\(V\\)", "type": "Formula"}]'
+        entities = _parse_entity_json(raw)
+        assert len(entities) == 2
+        assert entities[0]["name"] == "W\\_q"
+        assert entities[1]["name"] == "O\\(V\\)"
+
+    def test_fenced_json_parsed(self, cloud_settings, setup_a8_inputs):
+        """Fenced ```json ... ``` responses must parse."""
+        from cloud.extraction.entity_extractor import _parse_entity_json
+
+        raw = '```json\n[{"name": "BFS", "type": "Algorithm"}]\n```'
+        entities = _parse_entity_json(raw)
+        assert len(entities) == 1
+        assert entities[0]["name"] == "BFS"
+        assert entities[0]["type"] == "Algorithm"
+
+    def test_entity_type_normalization(self, cloud_settings, setup_a8_inputs):
+        """Variable/TextElement/unknown types normalize deterministically to Concept;
+        case variants normalize to the canonical type."""
+        from cloud.extraction.entity_extractor import _parse_entity_json, normalize_entity_type
+
+        assert normalize_entity_type("Variable") == "Concept"
+        assert normalize_entity_type("TextElement") == "Concept"
+        assert normalize_entity_type("concept") == "Concept"
+        assert normalize_entity_type("Algorithm") == "Algorithm"
+
+        raw = json.dumps([
+            {"name": "x", "type": "Variable"},
+            {"name": "y", "type": "TextElement"},
+            {"name": "z", "type": "concept"},
+        ])
+        entities = _parse_entity_json(raw)
+        assert len(entities) == 3
+        assert all(e["type"] == "Concept" for e in entities)
+
+    def test_extraction_stats_counters(self, cloud_settings, setup_a8_inputs):
+        """ExtractionStats records parse/accepted/normalized counters."""
+        from cloud.extraction.entity_extractor import _parse_entity_json
+        from cloud.utils.diagnostics import ExtractionStats
+
+        stats = ExtractionStats()
+        _parse_entity_json('[{"name": "A", "type": "Algorithm"}]', stats=stats)
+        _parse_entity_json('[{"name": "B", "type": "Variable"}]', stats=stats)
+
+        assert stats.requests == 2
+        assert stats.valid == 2
+        assert stats.accepted == 2
+        assert stats.normalized == 1
+        assert stats.rejected == 0
+        assert "A8 EXTRACTION QUALITY REPORT" in stats.report("A8")
 
     def test_missing_segments_raises(self, cloud_settings):
         """Missing segments.json must raise FileNotFoundError."""

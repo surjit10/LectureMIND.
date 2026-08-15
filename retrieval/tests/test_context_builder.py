@@ -167,6 +167,79 @@ class TestContextBuilderBugFix:
         assert context != ""
         assert len(context) <= 4000
 
+    def test_educational_ocr_with_url_not_discarded(self):
+        """
+        A single URL inside an otherwise educational slide must not destroy
+        the whole OCR text.
+
+        Regression (2026-08-11): the "Increasing Software Complexity" slide
+        OCR (Linux 2.2.0 / Firefox / Windows ranking) was dropped entirely
+        because it contained one informationisbeautiful.net URL, so the LLM
+        could never name the systems.
+        """
+        slide_ocr = (
+            "Increasing Software Complexity Linux2.2.0 Mars Curiosity Rover "
+            "Firefox Android Linux3.1(recent) Windows7 Microsoft Office 2013 "
+            "Windows Vista Facebook Mac OS X  www.informationisbeautiful.net "
+            "Base Pairs : 20 40"
+        )
+        chunk = _make_chunk(
+            "c_slide",
+            transcript="This information is beautiful.net visualizations and "
+            "million lines of code.",
+            ocr_text=slide_ocr,
+            timestamp=100.0,
+        )
+        builder = ContextBuilder(char_budget=4000)
+        context = builder.build([chunk], is_lecture_wide=False, need_visual=False)
+
+        # The slide content survives; the URL is stripped, not the slide.
+        assert "Linux2.2.0" in context
+        assert "Windows Vista" in context
+        assert "informationisbeautiful.net" not in context
+
+    def test_top_reranked_late_chunk_survives_budget(self):
+        """
+        Regression: the #1 reranked chunk must never be dropped just because
+        it is late in the lecture timeline.
+
+        Before the fix, ContextBuilder sorted chronologically and cut at the
+        budget in time order, so a top-ranked chunk with a late timestamp was
+        silently removed and the LLM answered "Insufficient evidence" even
+        though retrieval had found the evidence (2026-08-11: 25/50 refusals).
+        """
+        # 5 chunks; the late one (t=4000s) carries the answer and is the
+        # highest reranked.  The earlier chunks are low-ranked but would fill
+        # the budget in chronological order.
+        chunks = [
+            _make_chunk(
+                f"c_{i:03d}",
+                transcript=f"Distractor topic {i}. " * 30,  # ~300 chars each
+                timestamp=float(i * 100),
+                segment_id=f"seg_{i}",
+            )
+            for i in range(4)
+        ]
+        answer = _make_chunk(
+            "c_answer",
+            transcript="THE ACTUAL ANSWER TO THE QUESTION. " * 40,  # ~1200 chars
+            timestamp=4000.0,
+            segment_id="seg_99",
+        )
+        # Rank the answer chunk highest, distractors lower.
+        for i, c in enumerate(chunks):
+            c["rerank_score"] = 0.5 - i * 0.1
+        answer["rerank_score"] = 0.9
+        # Feed in retrieval order (answer last — chronological order would
+        # place it at the end of the pool, after the budget was exhausted).
+        builder = ContextBuilder(char_budget=1200)
+        context = builder.build(chunks + [answer], is_lecture_wide=False, need_visual=False)
+
+        assert "ACTUAL ANSWER" in context, (
+            "Top reranked evidence must survive the budget regardless of timestamp."
+        )
+        assert len(context) <= 1200
+
     def test_context_contains_transcript_label(self):
         """
         _build_passage_text prefixes transcripts with [Transcript].

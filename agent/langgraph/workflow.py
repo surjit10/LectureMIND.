@@ -90,14 +90,28 @@ class QueryWorkflow:
             graph_update = graph_retriever_node(state, driver=self._neo4j_driver)
             state.update(graph_update)
 
-        if route in (RetrievalRoute.vector_only, RetrievalRoute.graph_and_vector):
+        # graph_only ALSO runs vector retrieval: graph results carry entity
+        # names but no lecture text, so without vectors the answer generator
+        # has no grounded context and always falls back to "Insufficient
+        # evidence". The graph supplies the relationship structure; the
+        # vectors supply the transcript/OCR/visual text the answer must be
+        # grounded in. Never answer from the graph alone.
+        if route in (RetrievalRoute.vector_only, RetrievalRoute.graph_and_vector, RetrievalRoute.graph_only):
             from agent.langgraph.nodes.vector_retriever import vector_retriever_node
-            vector_update = vector_retriever_node(
-                state,
-                qdrant_client=self._qdrant_client,
-                embedding_model=self._embedding_model,
-            )
-            state.update(vector_update)
+            try:
+                vector_update = vector_retriever_node(
+                    state,
+                    qdrant_client=self._qdrant_client,
+                    embedding_model=self._embedding_model,
+                )
+                state.update(vector_update)
+            except Exception as exc:
+                # Non-fatal for graph_only: if vector grounding is
+                # unavailable (e.g. Qdrant down), still return graph
+                # context — the answer generator will fall back to
+                # "Insufficient evidence" rather than crash the query.
+                logger.warning("Workflow: Vector retrieval failed (graph_only): %s", exc)
+                state["vector_results"] = []
             
         state["telemetry"]["retrieval_latency"] = time.perf_counter() - t_ret_start
 

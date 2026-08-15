@@ -6,13 +6,21 @@
 fastapi==0.110.0
 uvicorn[standard]==0.27.1
 python-multipart==0.0.9
+# httpx backs FastAPI's TestClient. 0.28 removed the `app` kwarg that
+# starlette (<0.37) relies on, breaking all API tests — pin the last
+# compatible line.
+httpx==0.27.2
 
 # Configuration
 pydantic==2.9.2
 pydantic-settings==2.5.2
 
 # Vector & Graph DB
-qdrant-client
+# Pinned to match the Qdrant server image (qdrant/qdrant:v1.11.3) in
+# local/docker/docker-compose.yml and docker/docker-compose.prod.yml —
+# qdrant-client 1.18+ logs a version-mismatch warning against the 1.11
+# server. Keep in sync if the server image is ever upgraded.
+qdrant-client==1.11.3
 neo4j
 
 # LLM Providers

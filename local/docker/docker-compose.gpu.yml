@@ -1,0 +1,30 @@
+# docker-compose.gpu.yml — GPU enablement override for the ollama service.
+#
+# Base docker-compose.yml always stays CPU-safe; this file adds NVIDIA GPU
+# access to the ollama container WITHOUT modifying the base file.
+#
+# REQUIREMENTS (one-time, host-level):
+#   sudo apt-get install -y nvidia-container-toolkit
+#   sudo nvidia-ctk runtime configure --runtime=docker
+#   sudo systemctl restart docker
+#
+# ENABLE GPU (recreates only the ollama container; models persist):
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d ollama
+#
+# DISABLE / REVERT to CPU (no data loss — models live in local_runtime/models):
+#   docker compose up -d ollama          # base file only => CPU again
+#
+# If the NVIDIA toolkit is not installed, `up` fails loudly with a clear
+# "could not select device driver" error — the base CPU stack is unaffected.
+#
+# Verify: docker exec lecturemind-ollama ollama ps   (should show 100% GPU)
+
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

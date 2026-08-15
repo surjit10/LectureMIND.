@@ -16,6 +16,11 @@ services:
       - neo4j
       - qdrant
       - ollama
+    volumes:
+      # Persist downloaded models (reranker + embeddings, ~2.3 GB) and
+      # imported knowledge packages across container recreation.
+      - backend_models:/app/local_runtime/models
+      - backend_data:/app/data
     restart: unless-stopped
 
   frontend:
@@ -66,3 +71,5 @@ volumes:
   neo4j_data:
   qdrant_data:
   ollama_models:
+  backend_models:
+  backend_data:

@@ -100,6 +100,63 @@ class TestVisualUnderstanding:
         for rec in records:
             VLMCaption(**rec)
 
+    def test_batching_disabled_after_failure(self, cloud_settings):
+        """After one batch failure (e.g. CUDA OOM), the remaining frames are
+        processed sequentially WITHOUT retrying batched inference."""
+        from cloud.ingestion.qwen_pipeline.visual_understanding import (
+            run_visual_understanding,
+        )
+        import cloud.ingestion.qwen_pipeline.visual_understanding as vu_module
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_001"))
+        frames_dir = Path(cloud_settings.frame_dir("lec_001"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+        frames_dir.mkdir(parents=True, exist_ok=True)
+
+        # Two batches with BATCH_SIZE=4.
+        n_frames = 7
+        for i in range(1, n_frames + 1):
+            (frames_dir / f"frame_{i:06d}.jpg").write_bytes(b"fake")
+
+        frames_data = [
+            {"frame_id": i, "timestamp": float(i),
+             "image_path": f"frames/frame_{i:06d}.jpg"}
+            for i in range(1, n_frames + 1)
+        ]
+
+        def fake_caption(model, processor, image_path, frame_id):
+            return VLMCaption(
+                frame_id=frame_id, caption=f"Caption {frame_id}", objects=["obj"],
+            )
+
+        batch_calls = {"n": 0}
+
+        def failing_batch(model, processor, batch_items):
+            batch_calls["n"] += 1
+            raise vu_module.BatchInferenceUnavailable("CUDA out of memory (test)")
+
+        original_single = vu_module._caption_single_frame
+        original_batch = vu_module._caption_batch
+        vu_module._caption_single_frame = fake_caption
+        vu_module._caption_batch = failing_batch
+
+        try:
+            count = run_visual_understanding(
+                "lec_001", frames_data,
+                cloud_settings=cloud_settings,
+                model_loader=lambda: (MagicMock(), MagicMock()),
+            )
+        finally:
+            vu_module._caption_single_frame = original_single
+            vu_module._caption_batch = original_batch
+
+        assert count == n_frames
+        assert batch_calls["n"] == 1  # batching attempted exactly once
+
+        output_path = lecture_dir / "vlm_output.jsonl"
+        lines = [l for l in output_path.read_text().strip().split("\n") if l]
+        assert len(lines) == n_frames
+
     def test_vlm_caption_schema_rejects_empty_caption(self):
         """VLMCaption must reject empty captions."""
         with pytest.raises(Exception):

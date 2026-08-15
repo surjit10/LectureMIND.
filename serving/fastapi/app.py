@@ -117,8 +117,9 @@ def _run_model_recovery() -> None:
 
     logger.info("Startup: Starting automatic model recovery checks...")
 
-    reranker_status = "✗ Recovery Failed"
-    ollama_status = "✗ Recovery Failed"
+    reranker_status = "Recovery failed"
+    embedding_status = "Recovery failed"
+    ollama_status = "Recovery failed"
     error_reason = ""
 
     try:
@@ -134,9 +135,9 @@ def _run_model_recovery() -> None:
                 with open(reranker_dir / "config.json", "r", encoding="utf-8") as f:
                     cfg = json.load(f)
                 if "model_type" in cfg or "architectures" in cfg:
-                    logger.info("Startup: ✓ Found global reranker model.")
+                    logger.info("Startup: Found global reranker model.")
                     reranker_ready = True
-                    reranker_status = "✓ Already Present"
+                    reranker_status = "Already present"
                 else:
                     logger.warning("Startup: Global reranker config.json is missing required model keys.")
             except Exception as e:
@@ -152,9 +153,9 @@ def _run_model_recovery() -> None:
                 model = CrossEncoder(reranker_id, device="cpu")
                 os.makedirs(reranker_dir, exist_ok=True)
                 model.save(str(reranker_dir))
-                logger.info("Startup: ✓ Download complete.")
+                logger.info("Startup: Download complete.")
                 reranker_ready = True
-                reranker_status = "✓ Downloaded from Hugging Face"
+                reranker_status = "Downloaded from Hugging Face"
             except Exception as e:
                 logger.error("Startup: Hugging Face recovery failed: %s", e)
 
@@ -174,15 +175,31 @@ def _run_model_recovery() -> None:
             from retrieval.reranker import rerank_service as _rs
             model = _load_cross_encoder(reranker_dir)
             _rs._GLOBAL_RERANKER_SERVICE = RerankerService(model)
-            logger.info("Startup: ✓ Global reranker singleton initialized.")
-            if reranker_status == "✗ Recovery Failed":
-                reranker_status = "✓ Loaded"
+            logger.info("Startup: Global reranker singleton initialized.")
+            if reranker_status == "Recovery failed":
+                reranker_status = "Loaded"
         except Exception as e:
             raise RuntimeError(f"Global reranker model failed to load: {e}")
 
+        # 3b. Embedding model preload — load once at startup so the first
+        #     query never pays model-loading latency. Non-fatal: if this
+        #     fails (e.g. no HF access), qdrant_retriever lazy-loads on
+        #     first query, so startup still succeeds.
+        logger.info("Startup: Preloading embedding model (bge-large-en-v1.5)...")
+        try:
+            from retrieval.vector_retriever.qdrant_retriever import preload_embedding_model
+            preload_embedding_model(device="cpu")
+            embedding_status = "Preloaded"
+        except Exception as e:
+            logger.warning(
+                "Startup: Embedding model preload failed — will lazy-load on first query: %s",
+                e,
+            )
+            embedding_status = "Deferred (lazy-load on first query)"
+
         # 4. Ollama Recovery - REMOVED
         # Provider checking is now deferred to the runtime ProviderManager.
-        ollama_status = "✓ Deferred to Runtime Provider Manager"
+        ollama_status = "Deferred to Runtime Provider Manager"
 
         # Print Success Summary
         summary = f"""
@@ -194,7 +211,7 @@ Reranker (Global Singleton)
 {reranker_status}
 
 Embedding Model
-✓ Present
+{embedding_status}
 
 Ollama
 {ollama_status}
@@ -212,6 +229,9 @@ Model Recovery Summary
 
 Reranker (Global Singleton)
 {reranker_status}
+
+Embedding Model
+{embedding_status}
 
 Ollama
 {ollama_status}
@@ -258,8 +278,10 @@ app.include_router(lecture_routes.router, tags=["Lectures"])
 app.include_router(settings_routes.router)
 from serving.fastapi.routes import debug as debug_routes
 from serving.fastapi.routes import reranker as reranker_routes
+from serving.fastapi.routes import courses as course_routes
 app.include_router(debug_routes.router, tags=["Debug"])
 app.include_router(reranker_routes.router)
+app.include_router(course_routes.router, tags=["Courses"])
 
 
 @app.get("/health")
