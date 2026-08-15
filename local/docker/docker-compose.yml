@@ -32,14 +32,9 @@ services:
     volumes:
       - ./local_runtime/models:/root/.ollama/models
     restart: unless-stopped
-    # GPU support (uncomment if NVIDIA GPU available):
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+    # GPU support: enable via the override file (keeps this base file CPU-safe):
+    #   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d ollama
+    # See docker-compose.gpu.yml for requirements and how to revert.
 
   # Kafka is disabled by default — not needed for Chunk 4.
   # Uncomment for future streaming use cases.

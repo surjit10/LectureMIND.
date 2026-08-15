@@ -75,6 +75,13 @@ def _create_nodes(driver: Any, entities: List[Entity], lecture_id: str) -> int:
 
     Each node gets: entity_id, name, type, lecture_id.
     Label is derived from entity.type.
+
+    Data isolation: the MERGE key is (entity_id, lecture_id), NOT entity_id
+    alone. Cloud pipelines may reuse entity ids (e.g. two packages both
+    built from a lecture numbered lec_001), and a package may be
+    re-imported under a fresh runtime lecture id. Merging on entity_id only
+    would silently re-point the FIRST lecture's nodes at the SECOND import
+    and leak graph data across lectures.
     """
     count = 0
     with driver.session() as session:
@@ -84,8 +91,8 @@ def _create_nodes(driver: Any, entities: List[Entity], lecture_id: str) -> int:
                 raise Neo4jLoadError(f"Disallowed node label: {label}")
 
             query = (
-                f"MERGE (n:{label} {{entity_id: $entity_id}}) "
-                f"SET n.name = $name, n.type = $type, n.lecture_id = $lecture_id"
+                f"MERGE (n:{label} {{entity_id: $entity_id, lecture_id: $lecture_id}}) "
+                f"SET n.name = $name, n.type = $type"
             )
             session.run(
                 query,
@@ -100,20 +107,23 @@ def _create_nodes(driver: Any, entities: List[Entity], lecture_id: str) -> int:
     return count
 
 
-def _create_relationships(driver: Any, relations: List[Relation]) -> int:
+def _create_relationships(driver: Any, relations: List[Relation], lecture_id: str) -> int:
     """
     Create relationships in Neo4j.
 
-    Matches on entity_id, NEVER on name.
+    Matches on (entity_id, lecture_id), NEVER on name alone.
     Relationship type comes from relation.relation.
+
+    Data isolation: endpoints are matched within the SAME lecture only, so
+    a shared entity_id across lectures can never create a cross-lecture edge.
     """
     count = 0
     with driver.session() as session:
         for rel in relations:
             rel_type = rel.relation.value
             query = (
-                f"MATCH (s {{entity_id: $source}}) "
-                f"MATCH (t {{entity_id: $target}}) "
+                f"MATCH (s {{entity_id: $source, lecture_id: $lecture_id}}) "
+                f"MATCH (t {{entity_id: $target, lecture_id: $lecture_id}}) "
                 f"MERGE (s)-[r:{rel_type} {{relation_id: $relation_id}}]->(t)"
             )
             session.run(
@@ -121,6 +131,7 @@ def _create_relationships(driver: Any, relations: List[Relation]) -> int:
                 source=rel.source_entity_id,
                 target=rel.target_entity_id,
                 relation_id=rel.relation_id,
+                lecture_id=lecture_id,
             )
             count += 1
 
@@ -180,7 +191,7 @@ def load_neo4j(
 
     try:
         node_count = _create_nodes(driver, entities, lecture_id)
-        rel_count = _create_relationships(driver, relations)
+        rel_count = _create_relationships(driver, relations, lecture_id)
     finally:
         if close_driver:
             driver.close()

@@ -2,10 +2,11 @@
 # E2a — Neo4j Graph Retriever.
 #
 # Extracts entity mentions from the query via lightweight regex/keyword matching,
-# then runs bounded Cypher traversals (1–3 hops) using PREREQUISITE_OF and INTRODUCED_BEFORE.
+# then runs bounded Cypher traversals (1–3 hops) across all closed relation types.
 #
 # Populates state.graph_results only.
 
+import difflib
 import logging
 import re
 from typing import Any, Dict, List, Optional
@@ -21,13 +22,160 @@ ENTITY_PATTERN = re.compile(
     r"|\b([A-Z]{2,})\b"  # Acronyms like BFS, DFS
 )
 
+# All closed relation types (schemas/enums.py) — the traversal must span
+# the full graph, not just prerequisites, or it misses USED_BY / EXPLAINS /
+# DERIVED_FROM / VISUALIZED_BY edges and under-answers relational queries.
+ALL_RELATION_TYPES = (
+    "PREREQUISITE_OF|INTRODUCED_BEFORE|USED_BY|DERIVED_FROM|VISUALIZED_BY|EXPLAINS"
+)
+
+# Stopwords never useful as graph entity names. Deliberately NOT filtered:
+# domain terms like "relation", "model", "table", "database" — those are
+# exactly what a student queries about ("how is a relation connected to a
+# table") and CONTAINS matching maps them onto "Relational Model".
+_STOPWORDS = {
+    "what", "which", "how", "why", "when", "where", "who", "does", "did",
+    "the", "and", "are", "was", "were", "with", "from", "that", "this",
+    "have", "has", "had", "for", "its", "not", "but", "you", "your",
+    "about", "into", "can", "could", "will", "would", "shall", "should",
+    "than", "then", "there", "their", "they", "is", "it", "of", "to",
+    "in", "on", "at", "by", "be", "or", "as", "an", "a", "lecture",
+    "lectures", "explain", "explained", "explaining", "give", "given",
+    "tell", "called", "using", "used", "use", "via", "such", "like",
+}
+
+
+def _stem_word(word: str) -> str:
+    """Lightweight English suffix normalization for common plurals/inflections."""
+    w = word.lower().strip()
+    if len(w) > 3:
+        if w.endswith("ies"):
+            return w[:-3] + "y"
+        if w.endswith("ses") or w.endswith("xes") or w.endswith("ches") or w.endswith("shes"):
+            return w[:-2]
+        if w.endswith("s") and not w.endswith("ss"):
+            return w[:-1]
+    return w
+
+
+def _score_fuzzy_entity_match(
+    query_tokens: List[str],
+    query_stems: set,
+    entity_name: str,
+) -> float:
+    """
+    Compute conservative similarity score (0.0 to 1.0) between query tokens and an entity name.
+
+    Combines:
+    1. Stem overlap (handles singular/plural inflections like processes -> Process Abstraction)
+    2. Token-level fuzzy similarity (handles typos/spelling variations like Dijsktra -> Dijkstra)
+    3. Multi-word phrase similarity
+    """
+    ent_clean = entity_name.strip()
+    if not ent_clean:
+        return 0.0
+
+    ent_tokens = [
+        t.lower()
+        for t in re.findall(r"[a-zA-Z0-9]+", ent_clean)
+        if t.lower() not in _STOPWORDS and len(t) >= 2
+    ]
+    if not ent_tokens:
+        return 0.0
+
+    ent_stems = {_stem_word(t) for t in ent_tokens}
+
+    # 1. Stem intersection
+    common_stems = ent_stems.intersection(query_stems)
+    if common_stems:
+        stem_recall = len(common_stems) / len(ent_stems)
+        if stem_recall == 1.0:
+            return 1.0
+        if len(ent_stems) >= 2 and len(common_stems) >= 1:
+            return 0.70 + (0.30 * stem_recall)
+
+    # 2. Token-level fuzzy similarity (typo resilience)
+    tok_sims = []
+    for e_tok in ent_tokens:
+        best_sim = max(
+            (difflib.SequenceMatcher(None, q_tok, e_tok).ratio() for q_tok in query_tokens),
+            default=0.0,
+        )
+        tok_sims.append(best_sim)
+
+    avg_tok_sim = sum(tok_sims) / len(tok_sims) if tok_sims else 0.0
+    max_tok_sim = max(tok_sims, default=0.0)
+
+    # Single-word entity: require high token similarity
+    if len(ent_tokens) == 1:
+        if max_tok_sim >= 0.82:
+            return max_tok_sim
+        return 0.0
+
+    # Multi-word entity: require high average or phrase similarity
+    norm_ent = " ".join(ent_tokens)
+    norm_q = " ".join(query_tokens)
+    phrase_sim = difflib.SequenceMatcher(None, norm_ent, norm_q).ratio()
+
+    composite = max(avg_tok_sim, phrase_sim)
+    return composite if composite >= 0.72 else 0.0
+
+
+def _find_fuzzy_candidates(
+    query: str,
+    available_entities: List[str],
+    threshold: float = 0.72,
+    limit: int = 3,
+) -> List[str]:
+    """
+    Find top candidate entity names from available entities in the active lecture.
+
+    Returns up to `limit` entity names exceeding `threshold`, ordered by score descending.
+    """
+    q_tokens = [
+        t.lower()
+        for t in re.findall(r"[a-zA-Z0-9]+", query)
+        if t.lower() not in _STOPWORDS and len(t) >= 2
+    ]
+    if not q_tokens or not available_entities:
+        return []
+
+    q_stems = {_stem_word(t) for t in q_tokens}
+
+    scored: List[tuple[float, str]] = []
+    for ent_name in set(available_entities):
+        score = _score_fuzzy_entity_match(q_tokens, q_stems, ent_name)
+        if score >= threshold:
+            scored.append((score, ent_name))
+
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [name for _, name in scored[:limit]]
+
+
+def _fetch_lecture_entity_names(driver: Any, lecture_id: str, limit: int = 500) -> List[str]:
+    """Fetch distinct entity names for the active lecture from Neo4j."""
+    query = (
+        "MATCH (n) WHERE n.lecture_id = $lecture_id AND n.name IS NOT NULL "
+        "RETURN DISTINCT n.name AS name LIMIT $limit"
+    )
+    names = []
+    with driver.session() as session:
+        records = session.run(query, lecture_id=lecture_id, limit=limit)
+        for record in records:
+            name = record.get("name")
+            if name and isinstance(name, str) and name.strip():
+                names.append(name.strip())
+    return names
+
 
 def extract_entities(query: str) -> List[str]:
     """
     Extract entity mentions from a query using lightweight regex.
 
-    Not a full NER — just captures capitalized terms and acronyms
-    likely to match Neo4j node names.
+    Not a full NER — captures capitalized terms, acronyms, AND significant
+    lowercase words so natural-language queries like "how is a relation
+    connected to a table" still resolve to graph nodes. Matching in Cypher
+    is case-insensitive, so lowercase terms find "Relational Model".
     """
     matches = ENTITY_PATTERN.findall(query)
     entities = set()
@@ -36,21 +184,49 @@ def extract_entities(query: str) -> List[str]:
             g = g.strip()
             if g and len(g) >= 2:
                 entities.add(g)
+
+    # Lowercase significant words as additional candidates.
+    for token in re.findall(r"[a-zA-Z]{3,}", query):
+        lower = token.lower()
+        if lower not in _STOPWORDS and lower not in entities:
+            entities.add(lower)
+
     return list(entities)
 
 
-def _build_cypher(entity_names: List[str], max_hops: int = 3, lecture_id: Optional[str] = None) -> tuple:
+def _build_cypher(
+    entity_names: List[str],
+    max_hops: int = 3,
+    lecture_id: Optional[str] = None,
+    partial: bool = False,
+) -> tuple:
     """
     Build a bounded Cypher query for graph traversal.
 
-    Uses PREREQUISITE_OF and INTRODUCED_BEFORE relationships only.
-    Traversal depth: 1–max_hops.
+    Uses ALL closed relation types. Traversal depth: 1–max_hops.
+
+    Matching: exact case-insensitive by default. With partial=True, falls
+    back to substring matching so a lowercase query word like "relation"
+    still resolves to a node named "Relational Model".
+
+    Data isolation: BOTH the start node and every related node are filtered
+    on lecture_id (when supplied). Nodes MERGE on (entity_id, lecture_id) in
+    the loader, so the same cloud entity name may exist in multiple lectures
+    without cross-lecture contamination — the retrieval must mirror that.
 
     Returns:
         (cypher_query, params) tuple.
     """
-    where_clause = "WHERE start.name IN $entity_names "
-    params = {"entity_names": entity_names}
+    # Case-insensitive matching: nodes store title-case names ("Relational
+    # Model") while queries may be all lowercase.
+    if partial:
+        # Substring match — the term appears anywhere inside the node name.
+        where_clause = (
+            "WHERE ANY(term IN $entity_names WHERE toLower(start.name) CONTAINS term) "
+        )
+    else:
+        where_clause = "WHERE toLower(start.name) IN $entity_names "
+    params = {"entity_names": [n.lower() for n in entity_names]}
     if lecture_id:
         where_clause += "AND start.lecture_id = $lecture_id "
         params["lecture_id"] = lecture_id
@@ -58,9 +234,15 @@ def _build_cypher(entity_names: List[str], max_hops: int = 3, lecture_id: Option
     cypher = (
         "MATCH (start) "
         + where_clause +
-        "OPTIONAL MATCH path = (start)-[:PREREQUISITE_OF|INTRODUCED_BEFORE*1.."
+        "OPTIONAL MATCH path = (start)-[:" + ALL_RELATION_TYPES + "*1.."
         + str(max_hops)
         + "]->(related) "
+    )
+    if lecture_id:
+        # OPTIONAL MATCH leaves related NULL when a start node has no
+        # neighbors — keep those rows, but never leak another lecture's nodes.
+        cypher += "WHERE related IS NULL OR related.lecture_id = $lecture_id "
+    cypher += (
         "RETURN start.entity_id AS start_id, start.name AS start_name, "
         "start.type AS start_type, "
         "related.entity_id AS related_id, related.name AS related_name, "
@@ -82,7 +264,7 @@ def retrieve_graph(
     Retrieve graph context for a query.
 
     1. Extract entity mentions from query.
-    2. Run bounded Cypher traversal.
+    2. Run bounded Cypher traversal (Stage 1: exact, Stage 2: partial, Stage 3: fuzzy fallback).
     3. Return list of result dicts.
 
     Args:
@@ -96,6 +278,14 @@ def retrieve_graph(
         List of graph result dicts with entity info and paths.
     """
     settings = local_settings or LocalSettings()
+
+    if not lecture_id:
+        # Data isolation: a graph query without a lecture_id must never
+        # traverse another lecture's nodes (entities repeat across lectures).
+        raise ValueError(
+            "E2a: lecture_id is required for graph retrieval — refusing to "
+            "traverse across all lectures (cross-lecture data leak)."
+        )
 
     # Extract entities from query.
     entity_names = extract_entities(query)
@@ -113,23 +303,37 @@ def retrieve_graph(
         close_driver = True
 
     try:
-        cypher, params = _build_cypher(entity_names, max_hops, lecture_id)
-        results = []
+        # Stage 1: exact case-insensitive match.
+        cypher, params = _build_cypher(entity_names, max_hops, lecture_id, partial=False)
+        results = _run_traversal(driver, cypher, params)
 
-        with driver.session() as session:
-            records = session.run(cypher, **params)
-            for record in records:
-                result = {
-                    "start_id": record.get("start_id", ""),
-                    "start_name": record.get("start_name", ""),
-                    "start_type": record.get("start_type", ""),
-                    "related_id": record.get("related_id"),
-                    "related_name": record.get("related_name"),
-                    "related_type": record.get("related_type"),
-                    "rel_types": record.get("rel_types", []),
-                    "hops": record.get("hops", 0),
-                }
-                results.append(result)
+        # Stage 2: if exact matching found nothing, retry with substring
+        # matching so natural-language queries ("relation", "table") still
+        # resolve to title-case node names ("Relational Model", "Table").
+        if not results and entity_names:
+            logger.info("E2a: No exact matches; retrying with partial matching.")
+            cypher_partial, params_partial = _build_cypher(
+                entity_names, max_hops, lecture_id, partial=True,
+            )
+            results = _run_traversal(driver, cypher_partial, params_partial)
+
+        # Stage 3: if exact and substring matching both found nothing,
+        # run conservative fuzzy/stem candidate resolution against the
+        # active lecture's entity nodes to resolve inflections and typos.
+        if not results:
+            logger.info("E2a: No exact/partial matches; attempting fuzzy fallback resolution.")
+            try:
+                lecture_entities = _fetch_lecture_entity_names(driver, lecture_id)
+                if lecture_entities:
+                    candidates = _find_fuzzy_candidates(query, lecture_entities, threshold=0.72, limit=3)
+                    if candidates:
+                        logger.info("E2a: Fuzzy fallback resolved candidate entities: %s", candidates)
+                        cypher_fuzzy, params_fuzzy = _build_cypher(
+                            candidates, max_hops, lecture_id, partial=False,
+                        )
+                        results = _run_traversal(driver, cypher_fuzzy, params_fuzzy)
+            except Exception as exc:
+                logger.warning("E2a: Fuzzy fallback resolution skipped due to error: %s", exc)
 
         logger.info("E2a: Retrieved %d graph results.", len(results))
         return results
@@ -137,3 +341,23 @@ def retrieve_graph(
     finally:
         if close_driver:
             driver.close()
+
+
+def _run_traversal(driver: Any, cypher: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Execute a traversal Cypher and normalise records to result dicts."""
+    results = []
+    with driver.session() as session:
+        records = session.run(cypher, **params)
+        for record in records:
+            result = {
+                "start_id": record.get("start_id", ""),
+                "start_name": record.get("start_name", ""),
+                "start_type": record.get("start_type", ""),
+                "related_id": record.get("related_id"),
+                "related_name": record.get("related_name"),
+                "related_type": record.get("related_type"),
+                "rel_types": record.get("rel_types", []),
+                "hops": record.get("hops", 0),
+            }
+            results.append(result)
+    return results

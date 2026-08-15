@@ -1,11 +1,24 @@
 # cloud/packaging/exporter.py
-# Stage C2 — Knowledge Package Export ★ HANDOFF BOUNDARY.
+# Stage C2 — Knowledge Package Export — HANDOFF BOUNDARY.
 #
-# Zips selected artifacts from cloud_runtime into transfer/knowledge_package.zip.
+# Zips selected artifacts from cloud_runtime into transfer/{id}_knowledge_package.zip.
 # Only includes files needed for local loading.
 #
+# Format: FLAT layout — files sit at the zip root (no subfolder prefix). The
+# local importer (serving/fastapi/routes/lectures.py) validates and extracts
+# top-level files, so a prefixed layout would fail local import.
+#
 # NEVER includes: logs/, frames/, vlm_output.jsonl, ocr_output.jsonl,
-#                 transcript.json, frames.json, metadata.json, triplets.json.
+#                 transcript.json, frames.json,
+#                 training_metrics.json, reranker_model/.
+#
+# triplets.json IS included: it carries the reranker training data consumed by
+# scripts/train_global_reranker.py (Feature 2) for offline fine-tuning.
+#
+# metadata.json IS included: the local importer
+# (serving/fastapi/routes/lectures.py) reads it to enrich the lecture registry
+# with duration / course / speaker / language. Producer and consumer share this
+# contract — removing it would silently zero the lecture duration.
 #
 # Environment: Kaggle only.
 
@@ -30,6 +43,12 @@ PACKAGE_FILES = [
     "multimodal_chunks.json",
     "embeddings.npy",
     "embedding_ids.json",
+    # A1 video metadata (duration, fps) — consumed by the local importer
+    # to enrich the lecture registry. Producer/consumer contract.
+    "metadata.json",
+    # Reranker training data — consumed by the global fine-tuning
+    # orchestration (scripts/train_global_reranker.py).
+    "triplets.json",
 ]
 
 # Directories included in the knowledge package.
@@ -43,8 +62,6 @@ EXCLUDED_FILES = [
     "ocr_output.jsonl",
     "transcript.json",
     "frames.json",
-    "metadata.json",
-    "triplets.json",
     "training_metrics.json",
 ]
 
@@ -91,13 +108,13 @@ def export_package(
     # Step 3: Build zip.
     logger.info("C2: Building knowledge_package.zip...")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        # Add individual files.
+        # Add individual files — FLAT layout at the zip root so the local
+        # importer's top-level validation and extraction work unchanged.
         for filename in PACKAGE_FILES:
             filepath = lecture_dir / filename
             if filepath.exists():
-                arcname = f"knowledge_package/{filename}"
-                zf.write(filepath, arcname)
-                logger.debug("C2: Added %s", arcname)
+                zf.write(filepath, filename)
+                logger.debug("C2: Added %s", filename)
             else:
                 # chunk_segment_map.json is optional.
                 if filename != "chunk_segment_map.json":
@@ -109,7 +126,7 @@ def export_package(
             if dirpath.is_dir():
                 for file in dirpath.rglob("*"):
                     if file.is_file():
-                        arcname = f"knowledge_package/{dirname}/{file.relative_to(dirpath)}"
+                        arcname = f"{dirname}/{file.relative_to(dirpath)}"
                         zf.write(file, arcname)
                 logger.debug("C2: Added directory %s/", dirname)
 

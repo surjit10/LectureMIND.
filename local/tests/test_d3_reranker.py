@@ -47,6 +47,110 @@ class TestGlobalRerankerLoader:
             # Should not raise
             _load_cross_encoder(model_dir)
 
+    # ------------------------------------------------------------------
+    # int8 quantization (V2)
+    # ------------------------------------------------------------------
+
+    def _make_fake_ce(self):
+        """A CrossEncoder-shaped fake: Sequential-like with ce[0].auto_model."""
+        class FakeAuto:
+            pass
+
+        class FakeTransformer:
+            def __init__(self):
+                self.auto_model = FakeAuto()
+
+        class FakeCE:
+            def __init__(self):
+                self._modules = [FakeTransformer()]
+
+            def __getitem__(self, i):
+                return self._modules[i]
+
+            def __setitem__(self, i, value):
+                self._modules[i] = value
+
+            def __len__(self):
+                return len(self._modules)
+
+        return FakeCE()
+
+    def test_quantize_true_applies_int8(self, tmp_path):
+        """quantize=True applies dynamic quantization and tags precision."""
+        model_dir = tmp_path / "global_reranker"
+        model_dir.mkdir()
+
+        fake_ce = self._make_fake_ce()
+        original_transformer = fake_ce[0].auto_model
+        quantized_mock = MagicMock()
+
+        with patch("sentence_transformers.CrossEncoder", return_value=fake_ce):
+            with patch(
+                "torch.quantization.quantize_dynamic",
+                return_value=quantized_mock,
+            ) as mock_q:
+                from local.loaders.reranker_loader import _load_cross_encoder
+                result = _load_cross_encoder(model_dir, quantize=True)
+
+        # Quantization applied to the underlying transformer's auto_model.
+        mock_q.assert_called_once()
+        call_target = mock_q.call_args[0][0]
+        assert call_target is original_transformer
+        assert str(mock_q.call_args.kwargs["dtype"]) == "torch.qint8"
+        # Quantized copy re-attached in place.
+        assert fake_ce[0].auto_model is quantized_mock
+        assert result._precision == "int8_dynamic"
+
+    def test_quantize_failure_falls_back_to_fp32(self, tmp_path):
+        """quantize=True but quantization raising must fall back to FP32, never raise."""
+        model_dir = tmp_path / "global_reranker"
+        model_dir.mkdir()
+
+        fake_ce = self._make_fake_ce()
+
+        with patch("sentence_transformers.CrossEncoder", return_value=fake_ce):
+            with patch(
+                "torch.quantization.quantize_dynamic",
+                side_effect=RuntimeError("quantization failed"),
+            ):
+                from local.loaders.reranker_loader import _load_cross_encoder
+                result = _load_cross_encoder(model_dir, quantize=True)
+
+        assert result is fake_ce
+        assert result._precision == "fp32"
+
+    def test_quantize_none_respects_config_flag_false(self, tmp_path):
+        """quantize=None with RERANKER_QUANTIZE=False skips quantization."""
+        model_dir = tmp_path / "global_reranker"
+        model_dir.mkdir()
+
+        fake_ce = self._make_fake_ce()
+
+        with patch("sentence_transformers.CrossEncoder", return_value=fake_ce):
+            with patch("torch.quantization.quantize_dynamic") as mock_q:
+                from local.loaders.reranker_loader import _load_cross_encoder
+                result = _load_cross_encoder(model_dir)
+
+        mock_q.assert_not_called()
+        assert result._precision == "fp32"
+
+    def test_quantize_none_respects_config_flag_true(self, tmp_path):
+        """quantize=None with RERANKER_QUANTIZE=True applies quantization."""
+        model_dir = tmp_path / "global_reranker"
+        model_dir.mkdir()
+
+        fake_ce = self._make_fake_ce()
+        quantized_mock = MagicMock()
+
+        with patch("sentence_transformers.CrossEncoder", return_value=fake_ce):
+            with patch("torch.quantization.quantize_dynamic", return_value=quantized_mock) as mock_q:
+                with patch("config.local_settings.RERANKER_QUANTIZE", True):
+                    from local.loaders.reranker_loader import _load_cross_encoder
+                    result = _load_cross_encoder(model_dir)
+
+        mock_q.assert_called_once()
+        assert result._precision == "int8_dynamic"
+
 
 # ---------------------------------------------------------------------------
 # Singleton behavior

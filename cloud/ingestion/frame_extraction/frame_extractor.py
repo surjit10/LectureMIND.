@@ -18,7 +18,13 @@ import logging
 from pathlib import Path
 from typing import List
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    # cv2 is a cloud-only dependency (Kaggle). Importing it at module level
+    # made the module unimportable in local/CI environments, which broke the
+    # test mock target resolution. Tests patch this module attribute.
+    cv2 = None  # type: ignore[assignment]
 import numpy as np
 
 from config import CloudSettings
@@ -32,6 +38,12 @@ DEFAULT_SSIM_THRESHOLD = 0.75
 
 # Minimum time between keyframes in seconds.
 DEFAULT_COOLDOWN_SECONDS = 2.0
+
+# Maximum time between keyframes in seconds. When this interval elapses
+# without an SSIM-detected change, a frame is force-captured as a safety
+# keyframe so long static slides and subtle transitions that SSIM misses
+# still receive visual coverage (A4 VLM / A5 OCR / A6 fusion).
+DEFAULT_SAFETY_KEYFRAME_INTERVAL = 30.0
 
 
 def _compute_ssim(img1: np.ndarray, img2: np.ndarray) -> float:
@@ -67,13 +79,16 @@ def extract_frames(
     cloud_settings: CloudSettings | None = None,
     ssim_threshold: float = DEFAULT_SSIM_THRESHOLD,
     cooldown_seconds: float = DEFAULT_COOLDOWN_SECONDS,
+    safety_interval: float = DEFAULT_SAFETY_KEYFRAME_INTERVAL,
 ) -> List[Frame]:
     """
     Extract key frames from a lecture video using slide-change detection.
 
     Uses 1 FPS sampling to avoid scanning all video frames, a lowered SSIM
-    threshold (0.75) to reduce false keyframes, and a cooldown period to
-    prevent burst captures from animations.
+    threshold (0.75) to reduce false keyframes, a cooldown period to prevent
+    burst captures from animations, and a periodic safety keyframe so a long
+    stretch without an SSIM-detected change (e.g. a lecturer speaking on one
+    static slide for minutes) still yields a frame for visual understanding.
 
     Args:
         lecture_id: Unique lecture identifier.
@@ -81,6 +96,10 @@ def extract_frames(
         cloud_settings: Injected CloudSettings.
         ssim_threshold: SSIM threshold below which a frame is a new slide.
         cooldown_seconds: Minimum seconds between consecutive keyframes.
+        safety_interval: Maximum seconds allowed without a keyframe before
+            a frame is force-captured. Must be >= cooldown_seconds (the
+            safety check only runs once the cooldown gate has passed); the
+            defaults satisfy this (30.0 >= 2.0).
 
     Returns:
         List of validated Frame instances.
@@ -90,6 +109,11 @@ def extract_frames(
 
     if not video_path.exists():
         raise FileNotFoundError(f"Video file not found: {video_path}")
+
+    if cv2 is None:
+        raise RuntimeError(
+            "cv2 (opencv-python) is required for frame extraction but is not installed."
+        )
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
@@ -162,6 +186,15 @@ def extract_frames(
             if (timestamp - last_keyframe_timestamp) >= cooldown_seconds:
                 ssim_val = _compute_ssim(prev_gray, gray_resized)
                 if ssim_val < ssim_threshold:
+                    is_key_frame = True
+                elif (timestamp - last_keyframe_timestamp) >= safety_interval:
+                    # Periodic safety keyframe: no SSIM change for a long
+                    # stretch — force a capture so long static slides and
+                    # subtle transitions are not lost entirely.
+                    logger.info(
+                        "A3: Safety keyframe at t=%.1fs (%.1fs since last capture).",
+                        timestamp, timestamp - last_keyframe_timestamp,
+                    )
                     is_key_frame = True
 
         if is_key_frame:

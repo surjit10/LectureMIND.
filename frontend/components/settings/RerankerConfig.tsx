@@ -21,7 +21,6 @@ import {
   XCircle,
   UploadCloud,
   Package,
-  HardDrive,
   Loader2,
   AlertTriangle,
   Info,

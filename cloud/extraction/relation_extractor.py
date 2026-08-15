@@ -22,11 +22,25 @@ from schemas.segment import LectureSegment
 from schemas.entity import Entity
 from schemas.relation import Relation
 from schemas.enums import RelationType
+from cloud.utils.diagnostics import ExtractionStats
+from cloud.utils.json_repair import (
+    parse_json_array,
+    STATUS_FAILED,
+    STATUS_PARTIAL,
+)
 
 logger = logging.getLogger(__name__)
 
 # Allowed relation types for validation.
 ALLOWED_RELATION_TYPES = {t.value for t in RelationType}
+
+# Output token budgets for relation extraction. The measured production
+# failure mode was max_tokens=2048 truncating the response mid-array on
+# lectures with long entity IDs (e.g. CS162 Lecture 1), which dropped a
+# segment's relations entirely. _load_llm()'s backend cap must stay >= the
+# retry budget — TransformersBackend clamps to min(max_tokens, max_new_tokens).
+A9_MAX_TOKENS = 4096
+A9_RETRY_MAX_TOKENS = 8192
 
 # Relation extraction prompt for Qwen2.5-7B-Instruct.
 RELATION_EXTRACTION_PROMPT = (
@@ -67,7 +81,7 @@ def _load_llm() -> Any:
     settings = CloudSettings()
     backend = TransformersBackend(
         model_path=settings.QWEN_TEXT_MODEL_PATH,
-        max_new_tokens=2048,
+        max_new_tokens=A9_RETRY_MAX_TOKENS,
     )
     logger.info("A9: Loaded Qwen2.5-7B-Instruct for relation extraction from %s.", settings.QWEN_TEXT_MODEL_PATH)
     return backend
@@ -102,9 +116,38 @@ def _build_segment_context(
     return full_context[:max_chars]
 
 
+def normalize_relation_type(raw_type: str) -> Optional[str]:
+    """Map an LLM-emitted relation string onto the closed RelationType ontology.
+
+    Deterministic normalization order:
+    1. Exact canonical match -> unchanged.
+    2. Case variant of a canonical type -> canonical form ("explains" ->
+       "EXPLAINS").
+    3. Unknown types (e.g. MODIFIES) -> None, i.e. rejected intentionally and
+       counted in diagnostics.
+
+    MODIFIES is deliberately NOT added to the closed enum: RelationType is
+    spec-locked (schemas/enums.py), and introducing a type requires updating
+    the graph retriever's ALL_RELATION_TYPES traversal regex
+    (retrieval/graph_retriever/neo4j_retriever.py) and the extraction prompt
+    in the SAME change to keep the A9 -> relations.json -> Neo4j import ->
+    GraphRetriever chain consistent. Until that decision is made, unknown
+    types are rejected but never silently.
+    """
+    t = raw_type.strip()
+    if t in ALLOWED_RELATION_TYPES:
+        return t
+    lower = t.lower()
+    for allowed in ALLOWED_RELATION_TYPES:
+        if allowed.lower() == lower:
+            return allowed
+    return None
+
+
 def _extract_relations_batch(
     prompts: List[str],
     llm: Any,
+    stats: Optional[ExtractionStats] = None,
 ) -> List[List[Dict[str, str]]]:
     """
     Batch extract relations using the LLM backend.
@@ -112,6 +155,7 @@ def _extract_relations_batch(
     Args:
         prompts: List of formatted relation extraction prompts.
         llm: LLM backend instance (TransformersBackend or compatible).
+        stats: Optional ExtractionStats to record parse/accept counters.
 
     Returns:
         List of relation lists (one per prompt).
@@ -119,77 +163,92 @@ def _extract_relations_batch(
     outputs = llm.generate(
         prompts,
         temperature=0.1,
-        max_tokens=2048,
+        max_tokens=A9_MAX_TOKENS,
         top_p=0.95,
     )
 
     all_relations: List[List[Dict[str, str]]] = []
-    for raw_text in outputs:
-        relations = _parse_relation_json(raw_text)
+    retry_indices: List[int] = []
+    for idx, raw_text in enumerate(outputs):
+        relations, status = _parse_relation_json_with_status(raw_text, stats=stats)
         all_relations.append(relations)
+        if status in (STATUS_FAILED, STATUS_PARTIAL):
+            retry_indices.append(idx)
+
+    # Retry truncated/malformed responses once with a larger budget. A failed
+    # or partial parse means the response was cut off (or otherwise unusable);
+    # one extra call with a doubled budget recovers the tail without unbounded
+    # extra GPU time (only the affected segments are regenerated).
+    for idx in retry_indices:
+        if stats is not None:
+            stats.retries += 1
+        logger.warning(
+            "A9: Segment prompt %d parse failed — retrying once with a larger token budget.",
+            idx,
+        )
+        (retry_text,) = llm.generate(
+            [prompts[idx]],
+            temperature=0.1,
+            max_tokens=A9_RETRY_MAX_TOKENS,
+            top_p=0.95,
+        )
+        retry_relations, _retry_status = _parse_relation_json_with_status(
+            retry_text, stats=stats,
+        )
+        if retry_relations:
+            all_relations[idx] = retry_relations
 
     return all_relations
 
 
 def _parse_relation_json(
     raw_text: str,
+    stats: Optional[ExtractionStats] = None,
 ) -> List[Dict[str, str]]:
     """
     Parse LLM output into a list of relation dicts.
 
-    Validates relation types and ensures required fields exist.
+    Uses the shared json_repair pipeline (fences -> balanced array -> strict
+    load -> safe escape repair, and object salvage when the response was
+    truncated mid-array). A9 previously had NO escape repair, so a response
+    containing e.g. "W\\_q" raised "JSON parse error: Invalid \\escape" and
+    the whole segment's relations were discarded. Validates relation types
+    via normalize_relation_type() and requires required fields to exist.
+
+    Returns the validated relation list; see
+    _parse_relation_json_with_status() for the parse status consumed by the
+    retry policy.
     """
-    text = raw_text.strip()
-    text = text.replace("```json", "").replace("```", "")
+    relations, _status = _parse_relation_json_with_status(raw_text, stats=stats)
+    return relations
 
-    start = text.find("[")
-    if start == -1:
-        logger.warning("A9: Could not find JSON array in LLM output: %s", text[:200])
+
+def _parse_relation_json_with_status(
+    raw_text: str,
+    stats: Optional[ExtractionStats] = None,
+) -> Tuple[List[Dict[str, str]], str]:
+    """
+    Parse LLM output into relations, also returning the json_repair status.
+
+    Status is one of STATUS_OK / STATUS_REPAIRED / STATUS_PARTIAL /
+    STATUS_FAILED. STATUS_PARTIAL means the response was truncated mid-array
+    and only the complete leading objects were salvaged — the retry policy in
+    _extract_relations_batch() re-requests such segments with a larger token
+    budget to recover the tail.
+    """
+    parsed, status = parse_json_array(raw_text)
+    if stats is not None:
+        stats.requests += 1
+        stats.record_parse(status)
+
+    if parsed is None:
+        logger.warning("A9: JSON parse %s: %s", status, raw_text[:200])
         logger.warning("A9 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
-
-    depth = 0
-    in_string = False
-    escape = False
-    end = -1
-
-    for i in range(start, len(text)):
-        char = text[i]
-        if escape:
-            escape = False
-            continue
-        if char == '\\':
-            escape = True
-            continue
-        if char == '"':
-            in_string = not in_string
-            continue
-        if not in_string:
-            if char == '[':
-                depth += 1
-            elif char == ']':
-                depth -= 1
-                if depth == 0:
-                    end = i
-                    break
-
-    if end == -1:
-        logger.warning("A9: Unclosed JSON array in LLM output: %s", text[:200])
-        logger.warning("A9 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
-
-    json_str = text[start:end + 1]
-
-    try:
-        parsed = json.loads(json_str)
-    except json.JSONDecodeError as exc:
-        logger.warning("A9: JSON parse error: %s — text: %s", exc, json_str[:200])
-        logger.warning("A9 RAW OUTPUT (first 5000 chars):\n%s", raw_text[:5000])
-        return []
+        return [], status
 
     if not isinstance(parsed, list):
         logger.warning("A9: Expected list, got %s", type(parsed).__name__)
-        return []
+        return [], status
 
     # Validate and filter relations.
     valid_relations: List[Dict[str, str]] = []
@@ -204,9 +263,16 @@ def _parse_relation_json(
         if not src or not rel or not tgt:
             continue
 
-        if rel not in ALLOWED_RELATION_TYPES:
+        normalized = normalize_relation_type(rel)
+        if normalized is None:
+            if stats is not None:
+                stats.rejected += 1
             logger.warning("A9: Skipping relation with invalid type: %s", rel)
             continue
+        if normalized != rel:
+            if stats is not None:
+                stats.normalized += 1
+            logger.warning("A9: Normalized relation type %r -> %r", rel, normalized)
 
         # No self-relations.
         if src == tgt:
@@ -214,16 +280,19 @@ def _parse_relation_json(
 
         valid_relations.append({
             "source_entity_id": src,
-            "relation": rel,
+            "relation": normalized,
             "target_entity_id": tgt,
         })
 
-    return valid_relations
+    if stats is not None:
+        stats.accepted += len(valid_relations)
+    return valid_relations, status
 
 
 def _validate_entity_references(
     raw_relations: List[Dict[str, str]],
     entity_ids: Set[str],
+    stats: Optional[ExtractionStats] = None,
 ) -> List[Dict[str, str]]:
     """
     Filter relations to only those referencing valid entity_ids.
@@ -235,6 +304,8 @@ def _validate_entity_references(
         if rel["source_entity_id"] in entity_ids and rel["target_entity_id"] in entity_ids:
             valid.append(rel)
         else:
+            if stats is not None:
+                stats.rejected += 1
             logger.warning(
                 "A9: Dropping relation with unknown entity: %s -> %s",
                 rel["source_entity_id"], rel["target_entity_id"],
@@ -244,6 +315,7 @@ def _validate_entity_references(
 
 def _deduplicate_relations(
     raw_relations: List[Dict[str, str]],
+    stats: Optional[ExtractionStats] = None,
 ) -> List[Dict[str, str]]:
     """Remove duplicate (source, relation, target) triples."""
     seen: Set[Tuple[str, str, str]] = set()
@@ -253,6 +325,8 @@ def _deduplicate_relations(
         if key not in seen:
             seen.add(key)
             unique.append(rel)
+        elif stats is not None:
+            stats.duplicates += 1
     return unique
 
 
@@ -309,6 +383,9 @@ def extract_relations(
 
     entity_ids = {e["entity_id"] for e in entities_data}
 
+    # Extraction diagnostics (pure logging — never affects pipeline output).
+    stats = ExtractionStats()
+
     # Extract relations.
     raw_relations: List[Dict[str, str]] = []
 
@@ -360,15 +437,17 @@ def extract_relations(
             prompts = [prompt]
 
         # Batch extract.
-        batch_results = _extract_relations_batch(prompts, llm)
+        batch_results = _extract_relations_batch(prompts, llm, stats=stats)
         for rel_list in batch_results:
             raw_relations.extend(rel_list)
 
     # Validate entity references.
-    raw_relations = _validate_entity_references(raw_relations, entity_ids)
+    raw_relations = _validate_entity_references(raw_relations, entity_ids, stats=stats)
 
     # Deduplicate.
-    raw_relations = _deduplicate_relations(raw_relations)
+    raw_relations = _deduplicate_relations(raw_relations, stats=stats)
+
+    logger.info(stats.report("A9"))
 
     if not raw_relations:
         raise ValueError("A9: Relation extraction produced zero relations.")

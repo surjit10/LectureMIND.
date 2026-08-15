@@ -31,7 +31,9 @@ def vector_retriever_node(
     Only modifies vector_results. Does not touch other fields.
 
     V7: Uses plan_full() to determine top_k — lecture-wide queries
-    retrieve more chunks (top_k=15) to enable timeline sampling.
+    retrieve more chunks (top_k=15) to enable timeline sampling; normal
+    queries now retrieve a candidate pool of NORMAL_TOP_K (15) so the
+    reranker can recover chunks cosine ranks 6-15.
     """
     query = state.get("query", "")
     lecture_id = state.get("lecture_id", "")
@@ -43,7 +45,8 @@ def vector_retriever_node(
         is_lecture_wide = plan.is_lecture_wide
     except Exception as exc:
         logger.warning("Vector retriever: plan_full failed, using default top_k: %s", exc)
-        top_k = 5
+        from agent.dspy.planner import NORMAL_TOP_K
+        top_k = NORMAL_TOP_K
         is_lecture_wide = False
 
     if is_lecture_wide and lecture_id:

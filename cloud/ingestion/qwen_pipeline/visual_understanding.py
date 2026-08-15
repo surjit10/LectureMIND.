@@ -10,6 +10,10 @@
 #   - Batched generation (BATCH_SIZE=4) instead of one-at-a-time.
 #   - max_new_tokens reduced from 256 to 96.
 #   - Progress logging every 10 frames.
+#   - Sticky sequential fallback: if batched inference fails (e.g. CUDA OOM on
+#     a 14.5 GB GPU with fp16 Qwen2-VL-7B), batching is disabled for the REST
+#     of the run instead of retrying the failing batch size every batch — each
+#     failed attempt burned ~30 s, wasting ~23 min per lecture in production.
 #
 # Loaded in float16 via Transformers for T4/P100 VRAM constraints.
 # Writes JSONL incrementally — never loads entire output into memory.
@@ -23,6 +27,16 @@ from config import CloudSettings
 from schemas.vlm import VLMCaption
 
 logger = logging.getLogger(__name__)
+
+
+class BatchInferenceUnavailable(Exception):
+    """Batched VLM inference is unavailable (e.g. CUDA OOM on small GPUs).
+
+    Raised once by ``_caption_batch`` so the caller can disable batching for
+    the remainder of the run instead of retrying the failing batch size,
+    which wastes GPU time on a forward pass that can never succeed.
+    """
+
 
 # Prompt for Qwen2-VL visual understanding.
 VLM_PROMPT = (
@@ -159,8 +173,10 @@ def _caption_batch(
     """
     Generate captions for a batch of frames in a single forward pass.
 
-    Falls back to sequential processing if batched inference fails
-    (e.g., due to variable image sizes causing tensor shape issues).
+    Raises BatchInferenceUnavailable when batched inference fails (typically
+    CUDA OOM) so the caller can disable batching for the rest of the run.
+    It does NOT silently fall back per batch: retrying the same failing batch
+    size burns ~30 s per attempt on the failed forward pass.
 
     Args:
         model: Qwen2-VL model instance.
@@ -169,6 +185,9 @@ def _caption_batch(
 
     Returns:
         List of VLMCaption instances.
+
+    Raises:
+        BatchInferenceUnavailable: If the batched forward pass fails.
     """
     try:
         from qwen_vl_utils import process_vision_info
@@ -227,15 +246,54 @@ def _caption_batch(
         return results
 
     except Exception as exc:
-        # Fallback: process sequentially if batching fails.
-        logger.warning("A4: Falling back to sequential inference. Batch error: %s", exc)
-        results = []
-        for item in batch_items:
-            vlm_caption = _caption_single_frame(
-                model, processor, item["image_path"], item["frame_id"],
-            )
-            results.append(vlm_caption)
-        return results
+        # Batched inference failed (measured failure mode: CUDA OOM on a
+        # 14.5 GB GPU with fp16 Qwen2-VL-7B). Signal the caller once so it
+        # disables batching for the rest of the run — see BatchInferenceUnavailable.
+        logger.warning(
+            "A4: Batched inference failed (batch_size=%d): %s",
+            len(batch_items), exc,
+        )
+        raise BatchInferenceUnavailable(
+            f"batched inference failed for {len(batch_items)} frames: {exc}"
+        ) from exc
+
+
+def _caption_frames_sequential(
+    model: Any,
+    processor: Any,
+    batch_items: List[Dict[str, Any]],
+) -> List[VLMCaption]:
+    """
+    Caption a batch of frames one at a time (no batched forward pass).
+
+    Used when batched inference is unavailable (e.g. CUDA OOM on small GPUs).
+
+    Args:
+        model: Qwen2-VL model instance.
+        processor: Qwen2-VL processor instance.
+        batch_items: List of dicts with 'frame_id' and 'image_path'.
+
+    Returns:
+        List of VLMCaption instances.
+    """
+    results = []
+    for item in batch_items:
+        results.append(_caption_single_frame(
+            model, processor, item["image_path"], item["frame_id"],
+        ))
+    return results
+
+
+def _release_gpu_cache() -> None:
+    """Best-effort CUDA cache release to give sequential inference headroom."""
+    try:
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass
 
 
 def _extract_objects(raw_text: str) -> List[str]:
@@ -313,6 +371,9 @@ def run_visual_understanding(
     lecture_dir = Path(settings.lecture_dir(lecture_id))
     total_frames = len(frames)
     count = 0
+    # Disabled once a batch fails (e.g. CUDA OOM): batched inference is then
+    # never retried for the rest of the run — see BatchInferenceUnavailable.
+    batching_enabled = True
 
     logger.info("A4: Processing %d frames (batch_size=%d, max_tokens=%d)...",
                 total_frames, BATCH_SIZE, MAX_NEW_TOKENS)
@@ -339,15 +400,28 @@ def run_visual_understanding(
                 continue
 
             try:
-                captions = _caption_batch(model, processor, batch_items)
-                for vlm_caption in captions:
-                    f.write(json.dumps(vlm_caption.model_dump()) + "\n")
-                    f.flush()
-                    count += 1
+                if batching_enabled:
+                    captions = _caption_batch(model, processor, batch_items)
+                else:
+                    captions = _caption_frames_sequential(model, processor, batch_items)
+            except BatchInferenceUnavailable as exc:
+                logger.warning(
+                    "A4: %s — disabling batched inference for the remaining "
+                    "%d frames; processing sequentially to avoid repeated "
+                    "failed batch attempts.", exc, total_frames - count,
+                )
+                batching_enabled = False
+                _release_gpu_cache()
+                captions = _caption_frames_sequential(model, processor, batch_items)
             except Exception as exc:
                 logger.error("A4: Failed to process batch starting at frame %d: %s",
                              batch_start, exc)
                 raise
+
+            for vlm_caption in captions:
+                f.write(json.dumps(vlm_caption.model_dump()) + "\n")
+                f.flush()
+                count += 1
 
             # Progress logging every 10 frames.
             if count % 10 == 0 or count == total_frames:

@@ -15,6 +15,27 @@
 #       --lecture-id lec_001 \
 #       --video-path /path/to/lecture.mp4
 
+# ----------------------------------------------------------------------------
+# TensorFlow / protobuf workaround (mirrors the FRAMEWORK GUARD in run_kaggle.py)
+# ----------------------------------------------------------------------------
+# Kaggle ships TensorFlow pre-installed. TF's generated protobuf code requires
+# a newer protobuf (google.protobuf.runtime_version), but this project pins
+# protobuf==3.20.3 for PaddlePaddle 2.6.x compatibility (Paddle aborts at import
+# with newer protobuf). transformers probes for TF via importlib.util.find_spec()
+# and, when it finds it, imports it while loading Qwen2-VL
+# (transformers.image_transforms) — that import crashes with
+# "cannot import name 'runtime_version' from 'google.protobuf'".
+#
+# Marking tensorflow as "imported but disabled" makes find_spec("tensorflow")
+# return None, so transformers stays on its PyTorch-only path. This runs at the
+# top of this module so it takes effect before any stage imports transformers
+# (A4 Qwen2-VL, shared LLM backend, A7/B0 sentence-transformers, ...). This
+# subprocess does NOT inherit sys.modules from the parent runner (run_kaggle.py),
+# which is why the guard is repeated here.
+import sys
+
+sys.modules.setdefault("tensorflow", None)
+
 import argparse
 import json
 import logging
@@ -93,8 +114,12 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
     # --- A6: Multimodal Fusion ---
     logger.info("Stage A6: Running multimodal fusion (master contract)...")
     from cloud.ingestion.fusion.multimodal_fusion import fuse
-    chunks = fuse(lecture_id, cloud_settings=settings)
-    logger.info("A6 complete: %d multimodal chunks", len(chunks))
+    merge_segments = getattr(settings, "SEMANTIC_CHUNK_MERGE", False)
+    chunks = fuse(lecture_id, cloud_settings=settings, merge_segments=merge_segments)
+    if merge_segments:
+        logger.info("A6 complete: %d semantic chunks (V2 merge enabled)", len(chunks))
+    else:
+        logger.info("A6 complete: %d multimodal chunks (1:1 mode)", len(chunks))
 
     # --- Load shared LLM backend ONCE for A7/A8/A9/B1 ---
     shared_llm = None
@@ -181,6 +206,18 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
         except Exception:
             pass
         shared_llm = None
+
+    # --- B2: Reranker Fine-tuning (optional, default OFF) ---
+    # Reuses the existing trainer. Non-fatal: a training failure must never
+    # fail the package; the exporter excludes reranker_model/ anyway.
+    if getattr(settings, "ENABLE_PIPELINE_RERANKER_TRAINING", False):
+        logger.info("Stage B2: Fine-tuning reranker (flag enabled)...")
+        try:
+            from cloud.training.reranker_trainer import train_reranker
+            metrics = train_reranker(lecture_id, cloud_settings=settings)
+            logger.info("B2 complete: %s", metrics)
+        except Exception as exc:
+            logger.warning("B2: Reranker training failed (non-fatal): %s", exc)
 
 
     # --- C1: Validation ---

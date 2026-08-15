@@ -32,6 +32,7 @@ class TestWorkflow:
 
         # Mock Qdrant.
         mock_hit = SimpleNamespace(
+            id="uuid_c_001",
             payload={"chunk_id": "c_001", "transcript": "BFS uses queue",
                      "visual_context": "diagram", "ocr_text": "O(V+E)",
                      "segment_id": "s_001", "timestamp": 10.0, "lecture_id": "lec_001"},
@@ -39,6 +40,12 @@ class TestWorkflow:
         )
         mock_qdrant = MagicMock()
         mock_qdrant.search.return_value = [mock_hit]
+        # Vector retriever queries points (query_points), lecture-wide
+        # retrieval scrolls the collection (page, next_offset).
+        mock_qp_response = MagicMock()
+        mock_qp_response.points = [mock_hit]
+        mock_qdrant.query_points.return_value = mock_qp_response
+        mock_qdrant.scroll.return_value = ([mock_hit], None)
 
         # Mock embedding model.
         mock_embed = MagicMock()
@@ -67,7 +74,7 @@ class TestWorkflow:
     def test_vector_only_workflow(self):
         """Vector-only query produces answer with sources."""
         workflow = self._make_workflow()
-        state = workflow.run("Summarize lecture section on BFS")
+        state = workflow.run("Summarize lecture section on BFS", lecture_id="lec_001")
 
         assert state["retrieval_route"] == RetrievalRoute.vector_only
         assert state["answer"] != ""
@@ -75,18 +82,23 @@ class TestWorkflow:
         assert state["graph_results"] == []  # No graph retrieval.
 
     def test_graph_only_workflow(self):
-        """Graph-only query triggers graph retriever."""
+        """
+        Graph-only query triggers graph retriever AND vector retrieval.
+
+        Graph results carry entity names but no lecture text; the answer
+        must be grounded in vector-retrieved transcript/OCR/visual context.
+        """
         workflow = self._make_workflow()
-        state = workflow.run("What is prerequisite of Dijkstra?")
+        state = workflow.run("What is prerequisite of Dijkstra?", lecture_id="lec_001")
 
         assert state["retrieval_route"] == RetrievalRoute.graph_only
         assert len(state["graph_results"]) > 0
-        assert state["vector_results"] == []  # No vector retrieval.
+        assert len(state["vector_results"]) > 0  # Grounding text for the answer.
 
     def test_state_has_all_fields(self):
         """Final state contains all QueryPipelineState fields."""
         workflow = self._make_workflow()
-        state = workflow.run("Tell me about BFS")
+        state = workflow.run("Tell me about BFS", lecture_id="lec_001")
 
         required_keys = {
             "query", "retrieval_route", "graph_results", "vector_results",
@@ -97,7 +109,7 @@ class TestWorkflow:
     def test_lecture_wide_retrieval(self):
         """Lecture-wide query triggers vector_only and returns answer."""
         workflow = self._make_workflow()
-        state = workflow.run("Explain the lecture")
+        state = workflow.run("Explain the lecture", lecture_id="lec_001")
 
         assert state["retrieval_route"] == RetrievalRoute.vector_only
         assert state["answer"] != ""

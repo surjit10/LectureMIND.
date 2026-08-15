@@ -7,7 +7,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import Link from "next/link";
 import { useDeveloperMode } from "@/components/layout/Providers";
-import { Clock, Layers, FileText, FolderOpen, PackageOpen, Edit2, Trash2, Check, Activity, Search, AlertTriangle, ArrowRight } from "lucide-react";
+import { Clock, Layers, FileText, PackageOpen, Edit2, Trash2, Activity, Search, AlertTriangle, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {

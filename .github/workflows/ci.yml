@@ -21,7 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # local_requirements.txt carries the runtime + test stack (FastAPI,
+          # Qdrant, Neo4j, LLM SDKs). requirements.txt is cloud/GPU-only
+          # (torch/paddle/whisper) and is NOT required for the unit tests.
+          pip install -r local_requirements.txt
 
       - name: Compile check
         run: python -m compileall schemas/ config.py local/ agent/ retrieval/ serving/ -q

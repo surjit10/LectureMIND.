@@ -78,6 +78,18 @@ class TestQueryPlanner:
             "Explain the lecture",
             "Explain this lecture",
             "What is this lecture about?",
+            "What is this lecture on",
+            "What is explained in this lecture?",
+            "What is explain in this lecture",
+            "What explained in this lecture",
+            "What's explained in this lecture",
+            "What is this lecture explaining",
+            "What does this lecture explain",
+            "Explain what is in this lecture",
+            "What does this lecture cover",
+            "What is covered in the lecture",
+            "What concepts are taught",
+            "What topics are covered",
             "Summarize the lecture",
             "Give summary",
             "Lecture overview",
@@ -110,5 +122,5 @@ class TestQueryPlanner:
         for q in queries:
             plan = planner.plan_full(q)
             assert plan.is_lecture_wide is False, f"Failed for query: {q}"
-            assert plan.top_k == 5, f"Failed for query: {q}"
+            assert plan.top_k == 15, f"Failed for query: {q}"
             assert plan.context_budget == 4000, f"Failed for query: {q}"

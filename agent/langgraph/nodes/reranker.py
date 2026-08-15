@@ -53,6 +53,8 @@ def reranker_node(
         need_visual = False
         context_budget = None  # rerank() will fall back to MAX_CONTEXT_CHARS.
 
+    lecture_id = state.get("lecture_id", None)
+
     reranked, final_context = rerank(
         query, graph_results, vector_results,
         reranker_service=reranker_service,
@@ -60,6 +62,7 @@ def reranker_node(
         is_lecture_wide=is_lecture_wide,
         need_visual=need_visual,
         char_budget=context_budget,
+        lecture_id=lecture_id,
     )
 
     return {

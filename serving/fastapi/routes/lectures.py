@@ -12,6 +12,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 
+from config import local_settings
 from local.storage.lecture_registry import PROJECT_ROOT
 from local.storage.registry_provider import get_registry
 from local.loaders.package_validator import validate_package
@@ -117,11 +118,28 @@ async def import_knowledge_package(
         with open(zip_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        # ── Step 2.5: enforce upload size limit (matches reranker route) ─────
+        max_bytes = local_settings.MAX_PACKAGE_UPLOAD_MB * 1024 * 1024
+        if zip_path.stat().st_size > max_bytes:
+            raise ValueError(
+                f"Package exceeds maximum allowed size "
+                f"({local_settings.MAX_PACKAGE_UPLOAD_MB} MB)."
+            )
+
         # ── Step 3: extract ───────────────────────────────────────────────────
         logger.info("[import] Extracting package to %s", extract_dir)
         extract_dir.mkdir(parents=True, exist_ok=True)
         try:
             with zipfile.ZipFile(zip_path, "r") as zf:
+                # ZipSlip guard: reject any member whose resolved path escapes
+                # the extraction directory (mirrors _safe_extract in reranker.py).
+                # is_relative_to (not startswith) so sibling paths like
+                # "<root>_evil/file" cannot bypass the check.
+                extract_root = extract_dir.resolve()
+                for member in zf.namelist():
+                    member_path = (extract_dir / member).resolve()
+                    if not member_path.is_relative_to(extract_root):
+                        raise ValueError("Invalid path in ZIP archive.")
                 zf.extractall(extract_dir)
         except zipfile.BadZipFile:
             raise ValueError("The uploaded file is not a valid ZIP archive. The package may be corrupted.")
@@ -269,10 +287,13 @@ async def delete_lecture(lecture_id: str):
     # Delete from Neo4j
     try:
         from neo4j import GraphDatabase
-        from config import local_settings
         driver = GraphDatabase.driver(local_settings.NEO4J_URI)
         with driver.session() as session:
-            session.run("MATCH (n) WHERE n.id STARTS WITH $prefix DETACH DELETE n", prefix=f"{lecture_id}_")
+            # Nodes store the runtime lecture_id as a property (see
+            # neo4j_loader.py) — match on it so deletion actually removes
+            # the lecture's nodes. The previous `n.id` predicate matched
+            # nothing (no such property) and silently leaked graph data.
+            session.run("MATCH (n) WHERE n.lecture_id = $lecture_id DETACH DELETE n", lecture_id=lecture_id)
     except Exception as e:
         logger.warning(f"Failed to delete Neo4j nodes for {lecture_id}: {e}")
         

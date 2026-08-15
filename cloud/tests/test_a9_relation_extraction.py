@@ -196,6 +196,127 @@ class TestRelationExtractor:
         result = _parse_relation_json("not json at all {}")
         assert result == []
 
+    def test_invalid_escapes_repaired(self, cloud_settings, setup_a9_inputs):
+        r"""A9 must repair invalid escapes (W\_q) instead of discarding the whole
+        segment's relations — the measured production failure mode."""
+        from cloud.extraction.relation_extractor import _parse_relation_json
+
+        # Single backslash in the JSON literal ("W\_q") is an invalid escape.
+        raw = ('[{"source_entity_id": "e1", "relation": "EXPLAINS", '
+               '"target_entity_id": "e2", "note": "W\\_q"}]')
+        relations = _parse_relation_json(raw)
+        assert len(relations) == 1
+        assert relations[0]["relation"] == "EXPLAINS"
+        assert relations[0]["source_entity_id"] == "e1"
+        assert relations[0]["target_entity_id"] == "e2"
+
+    def test_fenced_json_parsed(self, cloud_settings, setup_a9_inputs):
+        """Fenced ```json ... ``` responses must parse."""
+        from cloud.extraction.relation_extractor import _parse_relation_json
+
+        raw = '```json\n[{"source_entity_id": "e1", "relation": "USED_BY", "target_entity_id": "e2"}]\n```'
+        relations = _parse_relation_json(raw)
+        assert len(relations) == 1
+        assert relations[0]["relation"] == "USED_BY"
+
+    def test_relation_type_normalization(self, cloud_settings, setup_a9_inputs):
+        """Case variants normalize to canonical types; unknown types like MODIFIES
+        are rejected intentionally (closed RelationType enum)."""
+        from cloud.extraction.relation_extractor import _parse_relation_json, normalize_relation_type
+
+        assert normalize_relation_type("explains") == "EXPLAINS"
+        assert normalize_relation_type("MODIFIES") is None
+        assert normalize_relation_type("PREREQUISITE_OF") == "PREREQUISITE_OF"
+
+        raw = json.dumps([
+            {"source_entity_id": "e1", "relation": "explains", "target_entity_id": "e2"},
+            {"source_entity_id": "e1", "relation": "MODIFIES", "target_entity_id": "e2"},
+        ])
+        relations = _parse_relation_json(raw)
+        assert len(relations) == 1
+        assert relations[0]["relation"] == "EXPLAINS"
+
+    def test_relation_diagnostics_counters(self, cloud_settings, setup_a9_inputs):
+        """ExtractionStats records rejected/normalized for relation parsing."""
+        from cloud.extraction.relation_extractor import _parse_relation_json
+        from cloud.utils.diagnostics import ExtractionStats
+
+        stats = ExtractionStats()
+        raw = json.dumps([
+            {"source_entity_id": "e1", "relation": "explains", "target_entity_id": "e2"},
+            {"source_entity_id": "e1", "relation": "MODIFIES", "target_entity_id": "e2"},
+        ])
+        relations = _parse_relation_json(raw, stats=stats)
+        assert len(relations) == 1
+        assert stats.requests == 1
+        assert stats.valid == 1
+        assert stats.accepted == 1
+        assert stats.normalized == 1
+        assert stats.rejected == 1
+
+    def test_failed_segment_retried_once_with_larger_budget(self, cloud_settings, setup_a9_inputs):
+        """A segment whose JSON parse fails is retried once with a larger token budget."""
+        from cloud.extraction.relation_extractor import _extract_relations_batch
+        from cloud.utils.diagnostics import ExtractionStats
+
+        good = json.dumps([
+            {"source_entity_id": "lec_001_entity_000001", "relation": "EXPLAINS",
+             "target_entity_id": "lec_001_entity_000002"},
+        ])
+
+        calls = []
+
+        def generate_fn(prompts, **kwargs):
+            calls.append((list(prompts), kwargs))
+            if len(calls) == 1:
+                # First pass: segment 0 is garbage, segment 1 is fine.
+                return ["not json at all", good]
+            # Retry pass: only the failed segment 0 is regenerated.
+            return [good]
+
+        mock = MagicMock()
+        mock.generate.side_effect = generate_fn
+
+        stats = ExtractionStats()
+        results = _extract_relations_batch(["prompt0", "prompt1"], mock, stats=stats)
+
+        assert len(results) == 2
+        assert results[0][0]["relation"] == "EXPLAINS"  # recovered by the retry
+        assert results[1][0]["relation"] == "EXPLAINS"  # parsed on the first pass
+        assert stats.retries == 1
+        # Retry regenerates only the failed prompt with a larger budget.
+        retry_prompts, retry_kwargs = calls[1]
+        assert len(retry_prompts) == 1
+        assert retry_prompts[0] == "prompt0"
+        assert retry_kwargs["max_tokens"] > calls[0][1]["max_tokens"]
+
+    def test_truncated_segment_retried_to_recover_tail(self, cloud_settings, setup_a9_inputs):
+        """A truncated (partially salvaged) segment is retried to recover the tail."""
+        from cloud.extraction.relation_extractor import _extract_relations_batch
+        from cloud.utils.diagnostics import ExtractionStats
+
+        rel = ('{"source_entity_id": "lec_001_entity_000001", '
+               '"relation": "EXPLAINS", "target_entity_id": "lec_001_entity_000002"}')
+        truncated = "[%s, %s, {\"source" % (rel, rel)  # cut off mid-object
+        full = "[%s, %s, %s]" % (rel, rel, rel)
+
+        calls = []
+
+        def generate_fn(prompts, **kwargs):
+            calls.append(len(prompts))
+            if len(calls) == 1:
+                return [truncated]
+            return [full]
+
+        mock = MagicMock()
+        mock.generate.side_effect = generate_fn
+
+        stats = ExtractionStats()
+        results = _extract_relations_batch(["prompt0"], mock, stats=stats)
+
+        assert len(results[0]) == 3  # full list recovered via the retry
+        assert stats.retries == 1
+
     def test_custom_extractor_fn(self, cloud_settings, setup_a9_inputs):
         """Custom extractor_fn injection must work."""
         from cloud.extraction.relation_extractor import extract_relations

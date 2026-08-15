@@ -1,16 +1,18 @@
 # cloud/ingestion/fusion/multimodal_fusion.py
-# Stage A6 — Multimodal Fusion ★ MASTER CONTRACT.
+# Stage A6 — Multimodal Fusion — MASTER CONTRACT.
 #
-# Aligns transcript segments with VLM captions and OCR results by
-# nearest timestamp (tolerance ±2 seconds).
+# Aligns transcript segments with VLM captions and OCR results by matching
+# frames against the FULL segment interval [start − tolerance, end + tolerance]
+# (tolerance ±2 seconds), preferring the frame nearest the segment midpoint.
+#
+# V2 semantic chunk merging (opt-in via merge_segments=True): adjacent Whisper
+# segments are merged into larger semantic chunks via a deterministic
+# rolling-window algorithm (sentence-boundary-aware, silence-gap-aware).
 #
 # Reads: transcript.json, vlm_output.jsonl (stream), ocr_output.jsonl (stream).
 # Writes: cloud_runtime/lectures/{lecture_id}/multimodal_chunks.json
 #
 # Environment: Kaggle GPU only.
-#
-# CRITICAL: Output must validate against MultimodalChunk schema exactly.
-# No extra fields. No renamed fields. No schema modifications.
 
 import json
 import logging
@@ -24,6 +26,14 @@ logger = logging.getLogger(__name__)
 
 # Timestamp alignment tolerance in seconds.
 ALIGNMENT_TOLERANCE = 2.0
+
+# ── Semantic chunk merging constants ────────────────────────────────────
+# These control the rolling-window merge in _merge_atoms().
+# Values are tuned for lecture transcript text (~4 chars / token).
+MIN_CHUNK_CHARS = 300          # Minimum merged-chunk length in characters.
+TARGET_CHUNK_CHARS = 700       # Target — break at sentence boundaries near this.
+MAX_CHUNK_CHARS = 1200         # Hard cap — always break here.
+SILENCE_GAP_THRESHOLD = 1.5    # Seconds — gap larger than this is a topic break.
 
 
 def _stream_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -48,39 +58,43 @@ def _stream_jsonl(path: Path) -> List[Dict[str, Any]]:
     return records
 
 
-def _find_nearest(
-    timestamp: float,
+def _find_nearest_in_interval(
+    start: float,
+    end: float,
     records: List[Dict[str, Any]],
-    key: str = "timestamp",
-    frame_id_key: str = "frame_id",
+    key: str = "_timestamp",
+    tolerance: float = ALIGNMENT_TOLERANCE,
 ) -> Optional[Dict[str, Any]]:
     """
-    Find the record with the nearest timestamp within ±ALIGNMENT_TOLERANCE.
+    Find the record whose timestamp falls inside the segment interval
+    [start - tolerance, end + tolerance], preferring the one nearest the
+    segment midpoint.
 
-    Args:
-        timestamp: Target timestamp in seconds.
-        records: List of records with a timestamp-like field.
-        key: The timestamp field name to compare against.
-        frame_id_key: Not used for matching — just for logging.
+    Unlike _find_nearest (which only considers the segment start timestamp),
+    this matches against the FULL transcript segment interval, so a frame
+    shown anywhere while the segment is being spoken is still aligned — e.g.
+    a slide change that happens 3 s into a 10 s transcript segment now
+    attaches that segment to the new slide instead of missing it.
 
     Returns:
-        Nearest record dict, or None if nothing within tolerance.
+        Best record dict, or None if no record falls in the interval.
     """
+    lo = start - tolerance
+    hi = end + tolerance
+    midpoint = (start + end) / 2.0
+
     best: Optional[Dict[str, Any]] = None
     best_dist = float("inf")
 
     for rec in records:
-        rec_ts = rec.get(key, rec.get(frame_id_key, 0))
-        # If the record uses frame_id and we mapped timestamps externally,
-        # we need the caller to provide timestamp-mapped records.
-        dist = abs(rec_ts - timestamp)
-        if dist < best_dist:
-            best_dist = dist
-            best = rec
+        rec_ts = rec.get(key, 0.0)
+        if lo <= rec_ts <= hi:
+            dist = abs(rec_ts - midpoint)
+            if dist < best_dist:
+                best_dist = dist
+                best = rec
 
-    if best is not None and best_dist <= ALIGNMENT_TOLERANCE:
-        return best
-    return None
+    return best
 
 
 def _build_frame_timestamp_index(
@@ -122,16 +136,25 @@ def _build_frame_timestamp_index(
 def fuse(
     lecture_id: str,
     cloud_settings: CloudSettings | None = None,
+    merge_segments: bool | None = None,
 ) -> List[MultimodalChunk]:
     """
     Execute multimodal fusion: align transcript, VLM, and OCR by timestamp.
+
+    V2 semantic chunk merging: when merge_segments=True (or the
+    SEMANTIC_CHUNK_MERGE CloudSettings flag is set), adjacent Whisper
+    segments are merged into larger semantic chunks using a deterministic
+    rolling-window algorithm with sentence-boundary and silence-gap awareness.
 
     Reads transcript.json, vlm_output.jsonl, and ocr_output.jsonl from
     the lecture's cloud_runtime directory.
 
     Args:
         lecture_id: Unique lecture identifier.
-        cloud_settings: Injected CloudSettings.
+        cloud_settings: Injected CloudSettings. The SEMANTIC_CHUNK_MERGE
+            field controls merging unless overridden by merge_segments.
+        merge_segments: Explicit override for merge behavior. If None,
+            falls back to cloud_settings.SEMANTIC_CHUNK_MERGE (default False).
 
     Returns:
         List of validated MultimodalChunk instances.
@@ -169,21 +192,27 @@ def fuse(
         vlm_records, ocr_records, frames_data,
     )
 
-    # --- Align and fuse ---
-    chunks: List[MultimodalChunk] = []
+    # --- Phase 1: Align every transcript segment (atom) ---
+    atoms: List[Dict[str, Any]] = []
+    for seg in transcript_segments:
+        seg_start = seg.get("start", 0.0)
+        seg_end = seg.get("end", seg_start)
+        seg_id = seg.get("segment_id", 0)
 
-    for chunk_num, seg in enumerate(transcript_segments, start=1):
-        seg_timestamp = seg.get("start", 0.0)
-
-        # Find nearest VLM caption.
+        # Find the VLM caption whose frame falls inside the segment interval
+        # [start, end] (expanded by the alignment tolerance).
         visual_context = ""
-        nearest_vlm = _find_nearest(seg_timestamp, vlm_ts_records, key="_timestamp")
+        nearest_vlm = _find_nearest_in_interval(
+            seg_start, seg_end, vlm_ts_records, key="_timestamp",
+        )
         if nearest_vlm is not None:
             visual_context = nearest_vlm.get("caption", "")
 
-        # Find nearest OCR text.
+        # Find the OCR text whose frame falls inside the segment interval.
         ocr_text = ""
-        nearest_ocr = _find_nearest(seg_timestamp, ocr_ts_records, key="_timestamp")
+        nearest_ocr = _find_nearest_in_interval(
+            seg_start, seg_end, ocr_ts_records, key="_timestamp",
+        )
         if nearest_ocr is not None:
             ocr_list = nearest_ocr.get("ocr_text", [])
             if isinstance(ocr_list, list):
@@ -191,17 +220,60 @@ def fuse(
             else:
                 ocr_text = str(ocr_list)
 
-        # Build chunk_id: {lecture_id}_chunk_{chunk_number}
+        atoms.append({
+            "segment_id": seg_id,
+            "start": seg_start,
+            "end": seg_end,
+            "text": seg.get("text", ""),
+            "visual_context": visual_context,
+            "ocr_text": ocr_text,
+        })
+
+    if not atoms:
+        raise ValueError("A6: Fusion produced zero atoms.")
+
+    # --- Phase 2: Merge atoms into semantic chunk groups (opt-in) ---
+    if merge_segments is None:
+        merge_segments = getattr(cloud_settings, "SEMANTIC_CHUNK_MERGE", False) \
+            if cloud_settings is not None else False
+
+    if merge_segments:
+        groups = _merge_atoms(atoms)
+        logger.info(
+            "A6: Merged %d atoms into %d semantic chunks",
+            len(atoms), len(groups),
+        )
+    else:
+        groups = [[a] for a in atoms]
+
+    # --- Phase 3: Build validated MultimodalChunk instances ---
+    chunks: List[MultimodalChunk] = []
+
+    for chunk_num, group in enumerate(groups, start=1):
+        first = group[0]
+        last = group[-1]
+
+        # Merge transcript text — join with space, preserving natural flow.
+        transcript = " ".join(a["text"] for a in group).strip()
+
+        # Visual/OCR from the FIRST atom's aligned frame (the slide active
+        # when the chunk begins). Later atoms with a new slide frame are
+        # captured by the next chunk.
+        visual_context = first["visual_context"]
+        ocr_text = first["ocr_text"]
+
         chunk_id = f"{lecture_id}_chunk_{chunk_num:06d}"
 
-        # Validate against MultimodalChunk schema — raises on failure.
         chunk = MultimodalChunk(
             lecture_id=lecture_id,
             chunk_id=chunk_id,
-            timestamp=round(seg_timestamp, 3),
-            transcript=seg.get("text", ""),
+            timestamp=round(first["start"], 3),
+            transcript=transcript,
             visual_context=visual_context,
             ocr_text=ocr_text,
+            start_time=round(first["start"], 3),
+            end_time=round(last["end"], 3),
+            segment_ids=[a["segment_id"] for a in group],
         )
         chunks.append(chunk)
 
@@ -220,3 +292,87 @@ def fuse(
     )
 
     return chunks
+
+
+# ── Deterministic semantic chunk merge ──────────────────────────────────
+
+def _merge_atoms(
+    atoms: List[Dict[str, Any]],
+) -> List[List[Dict[str, Any]]]:
+    """
+    Merge atomic (Whisper-segment) records into semantic chunk groups using
+    a deterministic rolling-window algorithm.
+
+    Merge decisions are made on three criteria, evaluated greedily left-to-right:
+
+    1. **Hard cap** (MAX_CHUNK_CHARS): if adding the next atom would exceed
+       the maximum, the current group is flushed (unless it is below the
+       minimum, in which case the next atom is absorbed to avoid a tiny orphan).
+
+    2. **Strong boundary at content threshold** (MIN_CHUNK_CHARS): a large
+       silence gap (>SILENCE_GAP_THRESHOLD) is a topic boundary; a sentence
+       ending at or above TARGET_CHUNK_CHARS is a natural segment boundary.
+       Both only trigger if the current group has at least MIN_CHUNK_CHARS
+       content (otherwise the merge continues).
+
+    3. **Default grow**: absent any boundary signal, the next atom is appended
+       to the current group regardless of length.
+
+    This algorithm is fully deterministic — given the same atoms it always
+    produces the exact same groups. No ML, no randomness, no external state.
+
+    Each atom dict must have keys:
+        segment_id : int
+        start      : float  (seconds)
+        end        : float  (seconds)
+        text       : str
+
+    Args:
+        atoms: List of aligned atomic records (one per Whisper segment).
+
+    Returns:
+        List of groups, where each group is a list of atom dicts.
+    """
+    if not atoms:
+        return []
+
+    groups: List[List[Dict[str, Any]]] = [[atoms[0]]]
+
+    for atom in atoms[1:]:
+        current = groups[-1]
+        chars_now = sum(len(a["text"]) for a in current)
+        chars_next = len(atom["text"])
+        gap = atom["start"] - current[-1]["end"]
+
+        # ── Check last atom's text for sentence-ending punctuation ──
+        last_text = current[-1]["text"].strip()
+        sentence_boundary = bool(last_text and last_text[-1] in (".", "!", "?"))
+
+        # 1) Hard cap — must break.
+        if chars_now + chars_next > MAX_CHUNK_CHARS:
+            if chars_now >= MIN_CHUNK_CHARS:
+                groups.append([atom])
+            else:
+                # Current group still too small — absorb to avoid a 40-char orphan.
+                current.append(atom)
+            continue
+
+        # 2) Strong boundary at content threshold.
+        if chars_now >= MIN_CHUNK_CHARS:
+            should_break = False
+
+            # Large silence gap = topic boundary.
+            if gap > SILENCE_GAP_THRESHOLD:
+                should_break = True
+            # At or above target + sentence-ending punctuation = natural break.
+            elif chars_now >= TARGET_CHUNK_CHARS and sentence_boundary:
+                should_break = True
+
+            if should_break:
+                groups.append([atom])
+                continue
+
+        # 3) Default: keep growing.
+        current.append(atom)
+
+    return groups

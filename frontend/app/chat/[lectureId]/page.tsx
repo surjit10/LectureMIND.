@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { postQuery, getLecture } from "@/services/api";
+import { useDeveloperMode } from "@/components/layout/Providers";
+import PipelineTrace from "@/components/chat/PipelineTrace";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import StatusBadge from "@/components/common/StatusBadge";
 import LectureNav from "@/components/common/LectureNav";
@@ -30,6 +32,7 @@ interface Message {
 
 export default function ChatPage() {
   const { lectureId } = useParams<{ lectureId: string }>();
+  const { isDevMode } = useDeveloperMode();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -162,6 +165,11 @@ export default function ChatPage() {
                   <GitBranch size={13} />
                   <span>{m.response.graph_path.join(" → ")}</span>
                 </div>
+              )}
+
+              {/* Pipeline trace — Developer Mode only */}
+              {isDevMode && m.response?.debug && (
+                <PipelineTrace debug={m.response.debug} />
               )}
             </div>
             {m.role === "user" && (

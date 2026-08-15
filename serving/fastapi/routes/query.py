@@ -17,6 +17,18 @@ router = APIRouter()
 _workflow: Optional[QueryWorkflow] = None
 _active_package: Optional[Dict[str, Any]] = None
 
+# Module-level planner singleton (matches the pattern used by the nodes).
+_planner = None
+
+
+def _get_planner():
+    """Lazy-load the stateless planner singleton."""
+    global _planner
+    if _planner is None:
+        from agent.dspy.planner import QueryPlanner
+        _planner = QueryPlanner()
+    return _planner
+
 
 def get_workflow() -> Optional[QueryWorkflow]:
     """Return the currently active workflow, or None."""
@@ -114,6 +126,81 @@ def set_active_package(lecture_id: str, package: Dict[str, Any]) -> None:
     _active_package = package
 
 
+def _build_debug_trace(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Build the Developer-Mode pipeline trace from existing workflow state.
+
+    Pure pass-through of data the workflow already computed — no additional
+    retrieval, no recomputation of embeddings/reranking. The planner intent
+    is re-derived once via the lightweight heuristic plan_full() because
+    state intentionally does not carry it (frozen schema).
+    """
+    route = state.get("retrieval_route")
+    route_str = ""
+    if route is not None:
+        route_str = route.value if hasattr(route, "value") else str(route)
+
+    plan_info: Dict[str, Any] = {}
+    try:
+        plan = _get_planner().plan_full(state.get("query", ""))
+        plan_info = {
+            "intent": plan.intent,
+            "is_lecture_wide": plan.is_lecture_wide,
+            "answer_style": plan.answer_style,
+            "top_k": plan.top_k,
+            "context_budget": plan.context_budget,
+            "need_visual": plan.need_visual,
+        }
+    except Exception as exc:
+        logger.warning("Debug trace: plan_full failed: %s", exc)
+
+    def _round(value) -> float:
+        try:
+            return round(float(value), 4)
+        except (TypeError, ValueError):
+            return 0.0
+
+    vector_results = []
+    for r in state.get("vector_results", [])[:10]:
+        vector_results.append({
+            "chunk_id": r.get("chunk_id", ""),
+            "score": _round(r.get("score", 0.0)),
+        })
+
+    graph_results = []
+    for r in state.get("graph_results", [])[:10]:
+        graph_results.append({
+            "start": r.get("start_name", ""),
+            "related": r.get("related_name", ""),
+            "rel_types": r.get("rel_types", []),
+            "hops": r.get("hops", 0),
+        })
+
+    reranked_results = []
+    for r in state.get("reranked_results", [])[:10]:
+        payload = r.get("payload", r)
+        reranked_results.append({
+            "chunk_id": payload.get("chunk_id", r.get("chunk_id", "")),
+            "rerank_score": _round(r.get("rerank_score", 0.0)),
+        })
+
+    return {
+        "retrieval_route": route_str or "",
+        "plan": plan_info,
+        "telemetry": {k: _round(v) for k, v in state.get("telemetry", {}).items()},
+        "stage_counts": {
+            "vector": len(state.get("vector_results", [])),
+            "graph": len(state.get("graph_results", [])),
+            "reranked": len(state.get("reranked_results", [])),
+        },
+        "vector_results": vector_results,
+        "graph_results": graph_results,
+        "reranked_results": reranked_results,
+        "final_context_chars": len(state.get("final_context", "")),
+        "graph_path": state.get("graph_path", []),
+    }
+
+
 @router.post("/query", response_model=QueryResponse)
 async def query_endpoint(request: QueryRequest):
     """
@@ -144,6 +231,7 @@ async def query_endpoint(request: QueryRequest):
             answer=state.get("answer", ""),
             sources=state.get("sources", []),
             graph_path=state.get("graph_path", []),
+            debug=_build_debug_trace(state),
         )
     except Exception as exc:
         logger.error("Query pipeline failed: %s", exc)

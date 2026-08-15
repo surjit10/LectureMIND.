@@ -15,7 +15,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from local.llm.provider_registry import get_provider_registry
 from local.llm.provider_manager import get_provider_manager
@@ -234,6 +234,10 @@ async def list_ollama_models():
 
 
 class DownloadModelRequest(BaseModel):
+    """Request body for POST /settings/ollama/download."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
     model_name: str
 
 @router.post("/ollama/download")

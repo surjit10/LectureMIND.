@@ -146,7 +146,7 @@ export default function LearningPathPage() {
             <Map size={48} className="text-gray-600 mb-4" />
             <h3>No learning path available</h3>
             <p className="text-gray-400 max-w-sm text-center mt-2">
-              We couldn't generate a structured path for this lecture. Try re-processing the knowledge package.
+              We couldn&apos;t generate a structured path for this lecture. Try re-processing the knowledge package.
             </p>
           </div>
         )}

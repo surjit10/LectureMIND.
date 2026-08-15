@@ -314,7 +314,7 @@ export default function ImportPackagePage() {
       {/* Helpful Tip Banner */}
       <div className="upload-tip-banner">
         <Lightbulb size={20} />
-        <span>Tip: For best results, import packages generated exclusively by LectureMind Cloud Pipeline (V7).</span>
+        <span>Tip: For best results, import packages generated exclusively by the LectureMind Cloud Pipeline.</span>
       </div>
 
       {/* ── Name Package Modal ──────────────────────────────────────────────── */}

@@ -7,8 +7,12 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies.
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# NOTE: local_requirements.txt is the API runtime stack (FastAPI, Qdrant,
+# Neo4j, LLM SDKs, sentence-transformers). requirements.txt is the
+# cloud/GPU-only ingestion stack (torch/paddle/whisper) and would
+# massively bloat the image and break CPU builds.
+COPY local_requirements.txt .
+RUN pip install --no-cache-dir -r local_requirements.txt
 
 # Copy source code.
 COPY schemas/ schemas/

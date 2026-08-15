@@ -18,6 +18,7 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -48,7 +49,10 @@ TITLE_PROMPT = (
     "Do not return headings.\n"
     "Do not return explanations.\n"
     "Do not repeat slide labels.\n"
-    "Do not return prefixes such as Title, Caption, Analysis, Objects and Concepts.\n\n"
+    "Do not return prefixes such as Title, Caption, Analysis, Objects and Concepts.\n"
+    "Ignore unrelated OCR noise, disclaimers, and boilerplate (e.g. parental \n"
+    "permission notices, channel branding, 'adults-only' announcements). Title \n"
+    "must describe the actual academic topic being taught.\n\n"
     "Segment content:\n{content}"
 )
 
@@ -263,6 +267,18 @@ def _generate_titles_batch(
         raw_title = raw_title.strip()
         # Clean up: remove quotes, trailing periods, limit length.
         raw_title = raw_title.strip("\"'").rstrip(".")
+        # Strip leading label prefixes the model may echo despite the prompt
+        # (e.g. "Title: ...", "Caption: ...", "Segment 3: ...").
+        raw_title = re.sub(
+            r"^\s*(?:title|caption|segment|topic|heading)\s*\d*\s*[:\-.]\s*",
+            "",
+            raw_title,
+            flags=re.IGNORECASE,
+        )
+        # Strip markdown formatting that slips through.
+        raw_title = re.sub(r"[#*`_>]+", "", raw_title).strip()
+        # Collapse internal whitespace.
+        raw_title = re.sub(r"\s+", " ", raw_title).strip()
         # Enforce max 8 words.
         words = raw_title.split()
         if len(words) > 8:
@@ -274,25 +290,186 @@ def _generate_titles_batch(
     return titles
 
 
+# Stopwords too generic to form a meaningful segment title. Kept deliberately
+# small so domain terms (e.g. "model", "relation", "search") are never dropped.
+_TITLE_STOPWORDS = frozenset({
+    "the", "and", "of", "to", "in", "on", "for", "with", "that", "this",
+    "is", "are", "was", "were", "be", "been", "being", "a", "an", "as",
+    "at", "by", "from", "or", "but", "not", "so", "if", "then", "than",
+    "there", "their", "they", "them", "we", "you", "your", "it", "its",
+    "what", "which", "who", "whom", "when", "where", "why", "how", "do",
+    "does", "did", "have", "has", "had", "can", "could", "will", "would",
+    "should", "may", "might", "must", "about", "into", "over", "under",
+    "again", "once", "here", "all", "any", "both", "each", "few", "more",
+    "most", "other", "some", "such", "only", "own", "same", "too", "very",
+    "just", "also", "well", "really", "actually", "basically", "okay", "ok",
+    "um", "uh", "yeah", "right", "like", "kind", "sort", "thing", "things",
+    "one", "two", "three", "let", "lets", "going", "gonna", "want", "need",
+    "talk", "talking", "say", "said", "says", "see", "look", "looking",
+    "lecture", "lectures", "today", "guys", "everyone", "welcome", "thank",
+    "thanks", "question", "questions", "answer", "answers", "example",
+    "examples", "maybe", "even", "still", "much", "back", "now", "always",
+    "never", "sometimes", "usually", "often", "next", "last", "part",
+    "section", "slide", "slides", "page", "chapter", "module", "course",
+})
+
+# OCR lines that are channel branding / boilerplate, never slide headings.
+_OCR_NOISE_MARKERS = (
+    "subscribe", "notification", "share", "watching", "thank you",
+    "parental", "permission", "adults", "copyright", "disclaimer", "bell",
+    "watermark", "logo", "channel", "like this", "comment",
+)
+
+# Generic filler openings in VLM captions that are not topic labels.
+_VISUAL_FILLER_PREFIXES = (
+    "the image", "this image", "the picture", "this picture", "image of",
+    "this appears", "the screenshot", "this screenshot", "the photo",
+    "educational slide", "this slide", "the slide", "a slide", "description",
+    "key objects", "key concepts", "key points", "main points",
+    "overview of", "this diagram", "the diagram", "a diagram", "the figure",
+)
+
+
+def _extract_ocr_heading(chunks: List[Dict[str, Any]], max_words: int = 8) -> str:
+    """
+    Return the first OCR line that looks like a slide heading.
+
+    Slide text usually leads with the topic title, so a short, alphabetic,
+    non-boilerplate OCR line is the strongest fallback title signal.
+    """
+    for chunk in chunks:
+        ocr = (chunk.get("ocr_text") or "").strip()
+        if not ocr:
+            continue
+        for line in ocr.splitlines():
+            line = line.strip().strip('"').strip("'")
+            if not line:
+                continue
+            words = line.split()
+            if not (1 <= len(words) <= max_words):
+                continue
+            if not any(ch.isalpha() for ch in line):
+                continue
+            lowered = line.lower()
+            if any(marker in lowered for marker in _OCR_NOISE_MARKERS):
+                continue
+            return line
+    return ""
+
+
+def _keyword_title_from_chunks(
+    chunks: List[Dict[str, Any]],
+    max_words: int = 6,
+) -> str:
+    """
+    Derive a title from weighted keyword frequency across the segment.
+
+    OCR text and visual captions outrank transcript because slide text is
+    typically the topic label; transcript words add supporting signal.
+    Words are ranked by weighted frequency, ties broken by earliest
+    appearance, and original casing is preserved.
+    """
+    weights = {"ocr_text": 3.0, "visual_context": 2.0, "transcript": 1.0}
+    scores: Dict[str, float] = {}
+    first_pos: Dict[str, int] = {}
+    casing: Dict[str, str] = {}
+
+    # Single tokens that mark channel-branding / boilerplate OCR and generic
+    # VLM caption filler — the same text _extract_ocr_heading and the caption
+    # branch reject must not leak in as keywords either.
+    noise_tokens = (
+        {t for marker in _OCR_NOISE_MARKERS for t in marker.split()}
+        | {t for prefix in _VISUAL_FILLER_PREFIXES for t in prefix.split()}
+        | {"images", "pictures", "photos", "screenshots", "figures", "shows",
+           "shown", "showing", "contains", "including", "appear", "appears"}
+    )
+
+    pos = 0
+    for chunk in chunks:
+        for field, weight in weights.items():
+            text = chunk.get(field) or ""
+            for match in re.finditer(r"[A-Za-z][A-Za-z'\-]*", text):
+                word = match.group(0)
+                lower = word.lower()
+                pos += 1
+                if len(lower) < 3 or lower in _TITLE_STOPWORDS:
+                    continue
+                if lower in noise_tokens:
+                    continue
+                scores[lower] = scores.get(lower, 0.0) + weight
+                first_pos.setdefault(lower, pos)
+                casing.setdefault(lower, word)
+
+    if not scores:
+        return ""
+
+    ranked = sorted(scores.items(), key=lambda kv: (-kv[1], first_pos[kv[0]]))
+    return " ".join(casing[lower] for lower, _ in ranked[:max_words])
+
+
+def _clean_fallback_title(title: str) -> str:
+    """Normalize a fallback title to match LLM title conventions.
+
+    Strips stray markdown characters, collapses whitespace, and caps at
+    8 words — the same cleanup _generate_titles_batch applies to LLM titles.
+    """
+    if not title:
+        return "Untitled Segment"
+    title = re.sub(r"[#*`_>]+", "", title).strip()
+    title = re.sub(r"\s+", " ", title).strip()
+    words = title.split()
+    if len(words) > 8:
+        title = " ".join(words[:8])
+    return title or "Untitled Segment"
+
+
 def _generate_title_fallback(chunks: List[Dict[str, Any]]) -> str:
     """
     Fallback title generation when no title_generator is available.
 
-    Uses the first chunk's transcript, truncated to a meaningful phrase.
+    Derives a topic-level title instead of quoting raw speech:
+      1. slide headings from OCR text,
+      2. the visual caption (when it is not generic filler),
+      3. repeated technical keywords across transcript/OCR/captions,
+      4. the first transcript phrase as a last resort.
+
+    Every result passes through _clean_fallback_title so fallback titles
+    follow the same conventions as LLM titles (no markdown, ≤8 words).
     """
     if not chunks:
         return "Untitled Segment"
 
+    # 1) OCR slide heading.
+    ocr_heading = _extract_ocr_heading(chunks)
+    if ocr_heading:
+        return _clean_fallback_title(ocr_heading)
+
+    # 2) Visual caption — only when it is not generic filler text.
+    for chunk in chunks:
+        caption = (chunk.get("visual_context") or "").strip()
+        if not caption:
+            continue
+        # Strip markdown heading noise the VLM may prefix (e.g. "### Description").
+        cleaned = re.sub(r"^[\s#>*_`\-]+", "", caption).strip()
+        first_sentence = re.split(r"(?<=[.!?])\s+", cleaned)[0].strip()
+        if any(first_sentence.lower().startswith(p) for p in _VISUAL_FILLER_PREFIXES):
+            continue
+        words = first_sentence.split()
+        if words:
+            return _clean_fallback_title(" ".join(words[:8]))
+
+    # 3) Repeated technical keywords.
+    keyword_title = _keyword_title_from_chunks(chunks)
+    if keyword_title:
+        return _clean_fallback_title(keyword_title)
+
+    # 4) Last resort: first transcript phrase (existing behavior).
     first_transcript = chunks[0].get("transcript", "").strip()
     if first_transcript:
         title = first_transcript[:60].strip()
         if len(first_transcript) > 60:
             title = title.rsplit(" ", 1)[0]
-        return title
-
-    first_visual = chunks[0].get("visual_context", "").strip()
-    if first_visual:
-        return first_visual[:60].strip()
+        return _clean_fallback_title(title)
 
     return "Untitled Segment"
 

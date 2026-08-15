@@ -55,6 +55,35 @@ class CloudSettings(BaseSettings):
     # Set to True ONLY when cuDNN is verified present.
     OCR_USE_GPU: bool = False
 
+    # V2 semantic chunk merging (Stage A6) — OFF by default.
+    # When enabled, adjacent Whisper segments are merged into larger semantic
+    # chunks via a deterministic rolling-window algorithm. The resulting chunks
+    # have start_time, end_time, and segment_ids provenance fields.
+    # Enabling this flag for an existing lecture requires re-running A6–C2 and
+    # generates a new knowledge package with different chunk boundaries (the
+    # benchmark ground truth must be rebuilt for the new chunk IDs).
+    SEMANTIC_CHUNK_MERGE: bool = False
+
+    # Reranker fine-tuning (Stage B2) — OFF by default. When enabled and
+    # triplets exist, the pipeline fine-tunes the cross-encoder after B1.
+    # Training itself remains an offline process; this flag only opts an
+    # individual Kaggle run into producing a per-lecture model checkpoint.
+    ENABLE_PIPELINE_RERANKER_TRAINING: bool = False
+
+    # ── Pipeline B — Global Reranker Training (independent Kaggle notebook) ──
+    # This pipeline is COMPLETELY separate from the lecture processing pipeline
+    # (Pipeline A). It consumes only the triplets.json files inside previously
+    # exported lecture knowledge packages — never raw videos. The only shared
+    # artifact between the two Kaggle workflows is triplets.json.
+    #
+    # Defaults are Kaggle-native; override via env/CLI for local test runs.
+    RERANKER_TRAINING_PACKAGES_ROOT: str = "/kaggle/input"
+    RERANKER_TRAINING_MODELS_ROOT: str = "/kaggle/working/reranker_models/"
+    RERANKER_TRAINING_SCRATCH_ROOT: str = "/kaggle/working/reranker_training/scratch/"
+    # When scanning PACKAGES_ROOT recursively, skip directories with these names
+    # (e.g. /kaggle/input/datasets holds the big model datasets, not packages).
+    RERANKER_TRAINING_EXCLUDE_DIRS: list[str] = ["datasets"]
+
     # Kafka (cloud-side, between A6 and consumers)
     KAFKA_BROKER: str = "localhost:9092"
 
@@ -104,8 +133,29 @@ class LocalSettings(BaseSettings):
     RERANKER_MODEL_ID: str = "BAAI/bge-reranker-base"
     UPLOAD_TEMP_DIR: str = "local_runtime/temp/uploads/"
     MAX_MODEL_UPLOAD_MB: int = 2000
+    # Knowledge package (lecture ZIP) upload cap — typical packages are 50–500 MB.
+    MAX_PACKAGE_UPLOAD_MB: int = 2000
     ALLOWED_MODEL_FILES: list[str] = ["config.json", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "model.safetensors", "pytorch_model.bin", "vocab.txt"]
     AUTO_RELOAD_RERANKER: bool = True
+
+    # Reranker int8 quantization — OFF by default.
+    # When enabled, the cross-encoder is dynamically quantized to int8 at load
+    # time (weights only; activations stay FP32). Measured ~3.7x faster on CPU
+    # with identical scores/ordering on bge-reranker-base. If quantization
+    # fails for any reason, the loader falls back to FP32 automatically.
+    RERANKER_QUANTIZE: bool = False
+
+    # Hybrid retrieval — ON: dense vector candidates are augmented with
+    # BM25 lexical results fused via Reciprocal Rank Fusion (RRF). BM25
+    # catches exact entity names, numeric facts, and phrases (e.g. "Linux",
+    # "textbook") that dense embeddings can miss — without it, evidence
+    # chunks absent from the dense top-15 can never reach the LLM context
+    # (diagnosed: "Linux lines of code" had its evidence at BM25 rank 0
+    # but zero in the dense pool). The BM25 index is built lazily from
+    # Qdrant payloads on first query per lecture. This setting is read by
+    # rerank_service.rerank() at query time; no changes to lecture loading
+    # or the retrieval pipeline.
+    ENABLE_HYBRID_RETRIEVAL: bool = True
 
     TRANSFER_DIR: str = "transfer/"
     LOCAL_LOG_DIR: str = "local_runtime/logs/"

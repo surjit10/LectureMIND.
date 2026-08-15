@@ -114,6 +114,61 @@ class LearningPathResponse(BaseModel):
     path: List[Dict[str, str]] = []
 
 
+class CourseInfo(BaseModel):
+    """Course metadata for the course API (Feature 1)."""
+    model_config = ConfigDict(extra="forbid")
+
+    course_id: str
+    name: str
+    description: str = ""
+    lecture_ids: List[str] = []
+    lecture_count: int = 0
+    created_at: str = ""
+
+
+class CourseCreateRequest(BaseModel):
+    """Request for POST /courses."""
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    description: str = ""
+
+
+class CourseUpdateRequest(BaseModel):
+    """Request for PATCH /courses/{course_id}."""
+    model_config = ConfigDict(extra="forbid")
+
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CourseAddLectureRequest(BaseModel):
+    """Request for POST /courses/{course_id}/lectures."""
+    model_config = ConfigDict(extra="forbid")
+
+    lecture_id: str
+
+
+class CourseQueryRequest(BaseModel):
+    """Request for POST /courses/query."""
+    model_config = ConfigDict(extra="forbid")
+
+    course_id: str
+    query: str
+
+
+class CourseQueryResponse(BaseModel):
+    """Response for POST /courses/query."""
+    model_config = ConfigDict(extra="forbid")
+
+    course_id: str
+    answer: str
+    sources: List[Dict[str, Any]] = []
+    graph_path: List[str] = []
+    lectures_used: List[str] = []
+    skipped_lectures: List[str] = []
+
+
 class SettingsUpdate(BaseModel):
     """Request for PUT /settings."""
 

@@ -7,16 +7,23 @@ pytest-cov==5.0.0
 
 # === Chunk 2: Cloud Ingestion Pipeline (A1–C2) ===
 # These are pinned per spec §3. GPU deps only needed on Kaggle.
-# Do NOT install: torch, numpy, protobuf, cuda-toolkit (use Kaggle defaults).
+# Do NOT install: torch, numpy, cuda-toolkit (use Kaggle defaults).
+#
+# Paddle (A5 OCR) is CPU-only by design (OCR_USE_GPU=False): the CPU wheel
+# avoids PaddlePaddle's CUDA-init segfault on new Kaggle images (CUDA 13 /
+# Python 3.12). protobuf is pinned to 3.20.x because Paddle 2.6.x crashes at
+# import with the protobuf 5.x that ships on Kaggle by default.
 
-opencv-python==4.10.0.84
+opencv-python==4.11.0.86
+opencv-contrib-python==4.11.0.86
 ffmpeg-python==0.2.0
 faster-whisper==1.0.3
 transformers==4.46.2
 qwen-vl-utils==0.0.8
 accelerate>=0.34.2
 sentencepiece>=0.2
+protobuf==3.20.3
 paddleocr==2.9.1
-paddlepaddle-gpu==2.6.2
+paddlepaddle==2.6.2
 
 # sentence-transformers installed separately in run_kaggle.py

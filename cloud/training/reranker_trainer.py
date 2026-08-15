@@ -48,6 +48,9 @@ def train_reranker(
     epochs: int = 3,
     batch_size: int = 8,
     warmup_ratio: float = 0.1,
+    learning_rate: Optional[float] = None,
+    evaluation_steps: int = 0,
+    dev_triplets: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """
     Fine-tune the reranker cross-encoder on generated triplets.
@@ -62,6 +65,13 @@ def train_reranker(
         epochs: Number of training epochs.
         batch_size: Training batch size (small for T4 VRAM).
         warmup_ratio: Learning rate warmup ratio.
+        learning_rate: Optional AdamW learning rate. None → sentence-transformers
+            default (2e-5). Additive; existing callers are unaffected.
+        evaluation_steps: When > 0 AND dev_triplets provided, run the
+            CERerankingEvaluator on dev triplets every N training steps
+            (and trigger best-model saving). 0 disables mid-training eval.
+        dev_triplets: Optional held-out triplets for mid-training evaluation
+            and loss tracking. Not used by the injected trainer_fn path.
 
     Returns:
         Training metrics dict with MRR, Recall@K, nDCG@10.
@@ -82,12 +92,16 @@ def train_reranker(
         metrics = trainer_fn(
             triplets_data, model_output_dir, base_model,
             epochs=epochs, batch_size=batch_size,
+            learning_rate=learning_rate, evaluation_steps=evaluation_steps,
         )
     else:
         metrics = _run_training(
             triplets_data, model_output_dir, base_model,
             epochs=epochs, batch_size=batch_size,
             warmup_ratio=warmup_ratio,
+            learning_rate=learning_rate,
+            evaluation_steps=evaluation_steps,
+            dev_triplets=dev_triplets,
         )
 
     # Write training_metrics.json — simple JSON, no new schema.
@@ -109,6 +123,9 @@ def _run_training(
     epochs: int = 3,
     batch_size: int = 8,
     warmup_ratio: float = 0.1,
+    learning_rate: Optional[float] = None,
+    evaluation_steps: int = 0,
+    dev_triplets: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, float]:
     """
     Execute real reranker fine-tuning using sentence-transformers CrossEncoder.
@@ -117,9 +134,6 @@ def _run_training(
     gradient accumulation for Kaggle T4 compatibility.
     """
     from sentence_transformers import CrossEncoder, InputExample
-    from sentence_transformers.cross_encoder.evaluation import (
-        CERerankingEvaluator,
-    )
     from torch.utils.data import DataLoader
     import math
 
@@ -150,13 +164,37 @@ def _run_training(
         len(train_examples), epochs, batch_size, warmup_steps,
     )
 
-    model.fit(
+    # Optional tuning knobs — additive; defaults reproduce legacy behavior.
+    fit_kwargs = dict(
         train_dataloader=train_dataloader,
         epochs=epochs,
         warmup_steps=warmup_steps,
         output_path=str(output_dir),
         show_progress_bar=True,
     )
+    if learning_rate is not None:
+        fit_kwargs["optimizer_params"] = {"lr": learning_rate}
+    if dev_triplets and evaluation_steps and evaluation_steps > 0:
+        from sentence_transformers.cross_encoder.evaluation import (
+            CERerankingEvaluator,
+        )
+        samples = [
+            {
+                "query": t["query"],
+                "positive": [t["positive"]],
+                "negative": [t["negative"]],
+            }
+            for t in dev_triplets
+        ]
+        evaluator = CERerankingEvaluator(samples, name="dev", mrr_at_k=10, ndcg_at_k=10)
+        fit_kwargs["evaluator"] = evaluator
+        fit_kwargs["evaluation_steps"] = evaluation_steps
+        logger.info(
+            "B2: Mid-training evaluation on %d dev triplets every %d steps.",
+            len(dev_triplets), evaluation_steps,
+        )
+
+    fit_result = model.fit(**fit_kwargs)
 
     # Explicitly persist final model artifacts.
     # Safe because it operates on the already-trained in-memory model.
@@ -166,12 +204,38 @@ def _run_training(
 
     # Evaluate — compute metrics on the training data as a baseline.
     # In production, a held-out eval set would be used.
-    metrics = _compute_metrics(model, triplets)
+    metrics = compute_reranker_metrics(model, triplets)
+
+    # Loss history from CrossEncoder.fit's return value (list of per-step
+    # loss dicts on recent sentence-transformers). Defensive: older versions
+    # return nothing, in which case the key is simply omitted.
+    loss_history = _extract_loss_history(fit_result)
+    if loss_history:
+        metrics["train_loss_history"] = loss_history
 
     return metrics
 
 
-def _compute_metrics(
+def _extract_loss_history(fit_result: Any) -> List[float]:
+    """Extract a flat loss-history list from CrossEncoder.fit's return value.
+
+    Recent sentence-transformers return a list of {"loss": float, ...} dicts;
+    other versions return None or a plain list of floats. Never raise.
+    """
+    if not isinstance(fit_result, (list, tuple)):
+        return []
+    losses = []
+    for item in fit_result:
+        if isinstance(item, dict):
+            loss = item.get("loss")
+            if isinstance(loss, (int, float)):
+                losses.append(float(loss))
+        elif isinstance(item, (int, float)):
+            losses.append(float(item))
+    return losses
+
+
+def compute_reranker_metrics(
     model: Any,
     triplets: List[Dict[str, Any]],
 ) -> Dict[str, float]:
@@ -180,6 +244,9 @@ def _compute_metrics(
 
     For each triplet, scores positive and negative against query,
     then computes ranking metrics.
+
+    Public — also used by Pipeline B (cloud/reranker_training/pipeline.py) to
+    evaluate the trained model on a held-out dev set.
     """
     import numpy as np
 
@@ -221,3 +288,8 @@ def _compute_metrics(
         "num_triplets": len(triplets),
     }
     return metrics
+
+
+# Backward-compatible alias — the legacy private name is retained so existing
+# internal callers keep working unchanged.
+_compute_metrics = compute_reranker_metrics
