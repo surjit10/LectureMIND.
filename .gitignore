@@ -110,6 +110,8 @@ checkpoints/*
 # Datasets & archives
 # ------------------------------------------------------------
 *.zip
+!dist/*.zip
+!zip processed lecture data/*.zip
 *.tar
 *.tar.gz
 *.tgz
