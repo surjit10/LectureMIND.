@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
+    "annotation_method": "LLM-assisted reference labels, pending human verification",
+    "total_gold_prerequisites": 10,
+    "description": "Reference pedagogical prerequisite dependencies where Concept A is conceptually necessary to comprehend Concept B (LLM-assisted reference, pending human verification)."
+  },
+  "prerequisites": [
+    {
+      "source_name": "Alternating Current",
+      "target_name": "Magnetic Field",
+      "pedagogical_justification": "The concept of a dynamic, changing magnetic field in this lecture builds upon passing an alternating current through a conductor.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Alternating Current",
+      "target_name": "Transformer",
+      "pedagogical_justification": "Transformers cannot operate on DC; understanding AC is an absolute physical prerequisite to understanding why transformers work.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Magnetic Field",
+      "target_name": "Electromotive Force",
+      "pedagogical_justification": "EMF (Faraday induction) is defined as the force pushing free electrons due to a changing magnetic field.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Coil",
+      "target_name": "Transformer",
+      "pedagogical_justification": "A transformer physically consists of primary and secondary coils sharing magnetic flux.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Electromotive Force",
+      "target_name": "Transformer",
+      "pedagogical_justification": "The fundamental operating principle of a transformer is mutual induction of electromotive force.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Transformer",
+      "target_name": "Step Up Transformer",
+      "pedagogical_justification": "A step-up transformer is a specialized transformer; general transformer operating principles must be learned first.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Transformer",
+      "target_name": "Step Down Transformer",
+      "pedagogical_justification": "A step-down transformer is a specialized transformer; general transformer operating principles must be learned first.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Coil",
+      "target_name": "Step Up Transformer",
+      "pedagogical_justification": "Voltage stepping is accomplished by varying the number of turns on the coil.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Transformer",
+      "target_name": "Three Phase Configuration",
+      "pedagogical_justification": "Three-phase transformers combine multiple single-phase transformers or use shared three-limb cores.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    },
+    {
+      "source_name": "Three Phase Configuration",
+      "target_name": "Delta Y Connection",
+      "pedagogical_justification": "Delta and Y (Star) are specific topological wiring arrangements of a three-phase system.",
+      "is_acyclic": true,
+      "lecture_supported": true
+    }
+  ]
+}

@@ -1,0 +1,711 @@
+[
+  {
+    "query": "What is a transformer and what does it do?",
+    "ground_truth_answer": "A transformer is an electrical engineering device that transfers electrical energy between circuits through electromagnetic induction, operating only using alternating current (AC).",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Transformer",
+      "Alternating Current"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What kind of electricity can a transformer operate on?",
+    "ground_truth_answer": "Transformers can only work using AC (alternating current); they cannot operate on direct current (DC).",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Alternating Current",
+      "Direct Current",
+      "Transformer"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What waveform pattern does alternating current produce on an oscilloscope?",
+    "ground_truth_answer": "The alternation of current as it reaches its maximum and minimum points during the cycle gives it a sine wave (sinusoidal waveform) pattern on an oscilloscope.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Sinusoidal Waveform",
+      "Alternating Current"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What is electromotive force (EMF) in a transformer?",
+    "ground_truth_answer": "Electromotive force (EMF) is the movement of free electrons in the secondary coil forced by the constantly changing intensity and polarity of the magnetic field.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Electromotive Force",
+      "Magnetic Field",
+      "Coil"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What is an iron core used for in a transformer?",
+    "ground_truth_answer": "An iron core is a ferromagnetic loop placed between the primary and secondary coils to guide the magnetic field along a shared path, making the transformer much more efficient.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Iron Core",
+      "Transformer",
+      "Coil"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What are eddy currents and why are they problematic?",
+    "ground_truth_answer": "Eddy currents are swirling currents induced inside the iron core where electrical energy is lost as heat, heating up the transformer and reducing efficiency.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Eddy Currents",
+      "Iron Core",
+      "Transformer"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How do engineers reduce eddy currents in the transformer core?",
+    "ground_truth_answer": "Engineers use laminated sheets of iron to form the core, which greatly reduces the circulating eddy currents and associated heat loss.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Laminated Iron Sheets",
+      "Iron Core",
+      "Eddy Currents"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What is a step-up transformer?",
+    "ground_truth_answer": "A step-up transformer is a transformer in which the voltage is increased in the secondary coil while the current decreases, accomplished by having more turns on the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Step Up Transformer",
+      "Voltage",
+      "Current",
+      "Coil"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What is a step-down transformer?",
+    "ground_truth_answer": "A step-down transformer is a transformer where voltage is decreased in the secondary coil and current increases, accomplished by having fewer turns in the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Step Down Transformer",
+      "Voltage",
+      "Current",
+      "Coil"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What is a delta-y connection in three-phase transformers?",
+    "ground_truth_answer": "A delta-y (or delta-star) connection refers to the primary side wired in a delta configuration and the secondary side wired in a wye (Y/star) configuration with a grounded neutral line.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Delta Y Connection",
+      "Three Phase Configuration"
+    ],
+    "question_type": "direct_concept",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Why does a transformer require AC instead of DC?",
+    "ground_truth_answer": "A transformer requires a changing magnetic field to induce electromotive force. AC changes direction and strength constantly, whereas DC produces a constant, unchanging magnetic field that cannot disturb electrons.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Alternating Current",
+      "Direct Current",
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How is the magnetic field related to the alternating current passing through a cable?",
+    "ground_truth_answer": "As AC flows through a cable, it emits a magnetic field that increases and decreases in strength and changes polarity as the current changes direction.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Magnetic Field",
+      "Alternating Current"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How does wrapping a cable into a coil affect the magnetic field?",
+    "ground_truth_answer": "Wrapping a cable into a coil combines the magnetic fields of multiple adjacent cables, making the resulting magnetic field much stronger.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003"
+    ],
+    "expected_entity_ids": [
+      "Coil",
+      "Magnetic Field"
+    ],
+    "question_type": "relational",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What causes electromotive force to be induced in the secondary coil?",
+    "ground_truth_answer": "Electromotive force is caused by the change in intensity and polarity of the magnetic field from the primary coil disturbing free electrons in the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Electromotive Force",
+      "Magnetic Field",
+      "Coil"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How does an iron core improve the efficiency of a transformer?",
+    "ground_truth_answer": "Without an iron core, magnetic field from the primary coil is wasted in the surrounding space; the iron core provides a magnetic loop that guides the magnetic flux directly through the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Iron Core",
+      "Magnetic Field",
+      "Transformer"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How are eddy currents related to the iron core and transformer heating?",
+    "ground_truth_answer": "The changing magnetic field inside the iron core induces circulating eddy currents that swirl in the iron, dissipating electrical energy as unwanted heat.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Eddy Currents",
+      "Iron Core",
+      "Transformer"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How do coil turns affect voltage in a step-up transformer?",
+    "ground_truth_answer": "Adding more turns to the coil on the secondary side compared to the primary side increases the induced voltage in the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Coil",
+      "Voltage",
+      "Step Up Transformer"
+    ],
+    "question_type": "relational",
+    "difficulty": "easy"
+  },
+  {
+    "query": "What happens to current when voltage is stepped down in a transformer?",
+    "ground_truth_answer": "When voltage is decreased in the secondary coil of a step-down transformer, the secondary current increases proportionally.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Voltage",
+      "Current",
+      "Step Down Transformer"
+    ],
+    "question_type": "relational",
+    "difficulty": "easy"
+  },
+  {
+    "query": "Why do power stations step up voltage for long distance electricity transmission?",
+    "ground_truth_answer": "Power stations use step-up transformers to increase voltage and reduce current, which significantly reduces resistive heat losses through long transmission cables.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Step Up Transformer",
+      "Voltage",
+      "Current"
+    ],
+    "question_type": "relational",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Why is the center point of the Y configuration in a delta-y transformer grounded?",
+    "ground_truth_answer": "The center point of the wye/star connection allows a neutral line to be connected to ground for safety and single-phase load distribution.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Delta Y Connection",
+      "Three Phase Configuration"
+    ],
+    "question_type": "relational",
+    "difficulty": "hard"
+  },
+  {
+    "query": "Trace how electrical energy from an AC generator is transferred across space to light a load on a disconnected secondary coil.",
+    "ground_truth_answer": "AC generator produces alternating current in primary coil -> varying current emits a changing magnetic field -> magnetic field is guided through an iron core -> changing flux induces electromotive force in secondary coil -> electrons move, producing secondary current.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Alternating Current",
+      "Magnetic Field",
+      "Iron Core",
+      "Electromotive Force",
+      "Coil"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "Why does passing DC current through a primary coil fail to produce sustained electromotive force in the secondary coil?",
+    "ground_truth_answer": "DC current creates a constant magnetic field of fixed polarity and intensity. Because the magnetic field is not changing, free electrons in the secondary coil are not disturbed, producing no sustained EMF.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Direct Current",
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "multihop",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How does core lamination address the trade-off introduced by adding an iron core to improve flux linkage?",
+    "ground_truth_answer": "Adding an iron core concentrates magnetic flux to boost efficiency, but introduces eddy current losses. Laminated iron sheets break up circulating current loops, keeping the magnetic benefit while suppressing heat loss.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Iron Core",
+      "Eddy Currents",
+      "Laminated Iron Sheets"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "How does changing coil winding ratios allow power grids to safely transmit high voltage electricity to homes?",
+    "ground_truth_answer": "Power plants use high secondary coil turns in step-up transformers to transmit electricity with low current/low loss, then city substations use lower secondary coil turns in step-down transformers to reduce voltage to safe household levels.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Coil",
+      "Step Up Transformer",
+      "Step Down Transformer",
+      "Voltage"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "What is the relationship between sine wave polarity changes and electron motion in the secondary coil?",
+    "ground_truth_answer": "As the AC sine wave alternates polarity, the emitted magnetic field reverses its direction, which pushes and pulls on free electrons in the secondary coil back and forth.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Sinusoidal Waveform",
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "How do three-phase transformers combine multiple single-phase principles into commercial units?",
+    "ground_truth_answer": "Commercial three-phase systems connect three separate transformers or build them into one unit sharing an iron core, wiring the coils in configurations such as delta-y.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Three Phase Configuration",
+      "Iron Core",
+      "Delta Y Connection"
+    ],
+    "question_type": "multihop",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Why is an oscilloscope used to visualize the AC generator output?",
+    "ground_truth_answer": "An oscilloscope displays the alternation of voltage and current between maximum and minimum values over time, showing the characteristic sine wave pattern.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Sinusoidal Waveform",
+      "Alternating Current"
+    ],
+    "question_type": "multihop",
+    "difficulty": "medium"
+  },
+  {
+    "query": "In a step-up transformer, why does current decrease when voltage increases?",
+    "ground_truth_answer": "Conservation of electrical power dictates that as voltage increases across the secondary coil, current must decrease proportionally to maintain power balance minus losses.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Voltage",
+      "Current",
+      "Step Up Transformer"
+    ],
+    "question_type": "multihop",
+    "difficulty": "medium"
+  },
+  {
+    "query": "How are the primary and secondary coils insulated from one another in a three-phase unit?",
+    "ground_truth_answer": "The coils sit concentrically within one another and are electrically insulated so that no electric current passes between them\u2014only the shared magnetic field passes through.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008"
+    ],
+    "expected_entity_ids": [
+      "Coil",
+      "Magnetic Field",
+      "Three Phase Configuration"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "Why does brief EMF occur when a DC circuit is opened or closed?",
+    "ground_truth_answer": "Opening or closing a DC circuit creates a momentary spike or drop in current, which briefly changes the magnetic field and induces a temporary EMF.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Direct Current",
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "multihop",
+    "difficulty": "hard"
+  },
+  {
+    "query": "What foundational concept must be understood before learning why a transformer works?",
+    "ground_truth_answer": "Understanding alternating current (AC) and how an electric current emits a magnetic field is the foundational prerequisite to understanding transformers.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Alternating Current",
+      "Magnetic Field",
+      "Transformer"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What concept must a student understand before studying step-up and step-down transformers?",
+    "ground_truth_answer": "A student must first understand basic transformer mutual induction, primary/secondary coils, and the iron core before learning step-up and step-down ratios.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Transformer",
+      "Coil",
+      "Step Up Transformer"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Why is the concept of a sinusoidal waveform a prerequisite for understanding AC electricity?",
+    "ground_truth_answer": "The sine wave explains the continuous variation in magnitude and periodic reversal of polarity that distinguishes AC from constant DC.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002"
+    ],
+    "expected_entity_ids": [
+      "Sinusoidal Waveform",
+      "Alternating Current"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Before studying delta-y connections, what higher-level topic should the learner be familiar with?",
+    "ground_truth_answer": "The learner should be familiar with three-phase configurations and basic transformer coil winding arrangements.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Three Phase Configuration",
+      "Delta Y Connection"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What physics prerequisite explains why changing magnetic fields create electromotive force?",
+    "ground_truth_answer": "Electromagnetic induction: changing magnetic flux creates a force that pushes and pulls on free electrons in a conductive loop.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "hard"
+  },
+  {
+    "query": "What component knowledge is prerequisite to understanding core losses like eddy currents?",
+    "ground_truth_answer": "Understanding the function and composition of the ferromagnetic iron core used to guide magnetic flux.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Iron Core",
+      "Eddy Currents"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What basic electrical quantities must be understood prior to analyzing step-up coil turns ratios?",
+    "ground_truth_answer": "Voltage and current, and their inverse relationship across transformer primary and secondary coils.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Voltage",
+      "Current",
+      "Coil"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "easy"
+  },
+  {
+    "query": "Why is single-phase transformer operation a prerequisite for understanding three-phase units?",
+    "ground_truth_answer": "Three-phase transformers are either constructed from three single-phase transformers wired together or use three single-phase windings on a shared core.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008"
+    ],
+    "expected_entity_ids": [
+      "Transformer",
+      "Three Phase Configuration"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What concept is prerequisite to understanding why laminated sheets of iron reduce eddy currents?",
+    "ground_truth_answer": "Understanding eddy currents as swirling circulating electrical loops within a solid conductive iron block.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Eddy Currents",
+      "Laminated Iron Sheets"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What concept must be mastered before calculating power transmission line losses?",
+    "ground_truth_answer": "Understanding the relationship between stepping up voltage, reducing current, and minimizing resistive transmission cable losses.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Step Up Transformer",
+      "Voltage",
+      "Current"
+    ],
+    "question_type": "prerequisite",
+    "difficulty": "hard"
+  },
+  {
+    "query": "How does the AC current introduced in chunk 2 connect to the three-phase distribution introduced in chunk 8?",
+    "ground_truth_answer": "Single-phase AC generated by alternating polarity (chunk 2) scales to commercial three-phase transmission (chunk 8), where three AC waveforms offset in phase power large buildings.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008"
+    ],
+    "expected_entity_ids": [
+      "Alternating Current",
+      "Three Phase Configuration"
+    ],
+    "question_type": "cross_chunk",
+    "difficulty": "hard"
+  },
+  {
+    "query": "Connect the basic coil wrapped in chunk 3 with the step-up secondary turns explained in chunk 6.",
+    "ground_truth_answer": "Chunk 3 demonstrates that wrapping a cable into a coil intensifies magnetic fields; chunk 6 uses this principle by adding more turns to the secondary coil to multiply induced voltage.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Coil",
+      "Step Up Transformer"
+    ],
+    "question_type": "cross_chunk",
+    "difficulty": "hard"
+  },
+  {
+    "query": "How does the DC current limitation mentioned in chunk 1 connect to the EMF explanation in chunk 4?",
+    "ground_truth_answer": "Chunk 1 notes transformers only work on AC; chunk 4 explains why: DC current produces an unchanging magnetic field that fails to induce EMF in the secondary coil.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004"
+    ],
+    "expected_entity_ids": [
+      "Direct Current",
+      "Electromotive Force"
+    ],
+    "question_type": "cross_chunk",
+    "difficulty": "medium"
+  },
+  {
+    "query": "Trace the evolution of the iron core from its introduction in chunk 5 to its three-phase shared core implementation in chunk 8.",
+    "ground_truth_answer": "In chunk 5, the iron core is introduced as a single ferromagnetic loop connecting primary and secondary coils; in chunk 8, it evolves into a large unit with a shared core supporting three concentric coil pairs.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008"
+    ],
+    "expected_entity_ids": [
+      "Iron Core",
+      "Three Phase Configuration"
+    ],
+    "question_type": "cross_chunk",
+    "difficulty": "hard"
+  },
+  {
+    "query": "How does the sine wave pattern described in chunk 2 support the delta-y configuration discussed in chunk 9?",
+    "ground_truth_answer": "The sinusoidal cycle (chunk 2) provides the alternating waveforms that connect across three phases to the neutral grounded center point of the Y configuration (chunk 9).",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Sinusoidal Waveform",
+      "Delta Y Connection"
+    ],
+    "question_type": "cross_chunk",
+    "difficulty": "hard"
+  },
+  {
+    "query": "At what timestamp does the lecture explain how eddy currents cause heat loss in the transformer?",
+    "ground_truth_answer": "Between 176.4s and 219.3s (chunk 5), the lecturer explains that energy is lost as eddy currents swirl around the core and heat up the transformer.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005"
+    ],
+    "expected_entity_ids": [
+      "Eddy Currents",
+      "Transformer"
+    ],
+    "question_type": "evidence_verification",
+    "difficulty": "medium"
+  },
+  {
+    "query": "What exact video chunk explains why laminated iron sheets are used in transformer cores?",
+    "ground_truth_answer": "Chunk 6 (219.3s - 259.0s) explains that engineers use laminated sheets of iron to form the core to greatly reduce eddy currents.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006"
+    ],
+    "expected_entity_ids": [
+      "Laminated Iron Sheets",
+      "Eddy Currents"
+    ],
+    "question_type": "evidence_verification",
+    "difficulty": "easy"
+  },
+  {
+    "query": "In which chunk does the lecturer introduce the real-world example of transporting electricity from a power station to a city?",
+    "ground_truth_answer": "Chunk 7 (259.0s - 295.1s) introduces the transmission example using step-up transformers at the power station and step-down transformers at the city.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007"
+    ],
+    "expected_entity_ids": [
+      "Step Up Transformer",
+      "Step Down Transformer"
+    ],
+    "question_type": "evidence_verification",
+    "difficulty": "easy"
+  },
+  {
+    "query": "Where in the lecture is the distinction between delta and star (Y) configurations first detailed?",
+    "ground_truth_answer": "Chunk 8 and Chunk 9 (295.1s - 384.7s) detail the delta primary and Y secondary connection with a neutral center point.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000009"
+    ],
+    "expected_entity_ids": [
+      "Delta Y Connection"
+    ],
+    "question_type": "evidence_verification",
+    "difficulty": "easy"
+  },
+  {
+    "query": "In which chunk does the lecturer state that free electrons are pushed and pulled by the magnetic force?",
+    "ground_truth_answer": "Chunk 3 (101.0s - 132.1s) states that the magnetic force will push and pull on the free electrons forcing them to move.",
+    "expected_chunk_ids": [
+      "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003"
+    ],
+    "expected_entity_ids": [
+      "Magnetic Field",
+      "Electromotive Force"
+    ],
+    "question_type": "evidence_verification",
+    "difficulty": "medium"
+  }
+]

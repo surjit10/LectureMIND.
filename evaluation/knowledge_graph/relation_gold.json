@@ -1,0 +1,220 @@
+{
+  "metadata": {
+    "lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
+    "annotation_method": "LLM-assisted reference labels, pending human verification",
+    "total_gold_relations": 21,
+    "description": "Reference semantic relations directly supported by the Transformer lecture evidence (LLM-assisted reference, pending human verification)."
+  },
+  "relations": [
+    {
+      "source_name": "Alternating Current",
+      "relation": "USED_BY",
+      "target_name": "Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "evidence_text": "transformers can only work using AC or alternating current.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Magnetic Field",
+      "relation": "DERIVED_FROM",
+      "target_name": "Alternating Current",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "evidence_text": "As the current flows through the cable it will emit a magnetic field... if we pass AC current though the cable then the magnetic field will increase and decrease in strength and changes polarity as the current changes direction.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Electromotive Force",
+      "relation": "DERIVED_FROM",
+      "target_name": "Magnetic Field",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004",
+      "evidence_text": "This change in intensity and direction of the magnetic field constantly disturbs the free electrons in the secondary coil and this forces them to move. This movement is known as electromotive force or EMF.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Sinusoidal Waveform",
+      "relation": "EXPLAINS",
+      "target_name": "Alternating Current",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000002",
+      "evidence_text": "The alternation means that the current reaches its maximum and minimum point during the cycle which gives it its sine wave pattern when connected to an oscilloscope.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Transformer",
+      "relation": "INTRODUCED_BEFORE",
+      "target_name": "Step Up Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "evidence_text": "how a basic transformer works, then we'll look at step up and step down transformers",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Transformer",
+      "relation": "INTRODUCED_BEFORE",
+      "target_name": "Step Down Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "evidence_text": "how a basic transformer works, then we'll look at step up and step down transformers",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Transformer",
+      "relation": "INTRODUCED_BEFORE",
+      "target_name": "Three Phase Configuration",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000001",
+      "evidence_text": "how a basic transformer works, then we'll look at step up and step down transformers, and finally we'll finish on three phase transformers",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Transformer",
+      "relation": "EXPLAINS",
+      "target_name": "Eddy Currents",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "evidence_text": "Some energy will be lost through something known as eddy currents where the current swirls around the core and this heats up the transformer.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Laminated Iron Sheets",
+      "relation": "FORMS",
+      "target_name": "Iron Core",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "evidence_text": "To reduce this engineers use laminated sheets of iron to form the core and this greatly reduces the eddy currents.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Iron Core",
+      "relation": "USED_BY",
+      "target_name": "Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000005",
+      "evidence_text": "engineers place a core or ferromagnetic material such as iron in a loop between the primary and secondary coils... and this makes the transformer much more efficient.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Coil",
+      "relation": "USED_BY",
+      "target_name": "Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000003",
+      "evidence_text": "If we then wrap the cable into a coil... if we then place a second coil in close proximity to the first coil",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Electromotive Force",
+      "relation": "EXPLAINS",
+      "target_name": "Voltage",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004",
+      "evidence_text": "The only time it will cause EMF is very briefly when the primary circuit is opened and closed or when the voltage is increased or decreased and that's because these actions result in a change to the magnetic field.",
+      "evidence_type": "INDIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Electromotive Force",
+      "relation": "EXPLAINS",
+      "target_name": "Current",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000004",
+      "evidence_text": "This change in intensity and direction of the magnetic field constantly disturbs the free electrons in the secondary coil and this forces them to move. This movement is known as electromotive force or EMF.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Voltage",
+      "relation": "USED_BY",
+      "target_name": "Step Up Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "evidence_text": "In a step up transformer the voltage is increased in the secondary coil and this will mean that the current will decrease.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Current",
+      "relation": "USED_BY",
+      "target_name": "Step Up Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "evidence_text": "In a step up transformer the voltage is increased in the secondary coil and this will mean that the current will decrease.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Voltage",
+      "relation": "USED_BY",
+      "target_name": "Step Down Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007",
+      "evidence_text": "In a step down transformer the voltage is decreased in the secondary coil which means that the current increases.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Current",
+      "relation": "USED_BY",
+      "target_name": "Step Down Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007",
+      "evidence_text": "In a step down transformer the voltage is decreased in the secondary coil which means that the current increases.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Coil",
+      "relation": "USED_BY",
+      "target_name": "Step Up Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000006",
+      "evidence_text": "To increase the voltage in a step up transformer we just need to add more turns to the coil on the secondary side than the primary side.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Coil",
+      "relation": "USED_BY",
+      "target_name": "Step Down Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000007",
+      "evidence_text": "In a step down transformer the voltage is decreased in the secondary coil which means that the current increases... use less turns in the coil on the secondary side",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Three Phase Configuration",
+      "relation": "USED_BY",
+      "target_name": "Transformer",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "evidence_text": "The transformers for commercial buildings and power stations are usually in a three phase configuration.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    },
+    {
+      "source_name": "Delta Y Connection",
+      "relation": "USED_BY",
+      "target_name": "Three Phase Configuration",
+      "evidence_chunk_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_chunk_000008",
+      "evidence_text": "one of the most commonly used is to connect the coils in a configuration known as delta y, sometimes referred to as delta star.",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "lecture_supported": true,
+      "factually_correct": true
+    }
+  ]
+}
