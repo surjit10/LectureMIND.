@@ -32,6 +32,9 @@ class QueryResponse(BaseModel):
     answer: str
     sources: List[Dict[str, Any]] = []
     graph_path: List[str] = []
+    # Additive field for Socratic Prerequisite Back-Tracker. Defaults to []
+    # so every existing caller and test remains 100% backward-compatible.
+    prerequisites: List[Dict[str, Any]] = []
     # Additive pipeline trace for Developer Mode. Defaults to {} so every
     # existing caller is unaffected. Populated by the /query route from
     # workflow state — no recomputation, no new retrieval.

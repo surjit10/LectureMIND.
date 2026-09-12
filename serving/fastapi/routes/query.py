@@ -198,6 +198,7 @@ def _build_debug_trace(state: Dict[str, Any]) -> Dict[str, Any]:
         "reranked_results": reranked_results,
         "final_context_chars": len(state.get("final_context", "")),
         "graph_path": state.get("graph_path", []),
+        "prerequisites": state.get("prerequisites", []),
     }
 
 
@@ -209,7 +210,7 @@ async def query_endpoint(request: QueryRequest):
     DSPy Planner → LangGraph → Neo4j/Qdrant → Reranker → Answer Generator
 
     Request: QueryRequest (query field only)
-    Response: QueryResponse (answer, sources, graph_path)
+    Response: QueryResponse (answer, sources, graph_path, prerequisites)
     """
     try:
         if request.lecture_id:
@@ -227,10 +228,29 @@ async def query_endpoint(request: QueryRequest):
         # Fallback to active package if the request doesn't provide it
         lecture_id = request.lecture_id or (_active_package.get("lecture_id") if _active_package else "")
         state = _workflow.run(request.query, lecture_id=lecture_id)
+
+        # Socratic Prerequisite Back-Tracker: trace conceptual dependencies
+        prerequisites = []
+        driver = getattr(_workflow, "_neo4j_driver", None)
+        if lecture_id and driver is not None:
+            try:
+                from retrieval.graph_retriever.neo4j_retriever import get_prerequisites_for_query
+                prerequisites = get_prerequisites_for_query(
+                    query=request.query,
+                    lecture_id=lecture_id,
+                    driver=driver,
+                    graph_results=state.get("graph_results", []),
+                )
+            except Exception as exc:
+                logger.warning("Prerequisite back-tracker lookup skipped: %s", exc)
+
+        state["prerequisites"] = prerequisites
+
         return QueryResponse(
             answer=state.get("answer", ""),
             sources=state.get("sources", []),
             graph_path=state.get("graph_path", []),
+            prerequisites=prerequisites,
             debug=_build_debug_trace(state),
         )
     except Exception as exc:
@@ -238,5 +258,6 @@ async def query_endpoint(request: QueryRequest):
         return QueryResponse(
             answer=f"Query execution incomplete due to missing dependencies or models: {str(exc)}",
             sources=[],
-            graph_path=[]
+            graph_path=[],
+            prerequisites=[],
         )

@@ -30,10 +30,34 @@ export interface QueryRequest {
   query: string;
 }
 
+export interface EdgeProvenanceItem {
+  source: string;
+  target: string;
+  confidence?: number;
+  chunk_id?: string;
+  timestamp?: number;
+}
+
+export interface PrerequisiteItem {
+  concept: string;
+  entity_id?: string;
+  type?: string;
+  depth: number;
+  timestamp: number;
+  chunk_id?: string;
+  confidence: number;
+  parent_concept?: string;
+  target_concept?: string;
+  path?: string[];
+  edge_provenance?: EdgeProvenanceItem[];
+  slide_text?: string;
+}
+
 export interface QueryResponse {
   answer: string;
   sources: Source[];
   graph_path: string[];
+  prerequisites?: PrerequisiteItem[];
   debug?: QueryDebug;
 }
 
@@ -55,6 +79,7 @@ export interface QueryDebug {
   reranked_results?: { chunk_id: string; rerank_score: number }[];
   final_context_chars?: number;
   graph_path?: string[];
+  prerequisites?: PrerequisiteItem[];
 }
 
 export interface Source {

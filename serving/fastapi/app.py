@@ -282,6 +282,8 @@ from serving.fastapi.routes import courses as course_routes
 app.include_router(debug_routes.router, tags=["Debug"])
 app.include_router(reranker_routes.router)
 app.include_router(course_routes.router, tags=["Courses"])
+from serving.fastapi.routes import prerequisites as prerequisite_routes
+app.include_router(prerequisite_routes.router, tags=["Prerequisites"])
 
 
 @app.get("/health")
