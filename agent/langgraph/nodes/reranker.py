@@ -41,14 +41,19 @@ def reranker_node(
     vector_results = state.get("vector_results", [])
 
     # Derive is_lecture_wide / need_visual from the query plan.
-    # Pure heuristic — no I/O, negligible cost.
-    try:
-        plan = _get_planner().plan_full(query)
-        is_lecture_wide = plan.is_lecture_wide
-        need_visual = plan.need_visual
-        context_budget = plan.context_budget
-    except Exception as exc:
-        logger.warning("Reranker node: plan_full failed, using defaults: %s", exc)
+    plan = state.get("query_plan")
+    if plan is None:
+        try:
+            plan = _get_planner().plan_full(query)
+        except Exception as exc:
+            logger.warning("Reranker node: plan_full failed, using defaults: %s", exc)
+            plan = None
+
+    if plan is not None:
+        is_lecture_wide = getattr(plan, "is_lecture_wide", False)
+        need_visual = getattr(plan, "need_visual", False)
+        context_budget = getattr(plan, "context_budget", None)
+    else:
         is_lecture_wide = False
         need_visual = False
         context_budget = None  # rerank() will fall back to MAX_CONTEXT_CHARS.

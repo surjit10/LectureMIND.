@@ -52,19 +52,24 @@ def setup_a9_inputs(cloud_settings):
 
 
 def _make_mock_llm():
-    """Mock LLM backend that returns structured relation JSON."""
+    """Mock LLM backend that returns structured relation JSON.
+
+    The prompt now uses compact aliases (E1, E2, E3, ...) so the mock
+    must respond with the same alias style.  The relation extractor
+    remaps these back to real entity_ids via _remap_relations().
+    """
     mock = MagicMock()
 
     relation_json = json.dumps([
         {
-            "source_entity_id": "lec_001_entity_000001",
+            "source_entity_id": "E1",
             "relation": "PREREQUISITE_OF",
-            "target_entity_id": "lec_001_entity_000002",
+            "target_entity_id": "E2",
         },
         {
-            "source_entity_id": "lec_001_entity_000003",
+            "source_entity_id": "E3",
             "relation": "DERIVED_FROM",
-            "target_entity_id": "lec_001_entity_000001",
+            "target_entity_id": "E1",
         },
     ])
 
@@ -356,3 +361,83 @@ class TestRelationExtractor:
 
         with pytest.raises(FileNotFoundError, match="multimodal_chunks.json"):
             extract_relations("lec_001", cloud_settings=cloud_settings)
+
+
+class TestCompactEntityAliases:
+    """Tests for the compact entity alias system that fixes the star graph."""
+
+    def test_build_compact_entity_list_format(self):
+        """Compact list uses E1, E2, ... aliases and returns a valid mapping."""
+        from cloud.extraction.relation_extractor import _build_compact_entity_list
+
+        entities = [
+            {"entity_id": "long_lecture_id_entity_000001", "name": "BFS", "type": "Algorithm"},
+            {"entity_id": "long_lecture_id_entity_000002", "name": "DFS", "type": "Algorithm"},
+        ]
+        text, alias_map = _build_compact_entity_list(entities)
+
+        assert "E1: BFS (Algorithm)" in text
+        assert "E2: DFS (Algorithm)" in text
+        # Full entity_ids must NOT appear in the compact list.
+        assert "long_lecture_id_entity_000001" not in text
+        assert alias_map["E1"] == "long_lecture_id_entity_000001"
+        assert alias_map["E2"] == "long_lecture_id_entity_000002"
+
+    def test_compact_list_dramatically_shorter(self):
+        """Compact list must be much shorter than the full-ID version."""
+        from cloud.extraction.relation_extractor import (
+            _build_entity_list_str,
+            _build_compact_entity_list,
+        )
+
+        entities = [
+            {"entity_id": f"CS162_Lecture_1_What_is_an_Operating_System_720P_entity_{i:06d}",
+             "name": f"Entity {i}", "type": "Concept"}
+            for i in range(1, 101)
+        ]
+        full_str = _build_entity_list_str(entities)
+        compact_str, _ = _build_compact_entity_list(entities)
+
+        # Compact should be roughly 3-4x shorter.
+        assert len(compact_str) < len(full_str) / 2
+
+    def test_filter_entities_for_segment(self):
+        """Per-segment filtering only returns entities mentioned in the text."""
+        from cloud.extraction.relation_extractor import _filter_entities_for_segment
+
+        entities = [
+            {"entity_id": "e1", "name": "BFS", "type": "Algorithm"},
+            {"entity_id": "e2", "name": "DFS", "type": "Algorithm"},
+            {"entity_id": "e3", "name": "Dijkstra", "type": "Algorithm"},
+        ]
+        seg_text = "BFS uses a queue for traversal, unlike DFS."
+
+        filtered = _filter_entities_for_segment(entities, seg_text)
+        names = {e["name"] for e in filtered}
+        assert "BFS" in names
+        assert "DFS" in names
+        assert "Dijkstra" not in names
+
+    def test_remap_relations(self):
+        """Compact aliases are correctly remapped to real entity_ids."""
+        from cloud.extraction.relation_extractor import _remap_relations
+
+        alias_map = {"E1": "real_id_001", "E2": "real_id_002"}
+        relations = [
+            {"source_entity_id": "E1", "relation": "EXPLAINS", "target_entity_id": "E2"},
+        ]
+        remapped = _remap_relations(relations, alias_map)
+        assert len(remapped) == 1
+        assert remapped[0]["source_entity_id"] == "real_id_001"
+        assert remapped[0]["target_entity_id"] == "real_id_002"
+
+    def test_remap_drops_unmapped_aliases(self):
+        """Relations with aliases not in the map are dropped."""
+        from cloud.extraction.relation_extractor import _remap_relations
+
+        alias_map = {"E1": "real_id_001"}
+        relations = [
+            {"source_entity_id": "E1", "relation": "EXPLAINS", "target_entity_id": "E99"},
+        ]
+        remapped = _remap_relations(relations, alias_map)
+        assert len(remapped) == 0

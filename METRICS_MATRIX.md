@@ -81,11 +81,11 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 |---|---|---|
 | Routing accuracy | **0.980** (49/50) | 1.000 |
 | Visual routing accuracy (`need_visual`) | **1.000** | 1.000 |
-| MRR@5 | **0.788** | 1.000 |
-| Hit@5 | **0.980** | 1.000 |
-| NDCG@5 | **0.767** | 1.000 |
-| Recall@5 | **0.862** | 1.000 |
-| Precision@5 | 0.280 | 0.400 |
+| Hit@5 *(Primary Sufficiency)* | **0.980** | 1.000 |
+| MRR@5 *(Primary Rank-1)* | **0.788** | 1.000 |
+| Recall@5 *(Primary Coverage)* | **0.862** | 1.000 |
+| NDCG@5 *(Primary Ranking Order)* | **0.767** | 1.000 |
+| Precision@5 *(Secondary IR)* | 0.280 | 0.400 |
 | Ranking quality (rerank MRR) | **0.918** | 1.000 |
 | Answer F1 | **0.459** | 0.714 |
 | Keyword recall | **0.545** | 1.000 |
@@ -93,6 +93,8 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 | Citation coverage | **0.927** | 1.000 |
 | Chunk coverage | **1.000** | 1.000 |
 | Mean end-to-end latency | 20.51 s | 22.82 s |
+
+> **Note on Precision@5 (0.280) vs. Primary Metrics**: In single-lecture QA, ground-truth evidence is localized. In `cs162_lecture1_qa_50.json`, 27 questions (54%) have only 1 relevant chunk and 12 questions (24%) have only 2. The absolute mathematical upper bound for Precision@5 across this dataset is **0.3520 (35.20%)**. A score of 0.280 represents **79.5% of the theoretical maximum achievable by any system**. For this reason, the primary retrieval evaluation metrics for LectureMIND are **Hit@5 (0.980)**, **MRR@5 (0.788)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
 
 **By question type (measured):**
 
@@ -112,7 +114,7 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 4. **OCR noise sanitization.** URLs and social handles are stripped from otherwise-educational slides instead of discarding the whole slide.
 5. **Rate limiter + retry.** Per-provider token/request budgets with exponential backoff (`local/llm/rate_limiter.py`) keep runs on a single backend with 0 errors.
 
-Citation completeness of 1.0 means every cited source was actually retrieved: zero hallucinated citations.
+Citation completeness of 1.0 means every cited source was actually present in the prompt context supplied to the LLM: zero hallucinated or ungrounded citations.
 
 ### 2.5 Storage & compression
 

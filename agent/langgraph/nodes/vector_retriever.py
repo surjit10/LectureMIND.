@@ -39,12 +39,18 @@ def vector_retriever_node(
     lecture_id = state.get("lecture_id", "")
 
     # Determine top_k from the query plan (lecture-wide = more chunks).
-    try:
-        plan = _get_planner().plan_full(query)
-        top_k = plan.top_k
-        is_lecture_wide = plan.is_lecture_wide
-    except Exception as exc:
-        logger.warning("Vector retriever: plan_full failed, using default top_k: %s", exc)
+    plan = state.get("query_plan")
+    if plan is None:
+        try:
+            plan = _get_planner().plan_full(query)
+        except Exception as exc:
+            logger.warning("Vector retriever: plan_full failed, using default top_k: %s", exc)
+            plan = None
+
+    if plan is not None:
+        top_k = getattr(plan, "top_k", 15)
+        is_lecture_wide = getattr(plan, "is_lecture_wide", False)
+    else:
         from agent.dspy.planner import NORMAL_TOP_K
         top_k = NORMAL_TOP_K
         is_lecture_wide = False
