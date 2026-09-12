@@ -115,9 +115,65 @@ class TestCitationMetrics:
         reranked = [{"payload": {"chunk_id": "c1"}}]
         assert calculate_citation_completeness("ctx", sources, reranked) == 0.5
 
+    def test_completeness_candidate_not_in_context_is_invalid(self):
+        """A citation to a candidate dropped from prompt context (in_context=False) is invalid."""
+        from evaluation.metrics.citation_metrics import calculate_citation_completeness
+        sources = [{"chunk_id": "c1"}, {"chunk_id": "c2"}]
+        reranked = [
+            {"payload": {"chunk_id": "c1"}, "in_context": True},
+            {"payload": {"chunk_id": "c2"}, "in_context": False},
+        ]
+        assert calculate_citation_completeness("ctx", sources, reranked) == 0.5
+
+    def test_completeness_all_in_context_valid(self):
+        from evaluation.metrics.citation_metrics import calculate_citation_completeness
+        sources = [{"chunk_id": "c1"}]
+        reranked = [
+            {"payload": {"chunk_id": "c1"}, "in_context": True},
+            {"payload": {"chunk_id": "c2"}, "in_context": False},
+        ]
+        assert calculate_citation_completeness("ctx", sources, reranked) == 1.0
+
+    def test_completeness_explicit_context_ids(self):
+        from evaluation.metrics.citation_metrics import calculate_citation_completeness
+        sources = [{"chunk_id": "c1"}, {"chunk_id": "c2"}]
+        reranked = [{"chunk_id": "c1"}, {"chunk_id": "c2"}]
+        assert calculate_citation_completeness("ctx", sources, reranked, context_chunk_ids=["c1"]) == 0.5
+
     def test_completeness_no_sources_no_context_ok(self):
         from evaluation.metrics.citation_metrics import calculate_citation_completeness
         assert calculate_citation_completeness("", [], []) == 1.0
+
+
+class TestRPrecision:
+
+    def test_r_precision_single_chunk_hit(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert calculate_r_precision(["c1"], ["c1", "c2", "c3"]) == 1.0
+
+    def test_r_precision_single_chunk_miss(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert calculate_r_precision(["c1"], ["c2", "c1", "c3"]) == 0.0
+
+    def test_r_precision_two_chunks_partial(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert calculate_r_precision(["c1", "c2"], ["c1", "x", "c2"]) == 0.5
+
+    def test_r_precision_two_chunks_full(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert calculate_r_precision(["c1", "c2"], ["c2", "c1", "x"]) == 1.0
+
+    def test_r_precision_multiple_chunks(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert pytest.approx(calculate_r_precision(["A", "B", "C"], ["A", "X", "B", "Y", "C"])) == 2 / 3
+
+    def test_r_precision_zero_expected(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert calculate_r_precision([], ["c1", "c2"]) == 0.0
+
+    def test_r_precision_fewer_retrieved_than_r(self):
+        from evaluation.metrics.retrieval_metrics import calculate_r_precision
+        assert pytest.approx(calculate_r_precision(["A", "B", "C"], ["A"])) == 1 / 3
 
 
 class TestDatasetLoaderVisualFlag:

@@ -64,6 +64,12 @@ class CloudSettings(BaseSettings):
     # benchmark ground truth must be rebuilt for the new chunk IDs).
     SEMANTIC_CHUNK_MERGE: bool = False
 
+    # Visual context carry-forward (Stage A6) — OFF by default.
+    # When enabled, chunks that have no aligned keyframe inherit the most
+    # recent preceding visual and OCR context (since slides typically stay
+    # visible across multiple spoken transcript segments).
+    PROPAGATE_VISUAL_CONTEXT: bool = False
+
     # Reranker fine-tuning (Stage B2) — OFF by default. When enabled and
     # triplets exist, the pipeline fine-tunes the cross-encoder after B1.
     # Training itself remains an offline process; this flag only opts an

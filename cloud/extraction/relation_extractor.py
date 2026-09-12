@@ -57,7 +57,7 @@ RELATION_EXTRACTION_PROMPT = (
     "Available entities:\n{entity_list}\n\n"
     "Lecture context:\n{context}\n\n"
     "Output format:\n"
-    '[{{"source_entity_id":"...","relation":"RELATION_TYPE","target_entity_id":"..."}}]\n\n'
+    '[{{"source_entity_id":"E1","relation":"RELATION_TYPE","target_entity_id":"E2"}}]\n\n'
     "IMPORTANT:\n"
     "* Return ONLY a JSON array.\n"
     "* Do NOT include explanations.\n"
@@ -93,6 +93,78 @@ def _build_entity_list_str(entities: List[Dict[str, Any]]) -> str:
     for e in entities:
         lines.append(f'- {e["entity_id"]}: {e["name"]} ({e["type"]})')
     return "\n".join(lines)
+
+
+def _filter_entities_for_segment(
+    entities: List[Dict[str, Any]],
+    seg_text: str,
+) -> List[Dict[str, Any]]:
+    """Return entities whose name appears in the segment text.
+
+    Ensures the LLM only sees entities relevant to the current segment,
+    which keeps the prompt compact and focused.
+    """
+    seg_lower = seg_text.lower()
+    return [e for e in entities if e["name"].lower() in seg_lower]
+
+
+def _build_compact_entity_list(
+    entities: List[Dict[str, Any]],
+) -> Tuple[str, Dict[str, str]]:
+    """Build a compact entity list using short index-based IDs (E1, E2, ...).
+
+    Full entity_ids like ``lecture_cs162_v17_entity_000042`` are 60+ chars
+    each.  With 128 entities the formatted list exceeds 12 000 chars — far
+    beyond any practical prompt budget.  Short aliases (``E1``, ``E2``, …)
+    reduce each line from ~98 chars to ~25 chars, fitting 100+ entities in
+    under 3 000 chars.
+
+    Returns:
+        (entity_list_str, alias_to_real_id) — the formatted list and a
+        mapping from the compact alias back to the real entity_id so
+        parsed relations can be remapped.
+    """
+    lines: List[str] = []
+    alias_to_real: Dict[str, str] = {}
+    for idx, e in enumerate(entities, start=1):
+        alias = f"E{idx}"
+        alias_to_real[alias] = e["entity_id"]
+        lines.append(f"- {alias}: {e['name']} ({e['type']})")
+    return "\n".join(lines), alias_to_real
+
+
+def _remap_relations(
+    relations: List[Dict[str, str]],
+    alias_to_real: Dict[str, str],
+    valid_entity_ids: Optional[set] = None,
+) -> List[Dict[str, str]]:
+    """Remap compact aliases (E1, E2, …) back to real entity_ids.
+
+    Handles:
+      1. Compact aliases: 'E1' -> 'lec_001_entity_000001'
+      2. Already-valid entity_ids (from mocks, tests, or models that output real IDs directly)
+
+    Relations whose source or target cannot be remapped or resolved to valid
+    entity_ids are dropped (the downstream _validate_entity_references pass
+    would catch them anyway, but dropping early keeps diagnostics cleaner).
+    """
+    known_ids = set(alias_to_real.values())
+    if valid_entity_ids:
+        known_ids |= valid_entity_ids
+
+    remapped: List[Dict[str, str]] = []
+    for rel in relations:
+        src_raw = rel.get("source_entity_id", "")
+        tgt_raw = rel.get("target_entity_id", "")
+        src = alias_to_real.get(src_raw) or (src_raw if src_raw in known_ids else None)
+        tgt = alias_to_real.get(tgt_raw) or (tgt_raw if tgt_raw in known_ids else None)
+        if src and tgt:
+            remapped.append({
+                "source_entity_id": src,
+                "relation": rel["relation"],
+                "target_entity_id": tgt,
+            })
+    return remapped
 
 
 def _build_segment_context(
@@ -409,37 +481,62 @@ def extract_relations(
                 logger.error("A9: Failed to load LLM backend: %s", exc)
                 raise
 
-        # Build entity list and context.
-        entity_list_str = _build_entity_list_str(entities_data)
+        # Build context (used only for the no-segments fallback path).
         context_str = _build_segment_context(segments_data, chunks_data)
 
-        # For large entity sets, split into batches per segment.
+        # Per-segment entity filtering + compact aliases.
+        # Each segment prompt contains ONLY the entities whose names
+        # appear in that segment's text, using short aliases (E1, E2, …)
+        # instead of the full 67-char entity_ids.  This eliminates the
+        # [:2000] truncation that previously made 84% of entities
+        # invisible (the root cause of the star-graph problem).
+        segment_alias_maps: List[Dict[str, str]] = []
+
         if segments_data:
             chunk_lookup = {c["chunk_id"]: c for c in chunks_data}
             prompts: List[str] = []
             for seg in segments_data:
+                # Build segment context text.
                 seg_context = f"[{seg['title']}]: "
                 for cid in seg["chunks"]:
                     if cid in chunk_lookup:
                         c = chunk_lookup[cid]
                         seg_context += c["transcript"] + " " + c["visual_context"] + " "
+
+                # Filter entities to those mentioned in this segment.
+                seg_entities = _filter_entities_for_segment(
+                    entities_data, seg_context,
+                )
+                # Fallback: if filtering is too aggressive (< 2 entities),
+                # use all entities to avoid empty prompts.
+                if len(seg_entities) < 2:
+                    seg_entities = entities_data
+
+                # Build compact entity list with short aliases.
+                entity_list_str, alias_map = _build_compact_entity_list(seg_entities)
+                segment_alias_maps.append(alias_map)
+
                 prompt = RELATION_EXTRACTION_PROMPT.format(
-                    entity_list=entity_list_str[:2000],
-                    context=seg_context[:2000],
+                    entity_list=entity_list_str,
+                    context=seg_context[:3000],
                 )
                 prompts.append(prompt)
         else:
-            # Single prompt with all context.
+            # Single prompt with all context (no segments available).
+            entity_list_str, alias_map = _build_compact_entity_list(entities_data)
+            segment_alias_maps.append(alias_map)
             prompt = RELATION_EXTRACTION_PROMPT.format(
-                entity_list=entity_list_str[:2000],
+                entity_list=entity_list_str,
                 context=context_str,
             )
             prompts = [prompt]
 
-        # Batch extract.
+        # Batch extract and remap compact aliases → real entity_ids.
         batch_results = _extract_relations_batch(prompts, llm, stats=stats)
-        for rel_list in batch_results:
-            raw_relations.extend(rel_list)
+        for seg_idx, rel_list in enumerate(batch_results):
+            alias_map = segment_alias_maps[seg_idx]
+            remapped = _remap_relations(rel_list, alias_map, valid_entity_ids=entity_ids)
+            raw_relations.extend(remapped)
 
     # Validate entity references.
     raw_relations = _validate_entity_references(raw_relations, entity_ids, stats=stats)

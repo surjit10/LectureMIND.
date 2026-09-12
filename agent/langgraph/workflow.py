@@ -63,6 +63,7 @@ class QueryWorkflow:
             "query": query,
             "lecture_id": lecture_id,
             "retrieval_route": None,
+            "query_plan": None,
             "graph_results": [],
             "vector_results": [],
             "reranked_results": [],
@@ -78,7 +79,9 @@ class QueryWorkflow:
 
         # Step 1: Plan route.
         t_plan_start = time.perf_counter()
-        route = self._planner.plan(query)
+        plan = self._planner.plan_full(query)
+        route = plan.retrieval_route
+        state["query_plan"] = plan
         state["retrieval_route"] = route
         state["telemetry"]["planner_latency"] = time.perf_counter() - t_plan_start
         logger.info("Workflow: Route = %s", route.value)

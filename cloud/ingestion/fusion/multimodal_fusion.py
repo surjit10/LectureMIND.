@@ -16,6 +16,7 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -34,6 +35,63 @@ MIN_CHUNK_CHARS = 300          # Minimum merged-chunk length in characters.
 TARGET_CHUNK_CHARS = 700       # Target — break at sentence boundaries near this.
 MAX_CHUNK_CHARS = 1200         # Hard cap — always break here.
 SILENCE_GAP_THRESHOLD = 1.5    # Seconds — gap larger than this is a topic break.
+
+
+# ── Transcript cleaning ─────────────────────────────────────────────────
+# Deterministic filler removal for raw Whisper transcripts.
+# Removes verbal tics ("um", "uh"), hedge phrases ("you know"), and
+# sentence-initial fillers ("So, ", "Okay, ") without touching
+# educational content.  No LLM dependency — pure regex.
+
+# Standalone filler tokens removed wherever they appear (word-boundary).
+_FILLER_TOKENS = re.compile(
+    r'\b(?:um|uh|uhm|hmm|hm|mhm|erm)\b[,;]?\s*',
+    re.IGNORECASE,
+)
+
+# Hedge phrases removed wherever they appear.
+_FILLER_PHRASES = re.compile(
+    r'\b(?:you know|I mean|kind of|sort of|like,)\s*',
+    re.IGNORECASE,
+)
+
+# Sentence-initial conversational fillers — removed at the start of
+# the string or after sentence-ending punctuation (. ! ?).
+_SENTENCE_INITIAL = re.compile(
+    r'(?:^|(?<=[.!?])\s*)(?:So,?\s+|Okay,?\s+|OK,?\s+|All right\.?\s*|'
+    r'Right,?\s+|And so,?\s+|Well,?\s+)',
+    re.IGNORECASE,
+)
+
+# Dangling comma patterns left behind after filler removal.
+_DANGLING_COMMA = re.compile(r',(\s*,)+')
+_LEADING_COMMA = re.compile(r'^\s*,\s*')
+
+
+def _clean_transcript(text: str) -> str:
+    """Remove verbal filler from a raw Whisper transcript.
+
+    Deterministic, lightweight, regex-based.  Preserves all educational
+    content and sentence structure.  Only strips:
+      - Filler tokens: um, uh, uhm, hmm, erm
+      - Hedge phrases: you know, I mean, kind of, sort of
+      - Sentence-initial fillers: So, / Okay, / All right, / Well,
+      - Dangling commas left after removal
+
+    Designed to be safe for any language content — the patterns are
+    English-only and will simply not match non-English text.
+    """
+    if not text:
+        return text
+    text = _FILLER_TOKENS.sub('', text)
+    text = _FILLER_PHRASES.sub('', text)
+    text = _SENTENCE_INITIAL.sub('', text)
+    # Clean dangling commas: ", , ," → "," and leading ", " → "".
+    text = _DANGLING_COMMA.sub(',', text)
+    text = _LEADING_COMMA.sub('', text)
+    # Collapse multi-spaces / leading/trailing whitespace.
+    text = re.sub(r'\s{2,}', ' ', text).strip()
+    return text
 
 
 def _stream_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -137,6 +195,7 @@ def fuse(
     lecture_id: str,
     cloud_settings: CloudSettings | None = None,
     merge_segments: bool | None = None,
+    propagate_visual: bool | None = None,
 ) -> List[MultimodalChunk]:
     """
     Execute multimodal fusion: align transcript, VLM, and OCR by timestamp.
@@ -146,15 +205,21 @@ def fuse(
     segments are merged into larger semantic chunks using a deterministic
     rolling-window algorithm with sentence-boundary and silence-gap awareness.
 
+    Visual context carry-forward: when propagate_visual=True (or the
+    PROPAGATE_VISUAL_CONTEXT CloudSettings flag is set), atoms that have no
+    aligned frame within the tolerance window carry forward the visual
+    caption and OCR text from the most recent preceding atom.
+
     Reads transcript.json, vlm_output.jsonl, and ocr_output.jsonl from
     the lecture's cloud_runtime directory.
 
     Args:
         lecture_id: Unique lecture identifier.
-        cloud_settings: Injected CloudSettings. The SEMANTIC_CHUNK_MERGE
-            field controls merging unless overridden by merge_segments.
+        cloud_settings: Injected CloudSettings.
         merge_segments: Explicit override for merge behavior. If None,
             falls back to cloud_settings.SEMANTIC_CHUNK_MERGE (default False).
+        propagate_visual: Explicit override for visual carry-forward. If None,
+            falls back to cloud_settings.PROPAGATE_VISUAL_CONTEXT (default False).
 
     Returns:
         List of validated MultimodalChunk instances.
@@ -232,6 +297,36 @@ def fuse(
     if not atoms:
         raise ValueError("A6: Fusion produced zero atoms.")
 
+    # --- Phase 1.5: Propagate visual/OCR context to empty atoms (opt-in) ---
+    # Slides typically stay visible for multiple transcript segments.
+    # When enabled, atoms whose timestamp window missed a keyframe still
+    # inherit the last-seen visual/OCR context.
+    if propagate_visual is None:
+        propagate_visual = getattr(settings, "PROPAGATE_VISUAL_CONTEXT", False)
+
+    if propagate_visual:
+        last_visual = ""
+        last_ocr = ""
+        propagated = 0
+        for atom in atoms:
+            if atom["visual_context"]:
+                last_visual = atom["visual_context"]
+            elif last_visual:
+                atom["visual_context"] = last_visual
+                propagated += 1
+
+            if atom["ocr_text"]:
+                last_ocr = atom["ocr_text"]
+            elif last_ocr:
+                atom["ocr_text"] = last_ocr
+                propagated += 1
+
+        if propagated > 0:
+            logger.info(
+                "A6: Propagated visual/OCR context to %d empty atom fields.",
+                propagated,
+            )
+
     # --- Phase 2: Merge atoms into semantic chunk groups (opt-in) ---
     if merge_segments is None:
         merge_segments = getattr(cloud_settings, "SEMANTIC_CHUNK_MERGE", False) \
@@ -253,8 +348,9 @@ def fuse(
         first = group[0]
         last = group[-1]
 
-        # Merge transcript text — join with space, preserving natural flow.
+        # Merge transcript text — join with space, then clean filler.
         transcript = " ".join(a["text"] for a in group).strip()
+        transcript = _clean_transcript(transcript)
 
         # Visual/OCR from the FIRST atom's aligned frame (the slide active
         # when the chunk begins). Later atoms with a new slide frame are

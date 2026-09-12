@@ -315,3 +315,27 @@ class TestSegmenter:
         sims = [0.9, 0.85, 0.3, 0.8, 0.82]
         threshold = _compute_adaptive_threshold(sims)
         assert 0.3 <= threshold <= 0.85
+
+    def test_fallback_title_rejects_repetitive_babble(self):
+        """Repetitive babble/hallucinations like 'ea ea ea' must never become titles."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "ea ea ea ea ea ea ea ea", "visual_context": "", "ocr_text": ""},
+        ]
+        title = _generate_title_fallback(chunks)
+        assert "ea" not in title.lower()
+        assert title == "Untitled Segment"
+
+    def test_fallback_title_cleans_conversational_fillers(self):
+        """Conversational filler at the start of a transcript is stripped from title."""
+        from cloud.segmentation.segmenter import _generate_title_fallback
+
+        chunks = [
+            {"transcript": "So, you know, CPU virtualization abstracts hardware",
+             "visual_context": "", "ocr_text": ""},
+        ]
+        title = _generate_title_fallback(chunks)
+        assert "you know" not in title.lower()
+        assert "virtualization" in title.lower()
+

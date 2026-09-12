@@ -124,29 +124,30 @@ def rerank(
     """
     effective_budget = char_budget if char_budget is not None else MAX_CONTEXT_CHARS
 
-    # Combine and deduplicate.
-    combined = _extract_passages(graph_results, vector_results)
-
-    # ── Hybrid retrieval: BM25 + RRF fusion ──
+    # ── Hybrid retrieval: BM25 + RRF fusion on vector candidates ──
     # When enabled, augment the dense vector candidates with lexical BM25
     # results fused via Reciprocal Rank Fusion. This catches entity names,
     # numeric facts, and exact-phrase matches that dense embeddings may miss.
+    fused_vectors = vector_results
     if enable_hybrid is None:
         enable_hybrid = LocalSettings().ENABLE_HYBRID_RETRIEVAL
     if enable_hybrid and lecture_id:
         try:
             bm25_retrieved = bm25_search(query, lecture_id, top_k=15)
             if bm25_retrieved:
-                combined = rrf_fuse(vector_results, bm25_retrieved, top_k=15)
+                fused_vectors = rrf_fuse(vector_results, bm25_retrieved, top_k=15)
                 logger.info(
                     "E3: Hybrid retrieval — BM25 contributed %d candidates, "
                     "RRF fused to %d total.",
-                    len(bm25_retrieved), len(combined),
+                    len(bm25_retrieved), len(fused_vectors),
                 )
         except Exception as exc:
             logger.warning(
                 "E3: Hybrid retrieval failed (fallback to dense only): %s", exc,
             )
+
+    # Combine graph and vector results, deduplicate by chunk_id.
+    combined = _extract_passages(graph_results, fused_vectors)
 
     # Render graph paths as labelled context. Graph results carry entity
     # names + relation types (not chunk payloads), so they never enter the
@@ -188,11 +189,15 @@ def rerank(
                 active_service = reranker_service
             elif reranker_model is not None:
                 active_service = RerankerService(reranker_model)
-            else:
+            elif LocalSettings().ENABLE_AUTO_MODEL_RECOVERY:
                 raise RuntimeError(
                     "E3: Global reranker singleton is not initialized. "
                     "serving/fastapi/app.py must call _run_model_recovery() before "
                     "any query is processed. Do not load the reranker from disk here."
+                )
+            else:
+                logger.warning(
+                    "E3: Global reranker singleton is not initialized and auto-recovery is disabled; using original order."
                 )
 
     # Rerank.
@@ -224,12 +229,19 @@ def rerank(
             0, effective_budget - len(graph_context) - len(_CHUNK_SEPARATOR)
         )
 
-    final_context = _CONTEXT_BUILDER.build(
+    final_context, used_ids = _CONTEXT_BUILDER.build_with_metadata(
         reranked,
         is_lecture_wide=is_lecture_wide,
         need_visual=need_visual,
         char_budget=vector_budget,
     )
+
+    # Tag entries that actually made it into the LLM context prompt
+    used_id_set = set(used_ids)
+    for entry in reranked:
+        payload = entry.get("payload", entry)
+        cid = payload.get("chunk_id", entry.get("chunk_id", ""))
+        entry["in_context"] = bool(cid in used_id_set)
 
     # Prepend the graph section: relationship paths are the primary
     # evidence for relationship questions, so they lead the context.

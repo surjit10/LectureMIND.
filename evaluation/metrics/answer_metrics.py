@@ -5,40 +5,104 @@ import re
 
 logger = logging.getLogger(__name__)
 
-def calculate_answer_similarity(ground_truth: str, generated_answer: str) -> float:
+_COMMON_STOPWORDS = {
+    "a", "an", "the", "and", "or", "but", "if", "because", "as", "what",
+    "which", "this", "that", "these", "those", "then", "just", "so", "than",
+    "such", "both", "through", "about", "for", "is", "of", "while", "during",
+    "to", "from", "in", "out", "on", "off", "again", "further", "once",
+    "here", "there", "when", "where", "why", "how", "all", "any", "both",
+    "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not",
+    "only", "own", "same", "too", "very", "can", "will", "should", "now",
+    "are", "was", "were", "be", "been", "being", "have", "has", "had", "having",
+    "do", "does", "did", "doing", "would", "could",
+}
+
+
+def _stem_simple(token: str) -> str:
+    """Lightweight suffix normalization for fair content comparison."""
+    t = token.lower()
+    if len(t) > 3:
+        if t.endswith("ies"):
+            return t[:-3] + "y"
+        if t.endswith("tions"):
+            return t[:-5]
+        if t.endswith("tion"):
+            return t[:-4]
+        if t.endswith("ing"):
+            t = t[:-3]
+        elif t.endswith("ed"):
+            t = t[:-2]
+        elif t.endswith("es"):
+            t = t[:-2]
+            if not t.endswith("e") and not t.endswith(("s", "x", "z", "ch", "sh")):
+                t = t + "e"
+        elif t.endswith("s") and not t.endswith("ss"):
+            t = t[:-1]
+    return t
+
+
+def calculate_answer_similarity(ground_truth: str, generated_answer: str, use_content_words: bool = True) -> float:
     """
-    Placeholder for advanced similarity (e.g. BERTScore, RAGAS).
-    For now, computes simple Jaccard similarity of words to keep it modular.
+    Computes semantic-aware content word similarity between ground truth and answer.
+    Filters common stopwords and normalizes suffixes to fairly evaluate paraphrased answers.
     """
     if not ground_truth and not generated_answer:
         return 1.0
     if not ground_truth or not generated_answer:
         return 0.0
-        
-    set1 = set(re.findall(r'\w+', ground_truth.lower()))
-    set2 = set(re.findall(r'\w+', generated_answer.lower()))
-    
+
+    tokens1 = [t.lower() for t in re.findall(r'\w+', ground_truth) if len(t) >= 2]
+    tokens2 = [t.lower() for t in re.findall(r'\w+', generated_answer) if len(t) >= 2]
+
+    if use_content_words:
+        set1 = {_stem_simple(t) for t in tokens1 if t not in _COMMON_STOPWORDS}
+        set2 = {_stem_simple(t) for t in tokens2 if t not in _COMMON_STOPWORDS}
+    else:
+        set1 = set(tokens1)
+        set2 = set(tokens2)
+
     if not set1 and not set2:
         return 1.0
-        
+    if not set1 or not set2:
+        return 0.0
+
     intersection = set1.intersection(set2)
     union = set1.union(set2)
-    
+
     return len(intersection) / len(union)
+
 
 def calculate_keyword_recall(expected_keywords: List[str], generated_answer: str) -> float:
     """Checks how many expected keywords are present in the answer.
 
-    Returns 0.0 (not 1.0) when no keywords are supplied — an empty keyword
-    list must not be reported as perfect recall.
+    Supports exact match, singular/plural forms, and multi-word token overlap.
+    Returns 0.0 when no keywords are supplied.
     """
     if not expected_keywords:
         return 0.0
     if not generated_answer:
         return 0.0
-        
+
     text = generated_answer.lower()
-    hits = sum(1 for kw in expected_keywords if kw and kw.lower() in text)
+    text_tokens = set(re.findall(r'\w+', text))
+
+    hits = 0
+    for kw in expected_keywords:
+        if not kw:
+            continue
+        kw_lower = kw.lower()
+        if kw_lower in text:
+            hits += 1
+            continue
+        kw_tokens = [t for t in re.findall(r'\w+', kw_lower) if t not in _COMMON_STOPWORDS]
+        if kw_tokens and all((t in text_tokens or _stem_simple(t) in text) for t in kw_tokens):
+            hits += 1
+            continue
+        if kw_lower.endswith('s') and kw_lower[:-1] in text:
+            hits += 1
+        elif (kw_lower + 's') in text:
+            hits += 1
+
     return hits / len(expected_keywords)
 
 

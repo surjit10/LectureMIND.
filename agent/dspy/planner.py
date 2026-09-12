@@ -104,6 +104,13 @@ SUMMARY_PATTERNS = [
     r"\bwhat\s+(topics|concepts|ideas)\s+(are\s+)?(covered|discussed|taught|explained)\b",
     r"\bwhat\s+did\s+we\s+learn\b",
     r"\boverview\s+of\s+(the|this|today'?s?)\s+lecture\b",
+    r"\bsyllabus\b",
+    r"\bgrading\b",
+    r"\bgrading\s+breakdown\b",
+    r"\bgrading\s+policy\b",
+    r"\bcourse\s+outline\b",
+    r"\bcurriculum\b",
+    r"\bclass\s+schedule\b",
 ]
 
 # Learning content patterns — also lecture-wide.

@@ -306,3 +306,79 @@ class TestMergeAtoms:
         r1 = _merge_atoms(base)
         r2 = _merge_atoms(base)
         assert r1 == r2
+
+
+class TestTranscriptCleaning:
+    """Tests for deterministic transcript cleaning (filler word removal)."""
+
+    def test_removes_verbal_fillers(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        raw = "Um, uh, the operating system manages memory."
+        cleaned = _clean_transcript(raw)
+        assert "um" not in cleaned.lower()
+        assert "uh" not in cleaned.lower()
+        assert "operating system manages memory" in cleaned
+
+    def test_removes_hedge_phrases(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        raw = "This is, you know, sort of a graph traversal algorithm."
+        cleaned = _clean_transcript(raw)
+        assert "you know" not in cleaned
+        assert "sort of" not in cleaned
+        assert "graph traversal algorithm" in cleaned
+
+    def test_removes_sentence_initial_fillers(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        raw = "So, the kernel handles interrupts. Okay, next topic."
+        cleaned = _clean_transcript(raw)
+        assert cleaned.startswith("the kernel handles")
+        assert "Okay" not in cleaned
+
+    def test_preserves_technical_content(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        text = "Virtual memory uses page tables and TLB caches for address translation."
+        assert _clean_transcript(text) == text
+
+    def test_cleans_dangling_commas(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        raw = "Well, um, so, you know, CPU scheduling occurs here."
+        cleaned = _clean_transcript(raw)
+        assert not cleaned.startswith(",")
+        assert ", ," not in cleaned
+        assert "CPU scheduling occurs here" in cleaned
+
+    def test_empty_string(self):
+        from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+        assert _clean_transcript("") == ""
+        assert _clean_transcript(None) is None
+
+
+class TestVisualPropagation:
+    """Tests for visual context carry-forward."""
+
+    def test_visual_propagation_carries_forward(self, cloud_settings, setup_fusion_inputs):
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings, propagate_visual=True)
+        assert len(chunks) == 3
+        # Chunk 1 and 2 have their own frames
+        assert chunks[0].visual_context == "BFS traversal diagram"
+        assert chunks[1].visual_context == "DFS tree structure"
+        # Chunk 3 (timestamp 50.0s, no frame within ±2s) inherits from chunk 2
+        assert chunks[2].visual_context == "DFS tree structure"
+        assert "Depth First Search" in chunks[2].ocr_text
+
+    def test_visual_propagation_disabled_by_default(self, cloud_settings, setup_fusion_inputs):
+        from cloud.ingestion.fusion.multimodal_fusion import fuse
+
+        chunks = fuse("lec_001", cloud_settings=cloud_settings)
+        assert len(chunks) == 3
+        assert chunks[2].visual_context == ""
+        assert chunks[2].ocr_text == ""
+

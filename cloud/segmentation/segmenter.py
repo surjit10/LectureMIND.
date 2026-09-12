@@ -407,6 +407,9 @@ def _keyword_title_from_chunks(
     return " ".join(casing[lower] for lower, _ in ranked[:max_words])
 
 
+from cloud.ingestion.fusion.multimodal_fusion import _clean_transcript
+
+
 def _clean_fallback_title(title: str) -> str:
     """Normalize a fallback title to match LLM title conventions.
 
@@ -423,6 +426,45 @@ def _clean_fallback_title(title: str) -> str:
     return title or "Untitled Segment"
 
 
+def _is_repetitive_noise(text: str) -> bool:
+    """Detect Whisper hallucinations / repetitive babble like 'ea ea ea ea'."""
+    words = [w.lower() for w in re.findall(r"\b[A-Za-z]+\b", text)]
+    if not words:
+        return True
+    if len(words) >= 4 and (len(set(words)) / len(words)) < 0.4:
+        return True
+    if len(set(words)) == 1 and len(words[0]) <= 3:
+        return True
+    return False
+
+
+def _clean_transcript_phrase(chunks: List[Dict[str, Any]]) -> str:
+    """Extract a clean, non-repetitive phrase from chunks as last resort."""
+    for chunk in chunks:
+        raw = (chunk.get("transcript") or "").strip()
+        if not raw or _is_repetitive_noise(raw):
+            continue
+        cleaned = _clean_transcript(raw)
+        if not cleaned or _is_repetitive_noise(cleaned):
+            continue
+        words = cleaned.split()
+        # Drop leading fragmented word if cut off at chunk boundary (e.g. 't be', 'g, but')
+        if words and (len(words[0]) <= 2 or not words[0][0].isupper()):
+            cap_idx = next(
+                (i for i, w in enumerate(words) if w and w[0].isupper() and len(w) > 2),
+                -1,
+            )
+            if cap_idx > 0:
+                cleaned = " ".join(words[cap_idx:])
+        if cleaned:
+            phrase = cleaned[:60].strip()
+            if len(cleaned) > 60:
+                phrase = phrase.rsplit(" ", 1)[0]
+            if phrase and not _is_repetitive_noise(phrase):
+                return phrase
+    return ""
+
+
 def _generate_title_fallback(chunks: List[Dict[str, Any]]) -> str:
     """
     Fallback title generation when no title_generator is available.
@@ -431,7 +473,7 @@ def _generate_title_fallback(chunks: List[Dict[str, Any]]) -> str:
       1. slide headings from OCR text,
       2. the visual caption (when it is not generic filler),
       3. repeated technical keywords across transcript/OCR/captions,
-      4. the first transcript phrase as a last resort.
+      4. the clean, filtered transcript phrase as a last resort.
 
     Every result passes through _clean_fallback_title so fallback titles
     follow the same conventions as LLM titles (no markdown, ≤8 words).
@@ -463,13 +505,10 @@ def _generate_title_fallback(chunks: List[Dict[str, Any]]) -> str:
     if keyword_title:
         return _clean_fallback_title(keyword_title)
 
-    # 4) Last resort: first transcript phrase (existing behavior).
-    first_transcript = chunks[0].get("transcript", "").strip()
-    if first_transcript:
-        title = first_transcript[:60].strip()
-        if len(first_transcript) > 60:
-            title = title.rsplit(" ", 1)[0]
-        return _clean_fallback_title(title)
+    # 4) Last resort: clean transcript phrase across chunks.
+    clean_phrase = _clean_transcript_phrase(chunks)
+    if clean_phrase:
+        return _clean_fallback_title(clean_phrase)
 
     return "Untitled Segment"
 

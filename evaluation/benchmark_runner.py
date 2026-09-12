@@ -204,12 +204,15 @@ class BenchmarkRunner:
 
             metrics["precision_at_5"] = retrieval_metrics.calculate_precision_at_k(expected_ids, retrieved_ids, 5)
             metrics["recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, retrieved_ids, 5)
+            metrics["r_precision"] = retrieval_metrics.calculate_r_precision(expected_ids, retrieved_ids)
             metrics["hit_at_5"] = retrieval_metrics.calculate_hit_at_k(expected_ids, retrieved_ids, 5)
             metrics["mrr"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids)
             metrics["ndcg_at_5"] = retrieval_metrics.calculate_ndcg(expected_ids, retrieved_ids, 5)
 
             metrics["ranking_quality"] = reranker_metrics.evaluate_ranking_quality(expected_ids, reranked_results)
             metrics["avg_cross_encoder_score"] = reranker_metrics.average_cross_encoder_score(reranked_results)
+            metrics["top1_cross_encoder_score"] = reranker_metrics.top1_cross_encoder_score(reranked_results)
+            metrics["top3_cross_encoder_score"] = reranker_metrics.top_k_cross_encoder_score(reranked_results, k=3)
 
             metrics["answer_similarity"] = answer_metrics.calculate_answer_similarity(sample.ground_truth_answer, answer)
             metrics["answer_f1"] = answer_metrics.calculate_answer_f1(sample.ground_truth_answer, answer)

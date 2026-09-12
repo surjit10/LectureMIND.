@@ -48,10 +48,19 @@ def _build_sources(reranked_results: List[Dict[str, Any]]) -> List[Dict[str, Any
 
     Sources originate ONLY from reranked_results.
     Never invents chunk_ids, timestamps, or segment_ids.
+    When in_context tags are present, includes only chunks that entered
+    the final LLM context. Falls back to all reranked results if no tag is present.
     """
+    has_in_context_tag = any("in_context" in r for r in reranked_results)
+    candidates = (
+        [r for r in reranked_results if r.get("in_context")]
+        if has_in_context_tag
+        else reranked_results
+    )
+
     sources = []
     seen = set()
-    for result in reranked_results:
+    for result in candidates:
         payload = result.get("payload", result)
         chunk_id = payload.get("chunk_id", result.get("chunk_id", ""))
         if not chunk_id or chunk_id in seen:
@@ -113,13 +122,17 @@ def answer_generator_node(
     reranked_results = state.get("reranked_results", [])
     graph_results = state.get("graph_results", [])
 
-    # Derive answer_style from the query plan.
-    try:
-        from agent.dspy.planner import QueryPlanner
-        plan = QueryPlanner().plan_full(query)
-        answer_style = plan.answer_style
-    except Exception:
-        answer_style = "concise"
+    # Derive answer_style from state query_plan if present, else fallback to planner.
+    plan = state.get("query_plan")
+    if plan is not None:
+        answer_style = getattr(plan, "answer_style", "concise")
+    else:
+        try:
+            from agent.dspy.planner import QueryPlanner
+            plan = QueryPlanner().plan_full(query)
+            answer_style = plan.answer_style
+        except Exception:
+            answer_style = "concise"
 
     # Build sources from reranked results (never invented).
     sources = _build_sources(reranked_results)
@@ -214,6 +227,10 @@ def _generate_answer(
 
     result = backend.generate_with_metadata(messages)
     if not result.answer:
+        error_msg = (result.metadata or {}).get("error")
+        if error_msg:
+            logger.error("E4: LLM backend failed with error: %s", error_msg)
+            return f"Error from LLM provider ({result.metadata.get('provider', 'API')}): {error_msg}. Please verify your provider and model configuration in Settings.", result.metadata
         logger.error("E4: LLM backend returned empty response.")
         return "Insufficient evidence found in lecture.", result.metadata
     return result.answer, result.metadata

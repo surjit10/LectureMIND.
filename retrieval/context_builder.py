@@ -15,7 +15,7 @@
 
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -222,6 +222,7 @@ def _merge_adjacent(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     Merges transcript, ocr_text, and visual_context by concatenation.
     The merged chunk uses the timestamp of the first chunk in the group.
+    Tracks constituent_chunk_ids across merged chunks.
     """
     if not chunks:
         return []
@@ -229,10 +230,16 @@ def _merge_adjacent(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     merged = []
     current = dict(chunks[0])
     current_payload = dict(current.get("payload", current))
+    init_cid = current_payload.get("chunk_id") or current.get("chunk_id", "")
+    init_snippet = (current_payload.get("transcript") or current_payload.get("ocr_text") or "")[:40].strip()
+    current["constituent_chunks"] = [(init_cid, init_snippet)] if init_cid else []
 
     for nxt in chunks[1:]:
+        nxt_payload = nxt.get("payload", nxt)
+        nxt_cid = nxt_payload.get("chunk_id") or nxt.get("chunk_id", "")
+        nxt_snippet = (nxt_payload.get("transcript") or nxt_payload.get("ocr_text") or "")[:40].strip()
+
         if _are_adjacent(current, nxt):
-            nxt_payload = nxt.get("payload", nxt)
             # Merge text fields.
             for field in ("transcript", "ocr_text", "visual_context"):
                 a_text = (current_payload.get(field) or "").strip()
@@ -250,6 +257,9 @@ def _merge_adjacent(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             # Keep the earliest timestamp.
             if _get_timestamp(nxt) < _get_timestamp(current):
                 current_payload["timestamp"] = nxt_payload.get("timestamp", 0)
+            # Record constituent chunk id and snippet.
+            if nxt_cid and not any(nxt_cid == c[0] for c in current["constituent_chunks"]):
+                current["constituent_chunks"].append((nxt_cid, nxt_snippet))
         else:
             # Flush current.
             if "payload" in current:
@@ -259,6 +269,7 @@ def _merge_adjacent(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             merged.append(current)
             current = dict(nxt)
             current_payload = dict(current.get("payload", current))
+            current["constituent_chunks"] = [(nxt_cid, nxt_snippet)] if nxt_cid else []
 
     # Flush last.
     if "payload" in current:
@@ -330,6 +341,7 @@ class ContextBuilder:
     ) -> str:
         """
         Build the final LLM context string.
+        (Backward compatible — delegates to build_with_metadata).
 
         Args:
             reranked_results: Output of the E3 reranker (list of dicts).
@@ -341,10 +353,39 @@ class ContextBuilder:
         Returns:
             Assembled context string ready for the LLM prompt.
         """
+        final_context, _ = self.build_with_metadata(
+            reranked_results,
+            is_lecture_wide=is_lecture_wide,
+            need_visual=need_visual,
+            char_budget=char_budget,
+        )
+        return final_context
+
+    def build_with_metadata(
+        self,
+        reranked_results: List[Dict[str, Any]],
+        *,
+        is_lecture_wide: bool = False,
+        need_visual: bool = False,
+        char_budget: Optional[int] = None,
+    ) -> Tuple[str, List[str]]:
+        """
+        Build the final LLM context string and return the list of used chunk IDs.
+
+        Args:
+            reranked_results: Output of the E3 reranker (list of dicts).
+            is_lecture_wide: When True, sample across the full timeline
+                instead of taking only top-ranked chunks.
+            need_visual: When True, include [Visual] labels in context.
+            char_budget: Maximum character budget (overrides default).
+
+        Returns:
+            Tuple of (assembled_context_string, list_of_used_chunk_ids).
+        """
         budget = char_budget if char_budget is not None else self._default_budget
 
         if not reranked_results:
-            return ""
+            return "", []
 
         # 1. Deduplicate by chunk_id.
         seen_ids: set = set()
@@ -425,9 +466,27 @@ class ContextBuilder:
             selected.sort(key=lambda pair: _get_timestamp(pair[0]))
         context_parts = [text for _, text in selected]
 
+        # Extract constituent chunk IDs that made it into selected context.
+        used_ids: List[str] = []
+        seen_used: set = set()
+        for entry, sel_text in selected:
+            constituents = entry.get("constituent_chunks")
+            if constituents:
+                for cid, snippet in constituents:
+                    if cid and cid not in seen_used:
+                        if not snippet or snippet in sel_text:
+                            seen_used.add(cid)
+                            used_ids.append(cid)
+            else:
+                payload = entry.get("payload", entry)
+                cid = payload.get("chunk_id") or entry.get("chunk_id", "")
+                if cid and cid not in seen_used:
+                    seen_used.add(cid)
+                    used_ids.append(cid)
+
         final = _CHUNK_SEPARATOR.join(context_parts)
         logger.info(
             "ContextBuilder: %d input → %d merged → %d used, %d chars (lecture_wide=%s)",
             len(reranked_results), len(merged), len(context_parts), len(final), is_lecture_wide,
         )
-        return final
+        return final, used_ids
