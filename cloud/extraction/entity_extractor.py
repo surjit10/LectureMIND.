@@ -25,6 +25,7 @@ from schemas.entity import Entity
 from schemas.enums import EntityType
 from cloud.utils.diagnostics import ExtractionStats
 from cloud.utils.json_repair import parse_json_array
+from cloud.extraction.window_builder import build_extraction_windows
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +44,24 @@ _ENTITY_TYPE_ALIASES = {
 # Entity extraction prompt for Qwen2.5-7B-Instruct.
 ENTITY_EXTRACTION_PROMPT = (
     "Extract educational entities from the following lecture content.\n\n"
+    "Capture meaningful technical entities across categories:\n"
+    "* Physical components & hardware (e.g. CPU, Cache, Coil, Core, Sensor, Register)\n"
+    "* Scientific & technical principles (e.g. Alternating Current, Locality, Mutual Induction, Virtual Memory)\n"
+    "* Formulas, laws, quantities & variables (e.g. Faraday's Law, EMF, Voltage, Big-O, Flux)\n"
+    "* Devices, systems & tools (e.g. Transformer, Operating System, Oscilloscope, Database)\n"
+    "* Algorithms, methods & architectures (e.g. BFS, Dijkstra, Gradient Descent, Paging)\n"
+    "* Key technical concepts & state terms (e.g. Page Fault, Deadlock, Sinusoidal Waveform)\n\n"
     "Rules:\n"
-    "* Return ONLY valid JSON\n"
+    "* Return ONLY valid JSON array: [{{\"name\":\"entity name\",\"type\":\"EntityType\"}}]\n"
     "* Use only allowed entity types: Concept, Algorithm, Formula, Code, Diagram, LectureSegment\n"
-    "* Ignore generic words\n"
-    "* Extract algorithms, formulas, concepts, diagrams and code constructs\n\n"
-    "Segment title: {title}\n\n"
+    "* Map physical components, principles, devices, systems, and technical terms to 'Concept'\n"
+    "* Map mathematical laws, equations, and expressions to 'Formula'\n"
+    "* Map algorithms, procedures, and methods to 'Algorithm'\n"
+    "* Map code blocks, functions, and data structures to 'Code'\n"
+    "* Map visual figures, charts, and illustrations to 'Diagram'\n"
+    "* Do NOT invent entities or extrapolate beyond the provided text\n"
+    "* Ignore generic non-educational conversational filler\n\n"
+    "Lecture Window: {title}\n\n"
     "Content:\n{content}\n\n"
     "Output format:\n"
     '[{{"name":"entity name","type":"EntityType"}}]\n\n'
@@ -291,11 +304,51 @@ def extract_entities(
                 logger.error("A8: Failed to load LLM backend: %s", exc)
                 raise
 
-        # Build prompts.
-        prompts = [
-            ENTITY_EXTRACTION_PROMPT.format(title=title, content=text[:3000])
-            for title, text in segment_texts
-        ]
+        # Determine token counter for budgeting.
+        token_counter = None
+        if hasattr(llm, "count_tokens") and callable(getattr(llm, "count_tokens")):
+            try:
+                test_cnt = llm.count_tokens("test")
+                if isinstance(test_cnt, int):
+                    token_counter = llm.count_tokens
+            except Exception:
+                token_counter = None
+
+        if token_counter is None:
+            # Deterministic mock counter for tests / mocks
+            token_counter = lambda t: max(1, len(t.split()))
+
+        token_budget = getattr(settings, "EXTRACTION_WINDOW_TOKEN_BUDGET", 2000)
+        overlap_chunks = getattr(settings, "EXTRACTION_WINDOW_OVERLAP_CHUNKS", 1)
+
+        # Build token-budgeted overlapping extraction windows.
+        windows, coverage_metrics = build_extraction_windows(
+            chunks_data,
+            token_budget=token_budget,
+            overlap_chunks=overlap_chunks,
+            token_counter=token_counter,
+        )
+        logger.info(
+            "A8: Built %d extraction windows covering %d/%d chunks (%.1f%% coverage, %d overlaps).",
+            len(windows),
+            coverage_metrics["unique_covered_chunks"],
+            coverage_metrics["total_source_chunks"],
+            coverage_metrics["coverage_percentage"],
+            coverage_metrics["overlap_count"],
+        )
+
+        # Map each window to relevant segment title(s) if available.
+        chunk_to_seg = {}
+        for seg in segments_data:
+            for cid in seg.get("chunks", []):
+                chunk_to_seg[cid] = seg.get("title", "")
+
+        prompts = []
+        for w in windows:
+            titles = [chunk_to_seg[cid] for cid in w.chunk_ids if cid in chunk_to_seg and chunk_to_seg[cid]]
+            unique_titles = list(dict.fromkeys(titles))
+            w_title = " | ".join(unique_titles) if unique_titles else f"{w.start_time:.1f}s - {w.end_time:.1f}s"
+            prompts.append(ENTITY_EXTRACTION_PROMPT.format(title=w_title, content=w.text))
 
         # Batch extract.
         batch_results = _extract_entities_batch(prompts, llm, stats=stats)

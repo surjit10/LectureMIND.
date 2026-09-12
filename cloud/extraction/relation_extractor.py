@@ -28,6 +28,7 @@ from cloud.utils.json_repair import (
     STATUS_FAILED,
     STATUS_PARTIAL,
 )
+from cloud.extraction.window_builder import build_extraction_windows
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +138,7 @@ def _remap_relations(
     relations: List[Dict[str, str]],
     alias_to_real: Dict[str, str],
     valid_entity_ids: Optional[set] = None,
+    stats: Optional[ExtractionStats] = None,
 ) -> List[Dict[str, str]]:
     """Remap compact aliases (E1, E2, …) back to real entity_ids.
 
@@ -145,8 +147,7 @@ def _remap_relations(
       2. Already-valid entity_ids (from mocks, tests, or models that output real IDs directly)
 
     Relations whose source or target cannot be remapped or resolved to valid
-    entity_ids are dropped (the downstream _validate_entity_references pass
-    would catch them anyway, but dropping early keeps diagnostics cleaner).
+    entity_ids are dropped and recorded in diagnostics.
     """
     known_ids = set(alias_to_real.values())
     if valid_entity_ids:
@@ -164,7 +165,86 @@ def _remap_relations(
                 "relation": rel["relation"],
                 "target_entity_id": tgt,
             })
+        else:
+            if stats is not None:
+                stats.rejected += 1
+            logger.warning(
+                "A9: Dropping relation with unresolvable alias: src=%r -> tgt=%r (known aliases=%s)",
+                src_raw, tgt_raw, list(alias_to_real.keys())[:10],
+            )
     return remapped
+
+
+def _prune_entities_for_window(
+    seg_entities: List[Dict[str, Any]],
+    current_window_text: str,
+    neighbor_window_texts: List[str],
+    context: str,
+    seg_alias_map: Dict[str, str],
+    token_counter: Callable[[str], int],
+    max_tokens: int,
+    seg_id: str,
+    window_id: str,
+    stats: Optional[ExtractionStats] = None,
+) -> Tuple[str, Dict[str, str]]:
+    """Deterministically prune segment entities if the prompt exceeds the token ceiling.
+
+    Relevance tiers:
+      Tier 3: Mentioned directly in the current window.
+      Tier 2: Mentioned in immediate neighboring window(s) (overlap context).
+      Tier 1: Mentioned elsewhere in the segment.
+
+    Preserves stable segment aliases (E1, E2, …) even when pruned.
+    """
+    real_to_alias = {real_id: alias for alias, real_id in seg_alias_map.items()}
+
+    curr_lower = current_window_text.lower()
+    neighbor_lower = " ".join(t.lower() for t in neighbor_window_texts)
+
+    scored_entities: List[Tuple[int, int, Dict[str, Any]]] = []
+    for idx, e in enumerate(seg_entities):
+        name_lower = e["name"].lower()
+        if name_lower in curr_lower:
+            score = 3
+        elif name_lower in neighbor_lower:
+            score = 2
+        else:
+            score = 1
+        scored_entities.append((-score, idx, e))
+
+    scored_entities.sort(key=lambda x: (x[0], x[1]))
+
+    kept: List[Dict[str, Any]] = []
+    for _, _, e in scored_entities:
+        test_kept = kept + [e]
+        lines = [f"- {real_to_alias[x['entity_id']]}: {x['name']} ({x['type']})" for x in test_kept]
+        test_list_str = "\n".join(lines)
+        test_prompt = RELATION_EXTRACTION_PROMPT.format(
+            entity_list=test_list_str,
+            context=context,
+        )
+        if token_counter(test_prompt) <= max_tokens or len(kept) < 2:
+            kept = test_kept
+        else:
+            break
+
+    kept_ids = {x["entity_id"] for x in kept}
+    final_entities = [e for e in seg_entities if e["entity_id"] in kept_ids]
+
+    final_lines = [f"- {real_to_alias[e['entity_id']]}: {e['name']} ({e['type']})" for e in final_entities]
+    final_list_str = "\n".join(final_lines)
+    final_alias_map = {real_to_alias[e["entity_id"]]: e["entity_id"] for e in final_entities}
+
+    pruned_count = len(seg_entities) - len(final_entities)
+    if pruned_count > 0:
+        logger.warning(
+            "A9: Pruned %d/%d entities for segment %s window %s to fit token budget (prompt_tokens <= %d)",
+            pruned_count, len(seg_entities), seg_id, window_id, max_tokens,
+        )
+        if stats is not None:
+            stats.rejected += pruned_count
+
+    return final_list_str, final_alias_map
 
 
 def _build_segment_context(
@@ -481,61 +561,164 @@ def extract_relations(
                 logger.error("A9: Failed to load LLM backend: %s", exc)
                 raise
 
-        # Build context (used only for the no-segments fallback path).
-        context_str = _build_segment_context(segments_data, chunks_data)
+        # Determine token counter for budgeting.
+        token_counter = None
+        if hasattr(llm, "count_tokens") and callable(getattr(llm, "count_tokens")):
+            try:
+                test_cnt = llm.count_tokens("test")
+                if isinstance(test_cnt, int):
+                    token_counter = llm.count_tokens
+            except Exception:
+                token_counter = None
 
-        # Per-segment entity filtering + compact aliases.
-        # Each segment prompt contains ONLY the entities whose names
-        # appear in that segment's text, using short aliases (E1, E2, …)
-        # instead of the full 67-char entity_ids.  This eliminates the
-        # [:2000] truncation that previously made 84% of entities
-        # invisible (the root cause of the star-graph problem).
+        if token_counter is None:
+            token_counter = lambda t: max(1, len(t.split()))
+
+        token_budget = getattr(settings, "EXTRACTION_WINDOW_TOKEN_BUDGET", 2000)
+        overlap_chunks = getattr(settings, "EXTRACTION_WINDOW_OVERLAP_CHUNKS", 1)
+
+        # Segment-level entity visibility + compact aliases.
+        # Entities associated with each semantic segment are discovered across
+        # all chunks of that segment. Consistent aliases (E1, E2, …) are reused
+        # across all windows of that segment so entities in different windows
+        # remain jointly addressable, while bounded by token safety.
         segment_alias_maps: List[Dict[str, str]] = []
+        prompts: List[str] = []
+
+        max_input_length = getattr(settings, "TRANSFORMERS_MAX_INPUT_LENGTH", 3072)
+        safety_margin = getattr(settings, "EXTRACTION_TOKEN_SAFETY_MARGIN", 250)
+        max_prompt_budget = max_input_length - safety_margin
 
         if segments_data:
             chunk_lookup = {c["chunk_id"]: c for c in chunks_data}
-            prompts: List[str] = []
-            for seg in segments_data:
-                # Build segment context text.
-                seg_context = f"[{seg['title']}]: "
-                for cid in seg["chunks"]:
-                    if cid in chunk_lookup:
-                        c = chunk_lookup[cid]
-                        seg_context += c["transcript"] + " " + c["visual_context"] + " "
+            for s_idx, seg in enumerate(segments_data):
+                seg_chunks = [chunk_lookup[cid] for cid in seg.get("chunks", []) if cid in chunk_lookup]
+                if not seg_chunks:
+                    continue
 
-                # Filter entities to those mentioned in this segment.
-                seg_entities = _filter_entities_for_segment(
-                    entities_data, seg_context,
+                # 1. Discover all entities mentioned across this semantic segment.
+                seg_full_text = f"[{seg['title']}]:\n" + " ".join(
+                    (c.get("transcript", "") + " " + c.get("visual_context", "") + " " + c.get("ocr_text", ""))
+                    for c in seg_chunks
                 )
-                # Fallback: if filtering is too aggressive (< 2 entities),
-                # use all entities to avoid empty prompts.
+                seg_entities = _filter_entities_for_segment(entities_data, seg_full_text)
                 if len(seg_entities) < 2:
                     seg_entities = entities_data
 
-                # Build compact entity list with short aliases.
-                entity_list_str, alias_map = _build_compact_entity_list(seg_entities)
-                segment_alias_maps.append(alias_map)
+                # 2. Build consistent compact alias mapping ONCE for this segment.
+                seg_entity_list_str, seg_alias_map = _build_compact_entity_list(seg_entities)
 
-                prompt = RELATION_EXTRACTION_PROMPT.format(
-                    entity_list=entity_list_str,
-                    context=seg_context[:3000],
+                # 3. Build token-budgeted extraction windows for this segment's chunks.
+                seg_windows, _ = build_extraction_windows(
+                    seg_chunks,
+                    token_budget=token_budget,
+                    overlap_chunks=overlap_chunks,
+                    token_counter=token_counter,
                 )
-                prompts.append(prompt)
+
+                for w_idx, w in enumerate(seg_windows):
+                    seg_context = f"[{seg['title']}]:\n" + w.text
+
+                    # Check if the complete segment entity list fits within prompt budget.
+                    candidate_prompt = RELATION_EXTRACTION_PROMPT.format(
+                        entity_list=seg_entity_list_str,
+                        context=seg_context,
+                    )
+                    prompt_tokens = token_counter(candidate_prompt)
+
+                    if prompt_tokens <= max_prompt_budget:
+                        window_entity_list_str = seg_entity_list_str
+                        window_alias_map = seg_alias_map
+                        prompt = candidate_prompt
+                    else:
+                        neighbor_texts = []
+                        if w_idx > 0:
+                            neighbor_texts.append(seg_windows[w_idx - 1].text)
+                        if w_idx < len(seg_windows) - 1:
+                            neighbor_texts.append(seg_windows[w_idx + 1].text)
+
+                        window_entity_list_str, window_alias_map = _prune_entities_for_window(
+                            seg_entities=seg_entities,
+                            current_window_text=w.text,
+                            neighbor_window_texts=neighbor_texts,
+                            context=seg_context,
+                            seg_alias_map=seg_alias_map,
+                            token_counter=token_counter,
+                            max_tokens=max_prompt_budget,
+                            seg_id=seg.get("segment_id", f"seg_{s_idx}"),
+                            window_id=w.window_id,
+                            stats=stats,
+                        )
+                        prompt = RELATION_EXTRACTION_PROMPT.format(
+                            entity_list=window_entity_list_str,
+                            context=seg_context,
+                        )
+
+                    segment_alias_maps.append(window_alias_map)
+                    prompts.append(prompt)
         else:
-            # Single prompt with all context (no segments available).
-            entity_list_str, alias_map = _build_compact_entity_list(entities_data)
-            segment_alias_maps.append(alias_map)
-            prompt = RELATION_EXTRACTION_PROMPT.format(
-                entity_list=entity_list_str,
-                context=context_str,
+            # Fallback when no segments are available: window the full chunks list.
+            all_chunks_text = " ".join(
+                (c.get("transcript", "") + " " + c.get("visual_context", "") + " " + c.get("ocr_text", ""))
+                for c in chunks_data
             )
-            prompts = [prompt]
+            all_entities = _filter_entities_for_segment(entities_data, all_chunks_text)
+            if len(all_entities) < 2:
+                all_entities = entities_data
+
+            all_entity_list_str, all_alias_map = _build_compact_entity_list(all_entities)
+
+            all_windows, _ = build_extraction_windows(
+                chunks_data,
+                token_budget=token_budget,
+                overlap_chunks=overlap_chunks,
+                token_counter=token_counter,
+            )
+
+            for w_idx, w in enumerate(all_windows):
+                seg_context = w.text
+                candidate_prompt = RELATION_EXTRACTION_PROMPT.format(
+                    entity_list=all_entity_list_str,
+                    context=seg_context,
+                )
+                prompt_tokens = token_counter(candidate_prompt)
+
+                if prompt_tokens <= max_prompt_budget:
+                    window_entity_list_str = all_entity_list_str
+                    window_alias_map = all_alias_map
+                    prompt = candidate_prompt
+                else:
+                    neighbor_texts = []
+                    if w_idx > 0:
+                        neighbor_texts.append(all_windows[w_idx - 1].text)
+                    if w_idx < len(all_windows) - 1:
+                        neighbor_texts.append(all_windows[w_idx + 1].text)
+
+                    window_entity_list_str, window_alias_map = _prune_entities_for_window(
+                        seg_entities=all_entities,
+                        current_window_text=w.text,
+                        neighbor_window_texts=neighbor_texts,
+                        context=seg_context,
+                        seg_alias_map=all_alias_map,
+                        token_counter=token_counter,
+                        max_tokens=max_prompt_budget,
+                        seg_id="lecture_all",
+                        window_id=w.window_id,
+                        stats=stats,
+                    )
+                    prompt = RELATION_EXTRACTION_PROMPT.format(
+                        entity_list=window_entity_list_str,
+                        context=seg_context,
+                    )
+
+                segment_alias_maps.append(window_alias_map)
+                prompts.append(prompt)
 
         # Batch extract and remap compact aliases → real entity_ids.
         batch_results = _extract_relations_batch(prompts, llm, stats=stats)
         for seg_idx, rel_list in enumerate(batch_results):
             alias_map = segment_alias_maps[seg_idx]
-            remapped = _remap_relations(rel_list, alias_map, valid_entity_ids=entity_ids)
+            remapped = _remap_relations(rel_list, alias_map, valid_entity_ids=entity_ids, stats=stats)
             raw_relations.extend(remapped)
 
     # Validate entity references.

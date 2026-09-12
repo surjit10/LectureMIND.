@@ -258,3 +258,93 @@ class TestEntityExtractor:
 
         with pytest.raises(FileNotFoundError, match="multimodal_chunks.json"):
             extract_entities("lec_001", cloud_settings=cloud_settings)
+
+    def test_extract_entities_covers_all_chunks_across_windows(self, cloud_settings, tmp_path):
+        """Entity extraction with multiple windows covers 100% of chunks without truncation."""
+        from cloud.extraction.entity_extractor import extract_entities
+        from unittest.mock import MagicMock
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_002"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        chunks = [
+            {"lecture_id": "lec_002", "chunk_id": f"lec_002_chunk_{i:06d}",
+             "timestamp": float(i * 30), "transcript": f"Transcript content for chunk {i}",
+             "visual_context": f"Diagram {i}", "ocr_text": f"OCR Text {i}"}
+            for i in range(1, 7)
+        ]
+        segments = [
+            {"segment_id": "seg_001", "title": "Full Segment", "start": 0.0, "end": 180.0,
+             "chunks": [c["chunk_id"] for c in chunks]}
+        ]
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        prompts_seen = []
+        mock_llm = MagicMock()
+        def generate_side_effect(prompts, **kwargs):
+            prompts_seen.extend(prompts)
+            return [json.dumps([{"name": f"Entity_W{idx}", "type": "Concept"}]) for idx, _ in enumerate(prompts)]
+        mock_llm.generate.side_effect = generate_side_effect
+
+        # Set token budget small enough to force multiple windows
+        cloud_settings.EXTRACTION_WINDOW_TOKEN_BUDGET = 50
+
+        entities = extract_entities("lec_002", cloud_settings=cloud_settings, llm_loader=lambda: mock_llm)
+
+        assert len(prompts_seen) > 1, "Should have created multiple windows for 6 chunks with budget=50"
+        # Verify all chunk IDs were included in the prompts
+        all_cids = {c["chunk_id"] for c in chunks}
+        found_cids = {cid for cid in all_cids if any(cid in p for p in prompts_seen)}
+        assert found_cids == all_cids, "All source chunks must be present in prompts"
+        assert any(e.name.startswith("Entity_W") for e in entities)
+
+    def test_overlapping_windows_consolidate_duplicate_entities(self, cloud_settings, tmp_path):
+        """Overlapping windows extracting the same entity must consolidate to a single entity."""
+        from cloud.extraction.entity_extractor import extract_entities
+        from unittest.mock import MagicMock
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_003"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        chunks = [
+            {"lecture_id": "lec_003", "chunk_id": f"lec_003_chunk_{i:06d}",
+             "timestamp": float(i * 30), "transcript": f"Discussion of Transformers and Alternating Current {i}",
+             "visual_context": "", "ocr_text": ""}
+            for i in range(1, 5)
+        ]
+        segments = [
+            {"segment_id": "seg_001", "title": "Intro", "start": 0.0, "end": 120.0,
+             "chunks": [c["chunk_id"] for c in chunks]}
+        ]
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        mock_llm = MagicMock()
+        # Returns identical entity name across all windows
+        mock_llm.generate.side_effect = lambda prompts, **kwargs: [
+            json.dumps([{"name": "Alternating Current", "type": "Concept"}]) for _ in prompts
+        ]
+
+        cloud_settings.EXTRACTION_WINDOW_TOKEN_BUDGET = 40
+        entities = extract_entities("lec_003", cloud_settings=cloud_settings, llm_loader=lambda: mock_llm)
+
+        ac_entities = [e for e in entities if e.name == "Alternating Current"]
+        assert len(ac_entities) == 1, "Identical entity from multiple windows must consolidate to exactly 1 entity"
+
+    def test_similar_but_distinct_names_remain_distinct(self):
+        """Distinct terms like Cache vs Cache Controller must NOT be merged."""
+        from cloud.extraction.entity_extractor import _deduplicate_entities
+
+        raw = [
+            {"name": "Cache", "type": "Concept"},
+            {"name": "cache", "type": "Concept"},
+            {"name": "Cache Controller", "type": "Concept"},
+            {"name": "Cache Coherence", "type": "Concept"},
+        ]
+        deduped = _deduplicate_entities(raw)
+        names = [e["name"] for e in deduped]
+        assert len(deduped) == 3
+        assert "Cache" in names
+        assert "Cache Controller" in names
+        assert "Cache Coherence" in names

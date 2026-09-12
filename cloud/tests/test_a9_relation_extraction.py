@@ -441,3 +441,187 @@ class TestCompactEntityAliases:
         ]
         remapped = _remap_relations(relations, alias_map)
         assert len(remapped) == 0
+
+    def test_relation_extraction_windowing_without_truncation(self, cloud_settings):
+        """A large segment is cleanly windowed and all relations maintain referential integrity."""
+        from cloud.extraction.relation_extractor import extract_relations
+        from unittest.mock import MagicMock
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_rel_01"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        entities = [
+            {"entity_id": "lec_rel_01_entity_000001", "name": "Alternating Current", "type": "Concept"},
+            {"entity_id": "lec_rel_01_entity_000002", "name": "Transformers", "type": "Concept"},
+            {"entity_id": "lec_rel_01_entity_000003", "name": "Magnetic Field", "type": "Concept"},
+        ]
+        chunks = [
+            {"lecture_id": "lec_rel_01", "chunk_id": f"lec_rel_01_chunk_{i:06d}",
+             "timestamp": float(i * 30), "transcript": f"Discussing Alternating Current and Transformers in chunk {i}",
+             "visual_context": "Magnetic Field diagram", "ocr_text": "Alternating Current Transformers"}
+            for i in range(1, 6)
+        ]
+        segments = [
+            {"segment_id": "seg_001", "title": "Electrical Principles", "start": 0.0, "end": 150.0,
+             "chunks": [c["chunk_id"] for c in chunks]}
+        ]
+
+        (lecture_dir / "entities.json").write_text(json.dumps(entities))
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        prompts_seen = []
+        mock_llm = MagicMock()
+        def generate_fn(prompts, **kwargs):
+            prompts_seen.extend(prompts)
+            # Emits valid relation using compact aliases
+            return [json.dumps([{"source_entity_id": "E1", "relation": "PREREQUISITE_OF", "target_entity_id": "E2"}]) for _ in prompts]
+        mock_llm.generate.side_effect = generate_fn
+
+        cloud_settings.EXTRACTION_WINDOW_TOKEN_BUDGET = 50
+        relations = extract_relations("lec_rel_01", cloud_settings=cloud_settings, llm_loader=lambda: mock_llm)
+
+        assert len(prompts_seen) > 1, "Segment chunks should have been windowed into multiple prompts"
+        assert len(relations) == 1, "Duplicate relations across overlapping windows must be deduplicated"
+        assert relations[0].source_entity_id == "lec_rel_01_entity_000001"
+        assert relations[0].target_entity_id == "lec_rel_01_entity_000002"
+        assert relations[0].relation.value == "PREREQUISITE_OF"
+
+    def test_cross_window_segment_entity_visibility_and_alias_stability(self, cloud_settings):
+        """Entities in different windows of the same segment remain visible with stable aliases."""
+        from cloud.extraction.relation_extractor import extract_relations
+        from unittest.mock import MagicMock
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_synth_01"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        entities = [
+            {"entity_id": "lec_synth_entity_000001", "name": "Page Table", "type": "Concept"},
+            {"entity_id": "lec_synth_entity_000002", "name": "Virtual Memory", "type": "Concept"},
+            {"entity_id": "lec_synth_entity_000003", "name": "Page Fault", "type": "Concept"},
+        ]
+        # Chunk 1 introduces Page Table; Chunk 2 discusses Virtual Memory; Chunk 3 introduces Page Fault
+        chunks = [
+            {"lecture_id": "lec_synth_01", "chunk_id": "lec_synth_01_chunk_000001",
+             "timestamp": 10.0, "transcript": "Page Table maps virtual addresses in Virtual Memory to physical addresses.",
+             "visual_context": "", "ocr_text": ""},
+            {"lecture_id": "lec_synth_01", "chunk_id": "lec_synth_01_chunk_000002",
+             "timestamp": 20.0, "transcript": "The operating system translates these addresses before accessing memory.",
+             "visual_context": "", "ocr_text": ""},
+            {"lecture_id": "lec_synth_01", "chunk_id": "lec_synth_01_chunk_000003",
+             "timestamp": 30.0, "transcript": "A Page Fault occurs when the required page in Virtual Memory is not present.",
+             "visual_context": "", "ocr_text": ""},
+        ]
+        segments = [
+            {"segment_id": "seg_001", "title": "Virtual Memory Management", "start": 10.0, "end": 35.0,
+             "chunks": [c["chunk_id"] for c in chunks]}
+        ]
+
+        (lecture_dir / "entities.json").write_text(json.dumps(entities))
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        prompts_seen = []
+        mock_llm = MagicMock()
+        def generate_fn(prompts, **kwargs):
+            prompts_seen.extend(prompts)
+            # Emits: Page Table (E1) USED_BY Page Fault (E3) from Window 2
+            return [json.dumps([{"source_entity_id": "E1", "relation": "USED_BY", "target_entity_id": "E3"}]) for _ in prompts]
+        mock_llm.generate.side_effect = generate_fn
+
+        # Budget set to force windowing: Window 1 (Chunks 1 & 2), Window 2 (Chunks 2 & 3)
+        cloud_settings.EXTRACTION_WINDOW_TOKEN_BUDGET = 50
+        cloud_settings.EXTRACTION_WINDOW_OVERLAP_CHUNKS = 1
+
+        relations = extract_relations("lec_synth_01", cloud_settings=cloud_settings, llm_loader=lambda: mock_llm)
+
+        assert len(prompts_seen) == 2, f"Expected 2 windows, got {len(prompts_seen)}"
+
+        # Rule 13: Both windows must contain Page Table, Virtual Memory, and Page Fault in Available entities
+        for p in prompts_seen:
+            assert "Page Table" in p
+            assert "Virtual Memory" in p
+            assert "Page Fault" in p
+
+        # Rule 14: Alias stability across windows
+        # Check that E1, E2, E3 map to the same entities in both prompts
+        for p in prompts_seen:
+            assert "- E1: Page Table (Concept)" in p
+            assert "- E2: Virtual Memory (Concept)" in p
+            assert "- E3: Page Fault (Concept)" in p
+
+        # Rule 15: Cross-window relation remapping succeeds
+        assert len(relations) == 1
+        assert relations[0].source_entity_id == "lec_synth_entity_000001"
+        assert relations[0].target_entity_id == "lec_synth_entity_000003"
+        assert relations[0].relation.value == "USED_BY"
+
+    def test_unmappable_alias_drops_are_recorded_in_stats(self):
+        """Rule 16: Dropping an unmappable alias is observable via stats and diagnostics."""
+        from cloud.extraction.relation_extractor import _remap_relations
+        from cloud.utils.diagnostics import ExtractionStats
+
+        stats = ExtractionStats()
+        alias_map = {"E1": "real_id_001", "E2": "real_id_002"}
+        relations = [
+            {"source_entity_id": "E1", "relation": "EXPLAINS", "target_entity_id": "E99"},
+        ]
+        remapped = _remap_relations(relations, alias_map, stats=stats)
+        assert len(remapped) == 0
+        assert stats.rejected == 1
+
+    def test_deterministic_pruning_under_tight_budget(self):
+        """Rule 10 & 11: Prunes lower-relevance entities deterministically while preserving stable aliases."""
+        from cloud.extraction.relation_extractor import _prune_entities_for_window
+        from cloud.utils.diagnostics import ExtractionStats
+
+        stats = ExtractionStats()
+        seg_entities = [
+            {"entity_id": "e1", "name": "Alpha", "type": "Concept"},
+            {"entity_id": "e2", "name": "Beta", "type": "Concept"},
+            {"entity_id": "e3", "name": "Gamma", "type": "Concept"},
+            {"entity_id": "e4", "name": "Delta", "type": "Concept"},
+            {"entity_id": "e5", "name": "Epsilon", "type": "Concept"},
+        ]
+        alias_map = {f"E{i}": f"e{i}" for i in range(1, 6)}
+
+        # Current window mentions Alpha and Beta (Tier 3)
+        curr_text = "Here Alpha interacts with Beta."
+        # Neighbor mentions Gamma (Tier 2)
+        neighbor_texts = ["Next we introduce Gamma."]
+        # Delta and Epsilon are Tier 1 (elsewhere in segment)
+        context = "Context text for testing."
+
+        # Token counter: each word is 1 token. Instruction + prompt overhead ~ 40 tokens.
+        # Budget set so only ~2-3 entities can fit:
+        token_counter = lambda t: len(t.split())
+
+        # Measure baseline tokens with 2 entities
+        base_prompt_tokens = token_counter("Given the entities and lecture context ... \n- E1: Alpha (Concept)\n- E2: Beta (Concept)\n Context text")
+
+        list_str, pruned_map = _prune_entities_for_window(
+            seg_entities=seg_entities,
+            current_window_text=curr_text,
+            neighbor_window_texts=neighbor_texts,
+            context=context,
+            seg_alias_map=alias_map,
+            token_counter=token_counter,
+            max_tokens=base_prompt_tokens + 5, # tightly budgeted
+            seg_id="seg_001",
+            window_id="win_001",
+            stats=stats,
+        )
+
+        # Alpha and Beta MUST be preserved (Tier 3)
+        assert "Alpha" in list_str
+        assert "Beta" in list_str
+        # Delta and Epsilon should be pruned before Alpha/Beta
+        assert "Delta" not in list_str
+        assert "Epsilon" not in list_str
+        # Stable aliases preserved
+        assert "- E1: Alpha (Concept)" in list_str
+        assert "- E2: Beta (Concept)" in list_str
+        assert pruned_map["E1"] == "e1"
+        assert pruned_map["E2"] == "e2"
+        # Pruning is observable via stats
+        assert stats.rejected >= 2

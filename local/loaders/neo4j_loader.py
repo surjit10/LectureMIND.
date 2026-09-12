@@ -124,8 +124,9 @@ def _create_relationships(driver: Any, relations: List[Relation], lecture_id: st
             query = (
                 f"MATCH (s {{entity_id: $source, lecture_id: $lecture_id}}) "
                 f"MATCH (t {{entity_id: $target, lecture_id: $lecture_id}}) "
-                f"MERGE (s)-[r:{rel_type} {{relation_id: $relation_id}}]->(t) "
-                f"SET r.lecture_id = $lecture_id"
+                f"MERGE (s)-[r:{rel_type}]->(t) "
+                f"SET r.relation_id = coalesce(r.relation_id, $relation_id), "
+                f"    r.lecture_id = $lecture_id"
             )
             session.run(
                 query,
