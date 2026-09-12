@@ -24,6 +24,10 @@ class SharedSettings(BaseSettings):
     # 768 is the old bge-base model and is NOT used in this project.
     EMBEDDING_DIMENSION: int = 1024
 
+    # Prerequisite inference confidence threshold (0.0 to 1.0).
+    # Prioritizes high precision over recall for student-facing navigation.
+    PREREQUISITE_CONFIDENCE_THRESHOLD: float = 0.65
+
     @field_validator("EMBEDDING_DIMENSION")
     @classmethod
     def must_be_1024(cls, v: int) -> int:

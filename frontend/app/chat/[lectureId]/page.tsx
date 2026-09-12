@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { postQuery, getLecture } from "@/services/api";
 import { useDeveloperMode } from "@/components/layout/Providers";
 import PipelineTrace from "@/components/chat/PipelineTrace";
+import { PrerequisiteNavigator } from "@/components/chat/PrerequisiteNavigator";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import StatusBadge from "@/components/common/StatusBadge";
 import LectureNav from "@/components/common/LectureNav";
@@ -157,6 +158,20 @@ export default function ChatPage() {
               {/* Sources */}
               {m.response?.sources && m.response.sources.length > 0 && (
                 <SourcesToggle sources={m.response.sources} />
+              )}
+
+              {/* Socratic Prerequisite Navigator */}
+              {m.response?.prerequisites && m.response.prerequisites.length > 0 && (
+                <PrerequisiteNavigator
+                  prerequisites={m.response.prerequisites}
+                  onSeek={(seconds) => {
+                    const videoEl = document.querySelector("video");
+                    if (videoEl) {
+                      videoEl.currentTime = seconds;
+                      videoEl.play().catch(() => {});
+                    }
+                  }}
+                />
               )}
 
               {/* Graph path */}

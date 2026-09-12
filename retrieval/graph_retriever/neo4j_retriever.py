@@ -361,3 +361,191 @@ def _run_traversal(driver: Any, cypher: str, params: Dict[str, Any]) -> List[Dic
             }
             results.append(result)
     return results
+
+
+def get_prerequisites_for_concept(
+    concept_name: str,
+    lecture_id: str,
+    driver: Optional[Any] = None,
+    local_settings: Optional[LocalSettings] = None,
+    min_confidence: float = 0.65,
+    max_depth: int = 3,
+) -> List[Dict[str, Any]]:
+    """
+    Traverse backward across PREREQUISITE_OF edges in Neo4j to find conceptual dependencies.
+
+    Preserves full path topology, depth, and relationship-level provenance (supporting
+    DAG branching without lossy flattening).
+
+    Data isolation: strictly filters both nodes and every relationship on lecture_id.
+
+    Args:
+        concept_name: Name of target concept to explain / back-track prerequisites for.
+        lecture_id: Single lecture scope identifier.
+        driver: Optional Neo4j driver instance.
+        local_settings: Local settings.
+        min_confidence: Minimum edge confidence threshold (default: 0.65).
+        max_depth: Maximum backward traversal hops (default: 3).
+
+    Returns:
+        List of structured prerequisite items with depth, timestamps, path nodes,
+        and intermediate relationship provenance.
+    """
+    if not lecture_id:
+        raise ValueError("lecture_id is required for prerequisite traversal (single-lecture isolation).")
+
+    settings = local_settings or LocalSettings()
+    close_driver = False
+    if driver is None:
+        from neo4j import GraphDatabase
+        driver = GraphDatabase.driver(settings.NEO4J_URI)
+        close_driver = True
+
+    cypher = (
+        f"MATCH path = (prereq {{lecture_id: $lecture_id}})"
+        f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
+        f"(target {{lecture_id: $lecture_id}}) "
+        f"WHERE toLower(target.name) = toLower($concept_name) "
+        f"  AND all(rel IN relationships(path) WHERE rel.lecture_id = $lecture_id AND (rel.confidence IS NULL OR rel.confidence >= $min_confidence)) "
+        f"RETURN prereq.entity_id AS entity_id, "
+        f"       prereq.name AS concept, "
+        f"       prereq.type AS type, "
+        f"       target.name AS target_concept, "
+        f"       length(path) AS depth, "
+        f"       [node IN nodes(path) | node.name] AS path_nodes, "
+        f"       [rel IN relationships(path) | {{ "
+        f"           source: startNode(rel).name, "
+        f"           target: endNode(rel).name, "
+        f"           confidence: rel.confidence, "
+        f"           chunk_id: rel.evidence_chunk_id, "
+        f"           timestamp: rel.evidence_timestamp "
+        f"       }}] AS edge_provenance, "
+        f"       relationships(path)[0].confidence AS direct_confidence, "
+        f"       relationships(path)[0].evidence_chunk_id AS chunk_id, "
+        f"       relationships(path)[0].evidence_timestamp AS timestamp "
+        f"ORDER BY depth DESC, timestamp ASC"
+    )
+
+    params = {
+        "concept_name": concept_name.strip(),
+        "lecture_id": lecture_id,
+        "min_confidence": min_confidence,
+    }
+
+    try:
+        items = []
+        with driver.session() as session:
+            records = list(session.run(cypher, **params))
+
+            # Fallback to substring matching if exact match yields no rows
+            if not records:
+                cypher_partial = (
+                    f"MATCH path = (prereq {{lecture_id: $lecture_id}})"
+                    f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
+                    f"(target {{lecture_id: $lecture_id}}) "
+                    f"WHERE toLower(target.name) CONTAINS toLower($concept_name) "
+                    f"  AND all(rel IN relationships(path) WHERE rel.lecture_id = $lecture_id AND (rel.confidence IS NULL OR rel.confidence >= $min_confidence)) "
+                    f"RETURN prereq.entity_id AS entity_id, "
+                    f"       prereq.name AS concept, "
+                    f"       prereq.type AS type, "
+                    f"       target.name AS target_concept, "
+                    f"       length(path) AS depth, "
+                    f"       [node IN nodes(path) | node.name] AS path_nodes, "
+                    f"       [rel IN relationships(path) | {{ "
+                    f"           source: startNode(rel).name, "
+                    f"           target: endNode(rel).name, "
+                    f"           confidence: rel.confidence, "
+                    f"           chunk_id: rel.evidence_chunk_id, "
+                    f"           timestamp: rel.evidence_timestamp "
+                    f"       }}] AS edge_provenance, "
+                    f"       relationships(path)[0].confidence AS direct_confidence, "
+                    f"       relationships(path)[0].evidence_chunk_id AS chunk_id, "
+                    f"       relationships(path)[0].evidence_timestamp AS timestamp "
+                    f"ORDER BY depth DESC, timestamp ASC"
+                )
+                records = list(session.run(cypher_partial, **params))
+
+            seen_paths = set()
+            for rec in records:
+                path_nodes = rec.get("path_nodes", [])
+                path_key = tuple(path_nodes)
+                if path_key in seen_paths:
+                    continue
+                seen_paths.add(path_key)
+
+                parent_concept = path_nodes[1] if len(path_nodes) > 1 else rec.get("target_concept", "")
+                items.append({
+                    "concept": rec.get("concept", ""),
+                    "entity_id": rec.get("entity_id", ""),
+                    "type": rec.get("type", "Concept"),
+                    "depth": rec.get("depth", 1),
+                    "timestamp": rec.get("timestamp", 0.0),
+                    "chunk_id": rec.get("chunk_id", ""),
+                    "confidence": rec.get("direct_confidence") or 0.8,
+                    "parent_concept": parent_concept,
+                    "target_concept": rec.get("target_concept", ""),
+                    "path": path_nodes,
+                    "edge_provenance": rec.get("edge_provenance", []),
+                })
+
+        return items
+    finally:
+        if close_driver:
+            driver.close()
+
+
+def get_prerequisites_for_query(
+    query: str,
+    lecture_id: str,
+    driver: Optional[Any] = None,
+    local_settings: Optional[LocalSettings] = None,
+    graph_results: Optional[List[Dict[str, Any]]] = None,
+    min_confidence: float = 0.65,
+) -> List[Dict[str, Any]]:
+    """
+    Identify target concepts from a user query or graph retrieval results,
+    then trace backward prerequisites for them.
+    """
+    if not lecture_id:
+        return []
+
+    # 1. Identify target candidates
+    candidate_targets = []
+    # From graph_results first (highest relevance)
+    if graph_results:
+        for r in graph_results:
+            name = r.get("start_name") or r.get("related_name")
+            if name and name not in candidate_targets:
+                candidate_targets.append(name)
+
+    # From query entity extraction
+    extracted = extract_entities(query)
+    for name in extracted:
+        if name not in candidate_targets:
+            candidate_targets.append(name)
+
+    if not candidate_targets:
+        return []
+
+    # 2. Retrieve prerequisites for each candidate target
+    all_prereqs = []
+    seen_concepts = set()
+
+    for target in candidate_targets[:2]:  # focus on top 1-2 concepts
+        try:
+            items = get_prerequisites_for_concept(
+                concept_name=target,
+                lecture_id=lecture_id,
+                driver=driver,
+                local_settings=local_settings,
+                min_confidence=min_confidence,
+            )
+            for item in items:
+                cid = (item["concept"], item.get("parent_concept"))
+                if cid not in seen_concepts:
+                    seen_concepts.add(cid)
+                    all_prereqs.append(item)
+        except Exception as exc:
+            logger.warning("Prerequisite lookup failed for target '%s': %s", target, exc)
+
+    return all_prereqs

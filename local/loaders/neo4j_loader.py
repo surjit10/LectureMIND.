@@ -192,10 +192,25 @@ def load_neo4j(
     try:
         node_count = _create_nodes(driver, entities, lecture_id)
         rel_count = _create_relationships(driver, relations, lecture_id)
+
+        # Optional: load enriched prerequisites if prerequisites.json is present
+        prereq_count = 0
+        prereqs_path = package_dir / "prerequisites.json"
+        if prereqs_path.exists():
+            try:
+                from local.loaders.prerequisite_enricher import load_prerequisites_into_neo4j
+                prereqs_data = json.loads(prereqs_path.read_text(encoding="utf-8"))
+                prereq_list = prereqs_data.get("prerequisites", []) if isinstance(prereqs_data, dict) else prereqs_data
+                prereq_count = load_prerequisites_into_neo4j(driver, prereq_list, lecture_id)
+            except Exception as exc:
+                logger.warning("Failed to load optional prerequisites.json: %s", exc)
+
     finally:
         if close_driver:
             driver.close()
 
     result = {"node_count": node_count, "relationship_count": rel_count}
+    if prereq_count > 0:
+        result["prerequisite_count"] = prereq_count
     logger.info("D1: Neo4j load complete — %s", result)
     return result
