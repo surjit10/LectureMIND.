@@ -306,9 +306,6 @@ def generate_triplets(
         for sid in sibling_ids:
             neg_pool.extend(all_chunks_by_seg.get(sid, []))
 
-        if not neg_pool:
-            continue
-
         queries = segment_queries.get(seg_id, [])
         if not queries:
             continue
@@ -321,8 +318,19 @@ def generate_triplets(
             pos_chunk = rng.choice(pos_chunks)
             pos_text = _chunk_to_text(pos_chunk)
 
-            # Pick a hard negative from sibling segments.
-            neg_chunk = rng.choice(neg_pool)
+            # Pick a hard negative: prefer sibling segments; fallback to intra-segment chunks.
+            if neg_pool:
+                neg_chunk = rng.choice(neg_pool)
+            else:
+                # Single-segment lecture fallback: pick any distinct chunk from the lecture
+                candidate_negs = [
+                    c for c in chunks
+                    if c.get("chunk_id") != pos_chunk.get("chunk_id")
+                ]
+                if not candidate_negs:
+                    continue
+                neg_chunk = rng.choice(candidate_negs)
+
             neg_text = _chunk_to_text(neg_chunk)
 
             if not pos_text.strip() or not neg_text.strip():
@@ -340,7 +348,9 @@ def generate_triplets(
     logger.info(stats.report("B1"))
 
     if not triplets:
-        raise ValueError("B1: Generated zero triplets.")
+        logger.warning(
+            "B1: Generated zero triplets (lecture may have insufficient chunks to form contrast pairs). Writing empty triplets.json."
+        )
 
     # Write triplets.json
     output_path = lecture_dir / "triplets.json"

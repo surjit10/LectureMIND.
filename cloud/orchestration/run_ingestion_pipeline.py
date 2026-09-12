@@ -189,15 +189,22 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
         embedding_count = generate_embeddings(lecture_id, cloud_settings=settings)
     logger.info("B0 complete: %d embeddings", embedding_count)
 
-    # --- B1: Triplet Generation ---
+    # --- B1: Triplet Generation (non-fatal) ---
     logger.info("Stage B1: Generating reranker training triplets...")
     from cloud.training.triplet_generator import generate_triplets
-    if shared_llm is not None:
-        triplets = generate_triplets(lecture_id, cloud_settings=settings,
-                                     llm_loader=_llm_loader)
-    else:
-        triplets = generate_triplets(lecture_id, cloud_settings=settings)
-    logger.info("B1 complete: %d triplets", len(triplets))
+    try:
+        if shared_llm is not None:
+            triplets = generate_triplets(lecture_id, cloud_settings=settings,
+                                         llm_loader=_llm_loader)
+        else:
+            triplets = generate_triplets(lecture_id, cloud_settings=settings)
+        logger.info("B1 complete: %d triplets", len(triplets))
+    except Exception as exc:
+        logger.warning("B1: Triplet generation failed (non-fatal): %s", exc)
+        triplets = []
+        trip_path = Path(settings.lecture_dir(lecture_id)) / "triplets.json"
+        if not trip_path.exists():
+            trip_path.write_text("[]", encoding="utf-8")
 
     # --- GPU Memory Cleanup: Release shared LLM after all text gen stages ---
     if shared_llm is not None:

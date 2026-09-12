@@ -151,3 +151,65 @@ class TestTripletGenerator:
 
         for t in triplets:
             assert t.query.startswith("What is ")
+
+    def test_single_segment_triplet_generation(self, cloud_settings):
+        """Single-segment lectures should fall back to intra-segment negatives instead of failing."""
+        from cloud.training.triplet_generator import generate_triplets
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_single"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        chunks = [
+            {
+                "lecture_id": "lec_single", "chunk_id": "chunk_01",
+                "timestamp": 10.0, "transcript": "Transformer attention mechanism",
+                "visual_context": "Self-attention diagram", "ocr_text": "Q, K, V matrices",
+            },
+            {
+                "lecture_id": "lec_single", "chunk_id": "chunk_02",
+                "timestamp": 20.0, "transcript": "Feed forward network layers",
+                "visual_context": "MLP block diagram", "ocr_text": "ReLU(xW1 + b1)W2 + b2",
+            },
+        ]
+        segments = [
+            {"segment_id": "seg_01", "title": "Transformers", "start": 10.0, "end": 25.0,
+             "chunks": ["chunk_01", "chunk_02"]},
+        ]
+
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        triplets = generate_triplets("lec_single", cloud_settings=cloud_settings)
+        assert len(triplets) > 0
+        assert (lecture_dir / "triplets.json").exists()
+        for t in triplets:
+            assert t.positive != t.negative
+
+    def test_single_chunk_does_not_crash(self, cloud_settings):
+        """Lectures with only 1 chunk write an empty triplets.json gracefully without crashing."""
+        from cloud.training.triplet_generator import generate_triplets
+
+        lecture_dir = Path(cloud_settings.lecture_dir("lec_one_chunk"))
+        lecture_dir.mkdir(parents=True, exist_ok=True)
+
+        chunks = [
+            {
+                "lecture_id": "lec_one_chunk", "chunk_id": "chunk_01",
+                "timestamp": 10.0, "transcript": "Introductory statement",
+                "visual_context": "Title slide", "ocr_text": "Introduction",
+            },
+        ]
+        segments = [
+            {"segment_id": "seg_01", "title": "Intro", "start": 10.0, "end": 20.0,
+             "chunks": ["chunk_01"]},
+        ]
+
+        (lecture_dir / "multimodal_chunks.json").write_text(json.dumps(chunks))
+        (lecture_dir / "segments.json").write_text(json.dumps(segments))
+
+        triplets = generate_triplets("lec_one_chunk", cloud_settings=cloud_settings)
+        assert triplets == []
+        output_file = lecture_dir / "triplets.json"
+        assert output_file.exists()
+        assert json.loads(output_file.read_text()) == []
+
