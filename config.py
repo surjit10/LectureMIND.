@@ -80,6 +80,13 @@ class CloudSettings(BaseSettings):
     # individual Kaggle run into producing a per-lecture model checkpoint.
     ENABLE_PIPELINE_RERANKER_TRAINING: bool = False
 
+    # Multimodal Extraction Windowing (Stages A8 & A9)
+    # Token budget for content per window. TransformersBackend prompt ceiling
+    # is max_length=3072; budget + instruction envelope + safety margin <= 3072.
+    EXTRACTION_WINDOW_TOKEN_BUDGET: int = 2000
+    EXTRACTION_WINDOW_OVERLAP_CHUNKS: int = 1
+    EXTRACTION_TOKEN_SAFETY_MARGIN: int = 250
+
     # ── Pipeline B — Global Reranker Training (independent Kaggle notebook) ──
     # This pipeline is COMPLETELY separate from the lecture processing pipeline
     # (Pipeline A). It consumes only the triplets.json files inside previously

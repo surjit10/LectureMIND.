@@ -109,30 +109,28 @@ def test_candidate_prefiltering_and_metrics_reporting():
 
 
 def test_hard_temporal_gate():
-    """Verify t(A) >= t(B) strictly fails (no backward causality)."""
-    detector = DiscourseCueDetector()
-    candidate = {
-        "source_id": "ent_002",
-        "source_name": "Thrashing",
-        "source_type": "Concept",
-        "target_id": "ent_001",
-        "target_name": "Page Table",
-        "target_type": "Concept",
-        "t_source": 50.0,
-        "t_target": 10.0,
-        "existing_relations": [],
-    }
+    """Verify t(A) > t(B) strictly fails (no backward causality)."""
+    # In candidate generation, reverse temporal order is strictly rejected:
+    # Page Table appears at t=10.0, Thrashing appears at t=50.0.
+    # Thrashing (50.0) -> Page Table (10.0) must be rejected.
     chunks = [
         MultimodalChunk(
             lecture_id="lec_001",
             chunk_id="chunk_001",
-            timestamp=50.0,
-            transcript="Page Table is a prerequisite for Thrashing.",
+            timestamp=10.0,
+            transcript="First, we define Page Table architecture.",
             visual_context="",
             ocr_text="",
-        )
+        ),
+        MultimodalChunk(
+            lecture_id="lec_001",
+            chunk_id="chunk_002",
+            timestamp=50.0,
+            transcript="Later, Thrashing occurs when working sets exceed memory.",
+            visual_context="",
+            ocr_text="",
+        ),
     ]
-    # In candidate generation, reverse temporal order is rejected
     entities = [
         Entity(entity_id="ent_001", name="Page Table", type=EntityType.Concept),
         Entity(entity_id="ent_002", name="Thrashing", type=EntityType.Concept),
@@ -143,13 +141,104 @@ def test_hard_temporal_gate():
             title="Overview",
             start=0.0,
             end=100.0,
-            chunks=["chunk_001"],
+            chunks=["chunk_001", "chunk_002"],
         )
     ]
     candidates, metrics = generate_prerequisite_candidates(entities, chunks, segments, [])
-    # Thrashing -> Page Table must be rejected by temporal gate
+    # Thrashing (t=50) -> Page Table (t=10) must be rejected by temporal gate
     thrashing_to_pt = [c for c in candidates if c["source_id"] == "ent_002" and c["target_id"] == "ent_001"]
     assert len(thrashing_to_pt) == 0
+    assert metrics["rejections"]["temporal_order"] > 0
+
+    # Normal forward order: Page Table (t=10) -> Thrashing (t=50) accepted to candidate evaluation
+    pt_to_thrashing = [c for c in candidates if c["source_id"] == "ent_001" and c["target_id"] == "ent_002"]
+    assert len(pt_to_thrashing) == 1
+
+
+def test_same_timestamp_candidate_accepted_with_evidence():
+    """
+    Verify candidates introduced in the same chunk (timestamp(A) == timestamp(B))
+    are NOT rejected solely by timestamp equality, allowing discourse/graph evidence
+    to determine validity.
+    """
+    entities = [
+        Entity(entity_id="e_ac", name="Alternating Current", type=EntityType.Concept),
+        Entity(entity_id="e_tf", name="Transformer", type=EntityType.Concept),
+    ]
+    # Both first appear in chunk_001 at t=0.0
+    chunks = [
+        MultimodalChunk(
+            lecture_id="lec_001",
+            chunk_id="chunk_001",
+            timestamp=0.0,
+            transcript="Before understanding Transformer, let's first understand Alternating Current.",
+            visual_context="",
+            ocr_text="",
+        )
+    ]
+    segments = [
+        LectureSegment(
+            segment_id="seg_001",
+            title="Intro",
+            start=0.0,
+            end=30.0,
+            chunks=["chunk_001"],
+        )
+    ]
+    relations = [
+        Relation(
+            relation_id="rel_001",
+            source_entity_id="e_ac",
+            relation=RelationType.PREREQUISITE_OF,
+            target_entity_id="e_tf",
+        )
+    ]
+
+    candidates, metrics = generate_prerequisite_candidates(entities, chunks, segments, relations)
+    cand_pairs = [(c["source_id"], c["target_id"]) for c in candidates]
+    assert ("e_ac", "e_tf") in cand_pairs, "Same-timestamp candidate with evidence must not be rejected"
+
+    # Full inference run: should pass threshold because of discourse and A9 relation
+    result = infer_prerequisites(entities, chunks, segments, relations, min_confidence=0.65)
+    inferred_pairs = [(p["source_id"], p["target_id"]) for p in result["prerequisites"]]
+    assert ("e_ac", "e_tf") in inferred_pairs
+    ac_to_tf = [p for p in result["prerequisites"] if p["source_id"] == "e_ac"][0]
+    assert ac_to_tf["confidence"] >= 0.65
+    assert ac_to_tf["signals"]["temporal"] == 0.5  # Neutral score for equal timestamps
+
+
+def test_same_timestamp_without_evidence_rejected_by_hard_anchor():
+    """
+    Verify that equal timestamps alone without discourse or graph evidence
+    remain strictly rejected with confidence 0.0 by the Hard Evidence Anchor.
+    """
+    entities = [
+        Entity(entity_id="e_x", name="Concept X", type=EntityType.Concept),
+        Entity(entity_id="e_y", name="Concept Y", type=EntityType.Concept),
+    ]
+    chunks = [
+        MultimodalChunk(
+            lecture_id="lec_001",
+            chunk_id="chunk_001",
+            timestamp=0.0,
+            transcript="In this section we mention Concept X and Concept Y without relation.",
+            visual_context="",
+            ocr_text="",
+        )
+    ]
+    segments = [
+        LectureSegment(
+            segment_id="seg_001",
+            title="Intro",
+            start=0.0,
+            end=30.0,
+            chunks=["chunk_001"],
+        )
+    ]
+
+    result = infer_prerequisites(entities, chunks, segments, [], min_confidence=0.50)
+    assert len(result["prerequisites"]) == 0, "No edges must pass without discourse or graph evidence"
+
 
 
 def test_hard_evidence_anchor_and_synthetic_scenario():

@@ -110,14 +110,17 @@ def load_prerequisites_into_neo4j(
             query = (
                 "MATCH (s {entity_id: $source, lecture_id: $lecture_id}) "
                 "MATCH (t {entity_id: $target, lecture_id: $lecture_id}) "
-                "MERGE (s)-[r:PREREQUISITE_OF {relation_id: $relation_id, lecture_id: $lecture_id}]->(t) "
-                "SET r.confidence = $confidence, "
+                "MERGE (s)-[r:PREREQUISITE_OF]->(t) "
+                "SET r.lecture_id = $lecture_id, "
+                "    r.confidence = $confidence, "
                 "    r.is_inferred = true, "
                 "    r.evidence_chunk_id = $chunk_id, "
                 "    r.evidence_timestamp = $timestamp, "
                 "    r.signals = $signals, "
                 "    r.discourse_pattern = $discourse_pattern, "
-                "    r.discourse_snippet = $discourse_snippet"
+                "    r.discourse_snippet = $discourse_snippet, "
+                "    r.inferred_relation_id = $relation_id, "
+                "    r.relation_id = coalesce(r.relation_id, $relation_id)"
             )
             session.run(
                 query,

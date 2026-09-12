@@ -125,6 +125,12 @@ class TransformersBackend(BaseLLMBackend):
 
         return results
 
+    def count_tokens(self, text: str) -> int:
+        """Count tokens accurately using the loaded model tokenizer."""
+        if not hasattr(self, "tokenizer") or self.tokenizer is None:
+            raise RuntimeError("TransformersBackend tokenizer is not initialized.")
+        return len(self.tokenizer.encode(text, add_special_tokens=False))
+
     def cleanup(self) -> None:
         """Release model and tokenizer, free GPU memory."""
         import torch

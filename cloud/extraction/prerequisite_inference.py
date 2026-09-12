@@ -360,9 +360,11 @@ def generate_prerequisite_candidates(
             off_a = ent_a.get("earliest_offset", 0.0)
             off_b = ent_b.get("earliest_offset", 0.0)
 
-            # Gate 1: Strict temporal causality gate (t(A) < t(B))
-            # A must strictly precede B in lecture time.
-            if math.isinf(t_a) or math.isinf(t_b) or t_a >= t_b:
+            # Gate 1: Strict temporal causality gate (t(A) <= t(B))
+            # A must not appear after B in lecture time.
+            # Equal timestamps (same initial chunk) are permitted so discourse/graph
+            # evidence can determine validity without false temporal rejection.
+            if math.isinf(t_a) or math.isinf(t_b) or t_a > t_b:
                 rejections["temporal_order"] += 1
                 continue
 
@@ -496,9 +498,14 @@ def score_prerequisite_candidate(
     prominence_score = min(1.0, prominence_score)
 
     # 4. Temporal Proximity (0.15)
-    delta_t = max(0.0, t_b - t_a)
-    # Proximity decay over 10 minutes (600 seconds)
-    temporal_score = 1.0 / (1.0 + (delta_t / 600.0))
+    if t_a == t_b:
+        # Unknown temporal ordering (same initial chunk); assign neutral score
+        # so other evidence determines validity without unearned forward precedence.
+        temporal_score = 0.5
+    else:
+        delta_t = max(0.0, t_b - t_a)
+        # Proximity decay over 10 minutes (600 seconds)
+        temporal_score = 1.0 / (1.0 + (delta_t / 600.0))
 
     # CRITICAL: HARD EVIDENCE ANCHOR
     # Merely appearing earlier or having a slide title MUST NOT create an edge.
