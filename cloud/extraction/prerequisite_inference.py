@@ -25,21 +25,26 @@ logger = logging.getLogger(__name__)
 # Directional prerequisite implication weights from existing A9 relations:
 # maps (relation_type, is_forward) -> prerequisite weight
 RELATION_PREREQUISITE_WEIGHTS = {
-    # If s PREREQUISITE_OF t: s is prerequisite of t
+    # If s PREREQUISITE_OF t: s is prerequisite of t (explicit strong dependency)
     ("PREREQUISITE_OF", True): 1.0,
     ("PREREQUISITE_OF", False): 0.0,
-    # If s USED_BY t (t uses s): s is prerequisite of t
-    ("USED_BY", True): 1.0,
-    ("USED_BY", False): 0.0,
+    # If s INTRODUCED_BEFORE t: chronological/specialization ordering
+    ("INTRODUCED_BEFORE", True): 0.70,
+    ("INTRODUCED_BEFORE", False): 0.0,
     # If s DERIVED_FROM t (s is derived from t): t is prerequisite of s
     ("DERIVED_FROM", True): 0.0,
-    ("DERIVED_FROM", False): 1.0,
-    # If s EXPLAINS t: s is prerequisite of t
-    ("EXPLAINS", True): 0.8,
+    ("DERIVED_FROM", False): 0.80,
+    # If s USED_BY t: t uses s (hardware/variable/component usage).
+    # Supporting evidence only; cannot pass threshold on its own (max score 0.44 < 0.65).
+    ("USED_BY", True): 0.20,
+    ("USED_BY", False): 0.0,
+    # If s EXPLAINS t: s explains t (explanatory/loss mechanism).
+    # Supporting evidence only; cannot pass threshold on its own.
+    ("EXPLAINS", True): 0.10,
     ("EXPLAINS", False): 0.0,
-    # If s INTRODUCED_BEFORE t: s is prerequisite of t
-    ("INTRODUCED_BEFORE", True): 0.3,
-    ("INTRODUCED_BEFORE", False): 0.0,
+    # Visualization: no prerequisite implication
+    ("VISUALIZED_BY", True): 0.0,
+    ("VISUALIZED_BY", False): 0.0,
 }
 
 _STOPWORDS = {
@@ -61,11 +66,22 @@ def _clean_text(text: str) -> str:
     return text
 
 
+GENERIC_HEAD_NOUNS = {
+    "connection", "configuration", "circuit", "concept", "type", "device", "phenomenon", "mechanism"
+}
+
+
 def _build_term_regex(term: str) -> str:
     """
     Build a flexible regex that matches singular/plural and inflectional
-    variations of each word in a term (e.g. 'Page Table' -> 'page(s)? table(s|es)?').
+    variations of each word in a term (e.g. 'Page Table' -> 'page(s)? table(s|es)?'),
+    with support for hyphens, connectors ('and'), optional classification head nouns,
+    and standard technical acronyms (e.g. 'AC', 'DC', 'EMF').
     """
+    # Distinguish generic 'Current' from compound terms ('Alternating Current', 'AC Current', 'Eddy Current', 'Direct Current', 'DC Current')
+    if term.strip().lower() in {"current", "currents"}:
+        return r"(?<!alternating\s)(?<!alternating\-)(?<!ac\s)(?<!ac\-)(?<!eddy\s)(?<!eddy\-)(?<!direct\s)(?<!direct\-)(?<!dc\s)(?<!dc\-)current(?:s|es)?"
+
     tokens = [t for t in re.findall(r"[a-zA-Z0-9]+", term.lower()) if t]
     if not tokens:
         return re.escape(term)
@@ -82,7 +98,25 @@ def _build_term_regex(term: str) -> str:
             parts.append(f"{re.escape(base)}(?:s|es)?")
         else:
             parts.append(f"{re.escape(tok)}(?:s|es)?")
-    return r"\s+".join(parts)
+
+    prefix_sep = r"(?:[\s\-]+(?:and\s+)?)"
+    if len(tokens) >= 3 and tokens[-1] in GENERIC_HEAD_NOUNS:
+        prefix = prefix_sep.join(parts[:-1])
+        suffix = parts[-1]
+        term_pattern = f"(?:{prefix}(?:{prefix_sep}{suffix})?)"
+    else:
+        term_pattern = prefix_sep.join(parts)
+
+    # Technical acronym and abbreviation aliases
+    words = term.split()
+    if len(words) >= 2:
+        acronym = "".join([w[0].lower() for w in words if w[0].isalnum()])
+        if len(acronym) >= 2 and acronym in {"ac", "dc"}:
+            term_pattern = f"(?:{term_pattern}|{re.escape(acronym)})"
+        elif "electromotive" in term.lower():
+            term_pattern = f"(?:{term_pattern}|emf)"
+
+    return term_pattern
 
 
 class DiscourseCueDetector:
@@ -98,62 +132,114 @@ class DiscourseCueDetector:
         self._compiled_patterns = [
             # 1. Explicit prerequisite statements (Confidence: 1.0)
             (
-                r"\b{A}\b.*?\bis\s+(?:a\s+)?prerequisite\s+(?:for|to)\s+\b{B}\b",
+                r"\b{A}\b[^.]{1,80}\bis\s+(?:a\s+)?prerequisite\s+(?:for|to)\s+\b{B}\b",
                 1.0,
                 "explicit_prerequisite",
             ),
             (
-                r"\bprerequisite\s+(?:for|to)\s+\b{B}\b.*?\bis\s+\b{A}\b",
+                r"\bprerequisite\s+(?:for|to)\s+\b{B}\b[^.]{1,80}\bis\s+\b{A}\b",
                 1.0,
                 "explicit_prerequisite_rev",
             ),
             (
-                r"\bwithout\s+(?:understanding\s+|knowing\s+)?\b{A}\b.*?(?:cannot|can't|impossible\s+to)\s+(?:understand|grasp|follow)\s+\b{B}\b",
+                r"\bwithout\s+(?:understanding\s+|knowing\s+)?\b{A}\b[^.]{1,80}(?:cannot|can't|impossible\s+to)\s+(?:understand|grasp|follow)\s+\b{B}\b",
                 0.95,
                 "negative_necessity",
             ),
+            (
+                r"\b{B}\b[^.]{1,60}\bcan\s+only\s+(?:work|operate|function)\s+(?:using|with|by|if\s+there\s+is)\s+(?:an?\s+)?\b{A}\b",
+                0.95,
+                "only_works_with_requirement",
+            ),
+            (
+                r"\bwhy\s+only\s+(?:an?\s+)?\b{A}\b\s+can\s+be\s+used\s+in\s+\b{B}\b",
+                0.95,
+                "why_only_used_requirement",
+            ),
             # 2. Before / In-order-to dependency cues (Confidence: 0.90 - 0.95)
             (
-                r"\bbefore\s+(?:we\s+)?(?:move\s+on\s+to|discuss|discussing|look\s+at|talk\s+about|understand|learn)\s+\b{B}\b.*?(?:let\s*\'?s|let\s+us|we|must|first|need\s+to|should)\s+(?:first\s+)?(?:understand|look\s+at|know|cover|review)\s+\b{A}\b",
+                r"\bbefore\s+(?:we\s+)?(?:move\s+on\s+to|discuss|discussing|look\s+at|talk\s+about|understand|learn)\s+\b{B}\b[^.]{1,80}(?:let\s*\'?s|let\s+us|we|must|first|need\s+to|should)\s+(?:first\s+)?(?:understand|look\s+at|know|cover|review)\s+\b{A}\b",
                 0.95,
                 "pedagogical_precedence",
             ),
             (
-                r"\b(?:need|have|require)\s+to\s+(?:know|understand|master)\s+\b{A}\b.*?(?:in\s+order\s+to|to)\s+(?:understand|know|study|implement)\s+\b{B}\b",
+                r"\b(?:need|have|require)\s+to\s+(?:know|understand|master)\s+\b{A}\b[^.]{1,80}(?:in\s+order\s+to|to)\s+(?:understand|know|study|implement)\s+\b{B}\b",
                 0.95,
                 "understanding_requirement",
             ),
             (
-                r"\bin\s+order\s+to\s+(?:understand|grasp|follow)\s+\b{B}\b.*?(?:you|we|one)?\s*(?:first\s+)?(?:must|need\s+to|have\s+to)\s+(?:understand|know)\s+\b{A}\b",
+                r"\bin\s+order\s+to\s+(?:understand|grasp|follow)\s+\b{B}\b[^.]{1,80}(?:you|we|one)?\s*(?:first\s+)?(?:must|need\s+to|have\s+to)\s+(?:understand|know)\s+\b{A}\b",
                 0.95,
                 "in_order_to_requirement",
             ),
-            # 3. Structural Reliance cues (Confidence: 0.85 - 0.90)
+            # 3. Specialization / Categorical Subdivision cues (Confidence: 0.90)
             (
-                r"\b{B}\b.*?\b(?:relies\s+on|depends\s+on|builds\s+upon|builds\s+on|is\s+based\s+on)\s+(?:the\s+mechanism\s+(?:we\s+discussed\s+earlier,?\s*)?)?\b{A}\b",
+                r"\b{A}\b[^.]{1,80}\b(?:are\s+manufactured\s+to\s+be|can\s+be\s+(?:classified|categorized|divided|split)\s+into|come\s+in\s+two\s+(?:types|forms)\s*(?:such\s+as|like|:)?|can\s+be\s+either|are\s+usually\s+in\s+a)\s+[^.]{0,60}\b{B}\b",
+                0.90,
+                "specialization_subdivision",
+            ),
+            (
+                r"\b{B}\b[^.]{0,60}\b(?:is\s+a\s+(?:type|form|kind|specialization|variation)\s+of|is\s+simply\s+a|are\s+made\s+from\s+(?:either\s+)?(?:three\s+)?(?:separate\s+)?)\s+\b{A}\b",
+                0.90,
+                "specialization_type_of",
+            ),
+            # 4. Compositional & Topological Configuration cues (Confidence: 0.85 - 0.90)
+            (
+                r"\b{A}\b\s+(?:configuration|system|setup)\s+(?:is\s+)?(?:known\s+as|called|referred\s+to\s+as|designated\s+as)\s+(?:a\s+|an\s+)?\b{B}\b",
+                0.85,
+                "topological_configuration",
+            ),
+            (
+                r"\b{B}\b[^.]{1,60}\b(?:refers\s+to|consists\s+of|is\s+a\s+configuration\s+of)\s+[^.]{1,60}\b{A}\b",
+                0.85,
+                "config_reference",
+            ),
+            # 5. Causal Physical Foundation & Inductive Generation cues (Confidence: 0.85 - 0.90)
+            (
+                r"\b(?:change\s+in|fluctuation\s+in|alternation\s+(?:of|in)|flow\s+of)\s+\b{A}\b[^.]{1,60}\b(?:creates|generates|produces|induces|results\s+in)\s+(?:a\s+|an\s+|the\s+)?(?:fluctuating\s+|changing\s+|varying\s+|dynamic\s+)?\b{B}\b",
+                0.85,
+                "causal_generation",
+            ),
+            (
+                r"\bpass\s+(?:an?\s+)?\b{A}\b[^.]{1,40}\bthen\s+(?:the\s+)?\b{B}\b\s+will\s+(?:fluctuate|vary|increase|decrease|change|reverse)\b",
+                0.85,
+                "signal_variation",
+            ),
+            (
+                r"\b(?:change\s+in\s+(?:the\s+)?(?:intensity\s+and\s+direction\s+of\s+(?:the\s+)?|fluctuation\s+of\s+(?:the\s+)?)|fluctuating\s+)\b{A}\b[^.]{1,60}\b(?:forces\s+(?:them|electrons)\s+to\s+move|produces|induces)\s+[^.]{1,60}\b{B}\b",
+                0.85,
+                "inductive_generation",
+            ),
+            (
+                r"\b{A}\b\s+(?:constantly\s+)?(?:disturbs|induces|creates|generates|produces|causes)\b[^.]{0,100}\.\s+this\s+(?:movement|force|action|induction|effect|phenomenon)\s+(?:is\s+known\s+as|is\s+called|causes|induces|produces|results\s+in)\s+[^.]{0,80}\b{B}\b",
+                0.90,
+                "anaphoric_induction",
+            ),
+            (
+                r"\b{B}\b[^.]{1,60}\b(?:is\s+induced|is\s+generated|arises\s+from|occurs\s+due\s+to)\s+(?:due\s+to|because\s+of|from\s+the\s+(?:changing|fluctuating|varying))\s+\b{A}\b",
+                0.85,
+                "passive_generation",
+            ),
+            (
+                r"\bto\s+(?:increase|decrease|step)\s+(?:the\s+voltage\s+in\s+)?(?:a\s+)?\b{B}\b[^.]{1,60}\b(?:turns\s+(?:to|on|in)\s+(?:the\s+)?)\b{A}\b",
+                0.85,
+                "turns_stepping_enablement",
+            ),
+            # 6. Structural Reliance cues (Confidence: 0.85 - 0.90)
+            (
+                r"\b{B}\b[^.]{1,60}\b(?:relies\s+on|depends\s+on|builds\s+upon|builds\s+on|is\s+based\s+on)\s+(?:the\s+mechanism\s+(?:we\s+discussed\s+earlier,?\s*)?)?\b{A}\b",
                 0.90,
                 "reliance_dependency",
             ),
             (
-                r"\b(?:recall|remember)\s+\b{A}\b.*?(?:because|since|as)\s+we(?:'ll|\s+will)?\s+(?:use|need)\s+it\s+(?:here\s+)?(?:for|in)?\s*\b{B}\b",
+                r"\b(?:recall|remember)\s+\b{A}\b[^.]{1,60}(?:because|since|as)\s+we(?:'ll|\s+will)?\s+(?:use|need)\s+it\s+(?:here\s+)?(?:for|in)?\s*\b{B}\b",
                 0.85,
                 "recall_relevance",
             ),
             (
-                r"\b{A}\b.*?\bis\s+(?:needed|required|essential|fundamental)\s+for\s+\b{B}\b",
+                r"\b{A}\b[^.]{1,60}\bis\s+(?:needed|required|essential|fundamental)\s+for\s+\b{B}\b",
                 0.85,
                 "essential_foundation",
-            ),
-            # 4. Mechanism usage cues (Confidence: 0.75 - 0.80)
-            (
-                r"\b{B}\b.*?\buses\s+(?:the\s+concept\s+of\s+)?\b{A}\b",
-                0.75,
-                "mechanism_usage",
-            ),
-            (
-                r"\b{B}\b.*?\bis\s+derived\s+from\s+\b{A}\b",
-                0.80,
-                "derivation",
             ),
         ]
 
@@ -360,13 +446,38 @@ def generate_prerequisite_candidates(
             off_a = ent_a.get("earliest_offset", 0.0)
             off_b = ent_b.get("earliest_offset", 0.0)
 
-            # Gate 1: Strict temporal causality gate (t(A) <= t(B))
-            # A must not appear after B in lecture time.
-            # Equal timestamps (same initial chunk) are permitted so discourse/graph
-            # evidence can determine validity without false temporal rejection.
-            if math.isinf(t_a) or math.isinf(t_b) or t_a > t_b:
+            if math.isinf(t_a) or math.isinf(t_b):
                 rejections["temporal_order"] += 1
                 continue
+
+            id_a = ent_a["entity_id"]
+            id_b = ent_b["entity_id"]
+            fwd_rels = existing_relations.get((id_a, id_b), [])
+            rev_rels = existing_relations.get((id_b, id_a), [])
+            has_rel = bool(fwd_rels or rev_rels)
+
+            # Gate 1: Temporal causality with pedagogical inversion allowance.
+            # Lecture presentation order sometimes introduces an overarching device
+            # before foundational physics (e.g. Transformer at 0s, EMF at 132s).
+            # If t(A) > t(B), allow ONLY IF backed by explicit strong prerequisite evidence:
+            # - Direct PREREQUISITE_OF relation in A9, OR
+            # - Target is derived from source (DERIVED_FROM in reverse), OR
+            # - Strong discourse cue in transcript (score >= 0.80).
+            # Otherwise, backward temporal order is strictly rejected.
+            if t_a > t_b:
+                has_strong_rel = ("PREREQUISITE_OF" in fwd_rels) or ("DERIVED_FROM" in rev_rels)
+                if not has_strong_rel:
+                    has_strong_disc = False
+                    detector_inst = DiscourseCueDetector()
+                    for chk in chunks:
+                        txt = chk.transcript if hasattr(chk, "transcript") else chk.get("transcript", "")
+                        sc, _, _ = detector_inst.detect(txt, ent_a["name"], ent_b["name"])
+                        if sc >= 0.80:
+                            has_strong_disc = True
+                            break
+                    if not has_strong_disc:
+                        rejections["temporal_order"] += 1
+                        continue
 
             # Gate 2: Structural or discourse proximity pre-filter
             id_a = ent_a["entity_id"]
@@ -502,10 +613,15 @@ def score_prerequisite_candidate(
         # Unknown temporal ordering (same initial chunk); assign neutral score
         # so other evidence determines validity without unearned forward precedence.
         temporal_score = 0.5
-    else:
+    elif t_a < t_b:
         delta_t = max(0.0, t_b - t_a)
         # Proximity decay over 10 minutes (600 seconds)
         temporal_score = 1.0 / (1.0 + (delta_t / 600.0))
+    else:
+        # Backward temporal delivery (e.g. foundational concept introduced after overarching artifact)
+        # Moderate base score (0.4) decayed by time gap to reflect non-standard presentation order
+        delta_t = t_a - t_b
+        temporal_score = 0.4 / (1.0 + (delta_t / 600.0))
 
     # CRITICAL: HARD EVIDENCE ANCHOR
     # Merely appearing earlier or having a slide title MUST NOT create an edge.

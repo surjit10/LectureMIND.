@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
+    "annotation_method": "LLM-assisted reference labels, pending human verification",
+    "total_gold_entities": 16,
+    "description": "Reference conceptual entities derived from the Transformer lecture transcript and slides (LLM-assisted reference, pending human verification)."
+  },
+  "entities": [
+    {
+      "canonical_name": "Transformer",
+      "aliases": ["Transformers", "Basic Transformer"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000002", "chunk_000005", "chunk_000006", "chunk_000007", "chunk_000008"],
+      "description": "Electrical device that transfers electrical energy between circuits through electromagnetic induction."
+    },
+    {
+      "canonical_name": "Alternating Current",
+      "aliases": ["AC", "AC current", "alternating current"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000002", "chunk_000003", "chunk_000004"],
+      "description": "Electric current which periodically reverses direction, creating a changing magnetic field."
+    },
+    {
+      "canonical_name": "Direct Current",
+      "aliases": ["DC", "DC current"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000002", "chunk_000004"],
+      "description": "Electric current flowing in one constant direction, producing a constant unchanging magnetic field."
+    },
+    {
+      "canonical_name": "Magnetic Field",
+      "aliases": ["magnetic fields"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000002", "chunk_000003", "chunk_000004", "chunk_000005", "chunk_000008"],
+      "description": "Field produced by electric currents; must change in intensity/direction to induce electromotive force."
+    },
+    {
+      "canonical_name": "Sinusoidal Waveform",
+      "aliases": ["sine wave", "sine wave pattern"],
+      "type": "Concept",
+      "chunks": ["chunk_000002"],
+      "description": "Mathematical waveform describing the periodic oscillation of alternating current."
+    },
+    {
+      "canonical_name": "Electromotive Force",
+      "aliases": ["EMF"],
+      "type": "Concept",
+      "chunks": ["chunk_000004"],
+      "description": "Induced electrical action produced by a changing magnetic field disturbing free electrons in a conductor."
+    },
+    {
+      "canonical_name": "Coil",
+      "aliases": ["coils", "primary coil", "secondary coil"],
+      "type": "Concept",
+      "chunks": ["chunk_000003", "chunk_000004", "chunk_000005", "chunk_000006", "chunk_000007", "chunk_000008"],
+      "description": "Loops of conductive wire wrapped to concentrate magnetic flux."
+    },
+    {
+      "canonical_name": "Iron Core",
+      "aliases": ["core", "ferromagnetic core", "ferromagnetic material"],
+      "type": "Concept",
+      "chunks": ["chunk_000005", "chunk_000006", "chunk_000007", "chunk_000008"],
+      "description": "High-permeability ferromagnetic loop placed between coils to guide magnetic flux."
+    },
+    {
+      "canonical_name": "Eddy Currents",
+      "aliases": ["eddy current"],
+      "type": "Concept",
+      "chunks": ["chunk_000005", "chunk_000006"],
+      "description": "Loops of electrical current induced within conductors by a changing magnetic field, causing resistive heat losses."
+    },
+    {
+      "canonical_name": "Laminated Iron Sheets",
+      "aliases": ["laminated sheets", "laminated sheets of iron"],
+      "type": "Concept",
+      "chunks": ["chunk_000006"],
+      "description": "Thin insulated sheets of iron stacked to form the core and suppress circulating eddy currents."
+    },
+    {
+      "canonical_name": "Step Up Transformer",
+      "aliases": ["step up transformers"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000006", "chunk_000007"],
+      "description": "Transformer that increases output secondary voltage while reducing output current via more secondary coil turns."
+    },
+    {
+      "canonical_name": "Step Down Transformer",
+      "aliases": ["step down transformers"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000006", "chunk_000007"],
+      "description": "Transformer that decreases output secondary voltage while increasing output current via fewer secondary coil turns."
+    },
+    {
+      "canonical_name": "Voltage",
+      "aliases": ["voltages"],
+      "type": "Concept",
+      "chunks": ["chunk_000004", "chunk_000006", "chunk_000007", "chunk_000008"],
+      "description": "Electric potential difference between points in the circuit."
+    },
+    {
+      "canonical_name": "Current",
+      "aliases": ["electric current"],
+      "type": "Concept",
+      "chunks": ["chunk_000002", "chunk_000003", "chunk_000004", "chunk_000005", "chunk_000006", "chunk_000007"],
+      "description": "Flow of electric charge carriers (electrons) through a conductor."
+    },
+    {
+      "canonical_name": "Three Phase Configuration",
+      "aliases": ["three phase", "3-phase configuration"],
+      "type": "Concept",
+      "chunks": ["chunk_000001", "chunk_000008"],
+      "description": "Arrangement using three alternating currents of the same frequency with a phase difference, used in commercial distribution."
+    },
+    {
+      "canonical_name": "Delta Y Connection",
+      "aliases": ["delta y", "delta star", "delta configuration", "y configuration"],
+      "type": "Concept",
+      "chunks": ["chunk_000008", "chunk_000009"],
+      "description": "Wiring configuration with primary coils in delta (triangle) and secondary coils in wye/star with a grounded neutral line."
+    }
+  ]
+}

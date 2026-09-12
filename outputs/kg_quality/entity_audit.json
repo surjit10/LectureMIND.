@@ -1,0 +1,44 @@
+{
+  "total_entities": 15,
+  "valid_entities": 14,
+  "fragment_count": 1,
+  "excessive_length_count": 1,
+  "generic_count": 0,
+  "orphan_count": 2,
+  "duplicate_groups_count": 0,
+  "fragment_rate": 0.0667,
+  "generic_rate": 0.0,
+  "orphan_rate": 0.1333,
+  "heuristic_accept_rate": 0.9333,
+  "gold_entity_precision": 0.9333,
+  "gold_entity_recall": 0.875,
+  "gold_entity_f1": 0.9032,
+  "gold_evaluation_method": "LLM-assisted reference labels, pending human verification",
+  "gold_entity_count": 16,
+  "matched_gold_entity_count": 14,
+  "tp_entity_count": 14,
+  "issues": [
+    {
+      "entity_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000014",
+      "entity_name": "Delta Y Connection",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000015",
+      "entity_name": "us a sinusoidal waveform. This is important because",
+      "issue_type": "FRAGMENT",
+      "reason": "Matches sentence fragment / clausal connector pattern: ^(us\\s+a|and\\s+then|this\\s+means|because\\s+the|which\\s+means|gives\\s+us|so\\s+that|therefore\\s+we|to\\s+fix|now\\s+the|we\\s+will|that\\s+is|due\\s+to)\\b",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000015",
+      "entity_name": "us a sinusoidal waveform. This is important because",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    }
+  ],
+  "duplicate_groups": []
+}

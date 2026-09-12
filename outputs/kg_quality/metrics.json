@@ -1,0 +1,88 @@
+{
+  "lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
+  "composite_diagnostic_score": 77.0,
+  "score_breakdown": {
+    "entity_quality": 18.06,
+    "relation_quality": 16.17,
+    "direction_accuracy": 7.31,
+    "evidence_grounding": 9.23,
+    "prerequisite_dag": 11.05,
+    "cross_chunk_quality": 6.15,
+    "graphrag_usefulness": 9.05
+  },
+  "entity_metrics": {
+    "total_entities": 15,
+    "fragment_rate": 0.0667,
+    "orphan_rate": 0.1333,
+    "gold_precision": 0.9333,
+    "gold_recall": 0.875,
+    "gold_f1": 0.9032
+  },
+  "relation_metrics": {
+    "total_relations": 26,
+    "evidence_coverage_rate": 0.6154,
+    "cross_chunk_ratio": 0.3077,
+    "gold_precision": 0.7308,
+    "gold_recall": 0.9048,
+    "gold_f1": 0.8085,
+    "direction_accuracy": 0.7308
+  },
+  "prerequisite_metrics": {
+    "total_prerequisites": 9,
+    "is_dag": true,
+    "cycle_count": 0,
+    "gold_precision": 0.7778,
+    "gold_recall": 0.7,
+    "gold_f1": 0.7369
+  },
+  "graphrag_metrics": {
+    "bm25": {
+      "Hit@1": 0.78,
+      "Hit@3": 0.96,
+      "Hit@5": 1.0,
+      "Recall@1": 0.5683,
+      "Recall@3": 0.8633,
+      "Recall@5": 0.94,
+      "Precision@1": 0.78,
+      "Precision@3": 0.42,
+      "Precision@5": 0.28,
+      "MRR": 0.879
+    },
+    "vector_rag": {
+      "Hit@1": 0.78,
+      "Hit@3": 0.96,
+      "Hit@5": 1.0,
+      "Recall@1": 0.5683,
+      "Recall@3": 0.8633,
+      "Recall@5": 0.94,
+      "Precision@1": 0.78,
+      "Precision@3": 0.42,
+      "Precision@5": 0.28,
+      "MRR": 0.879
+    },
+    "graph_rag": {
+      "Hit@1": 0.1,
+      "Hit@3": 0.38,
+      "Hit@5": 0.72,
+      "Recall@1": 0.0467,
+      "Recall@3": 0.27,
+      "Recall@5": 0.6017,
+      "Precision@1": 0.1,
+      "Precision@3": 0.1533,
+      "Precision@5": 0.184,
+      "MRR": 0.3295
+    },
+    "hybrid_rag": {
+      "Hit@1": 0.26,
+      "Hit@3": 0.94,
+      "Hit@5": 1.0,
+      "Recall@1": 0.1733,
+      "Recall@3": 0.7767,
+      "Recall@5": 0.905,
+      "Precision@1": 0.26,
+      "Precision@3": 0.3667,
+      "Precision@5": 0.268,
+      "MRR": 0.5873
+    }
+  }
+}

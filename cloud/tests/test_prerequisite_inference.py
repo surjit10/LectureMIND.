@@ -437,3 +437,228 @@ def test_confidence_threshold_sweep():
     # At extremely high threshold (> 0.99), filtered out
     res_high = infer_prerequisites(entities, chunks, segments, [], min_confidence=0.99)
     assert len(res_high["prerequisites"]) == 0
+
+
+def test_recalibrated_relation_weights():
+    """Verify recalibrated relation weights prevent USED_BY/EXPLAINS from passing alone."""
+    from cloud.extraction.prerequisite_inference import (
+        RELATION_PREREQUISITE_WEIGHTS,
+        score_prerequisite_candidate,
+    )
+    assert RELATION_PREREQUISITE_WEIGHTS[("PREREQUISITE_OF", True)] == 1.0
+    assert RELATION_PREREQUISITE_WEIGHTS[("INTRODUCED_BEFORE", True)] == 0.70
+    assert RELATION_PREREQUISITE_WEIGHTS[("DERIVED_FROM", False)] == 0.80
+    assert RELATION_PREREQUISITE_WEIGHTS[("USED_BY", True)] == 0.20
+    assert RELATION_PREREQUISITE_WEIGHTS[("EXPLAINS", True)] == 0.10
+
+    # A candidate backed ONLY by USED_BY (0.20) and no discourse cue must NOT pass >= 0.65
+    candidate = {
+        "source_id": "e_mat",
+        "source_name": "Iron Core",
+        "source_type": "Concept",
+        "target_id": "e_dev",
+        "target_name": "Transformer",
+        "target_type": "Concept",
+        "t_source": 10.0,
+        "t_target": 20.0,
+        "source_chunk_id": "c1",
+        "source_in_headings": False,
+        "source_in_first_segment": False,
+        "existing_forward_relations": ["USED_BY"],
+        "existing_reverse_relations": [],
+    }
+    chunks = [
+        MultimodalChunk(
+            lecture_id="lec_1",
+            chunk_id="c1",
+            timestamp=10.0,
+            transcript="Iron Core is used by Transformer.",
+            visual_context="",
+            ocr_text="",
+        )
+    ]
+    scored = score_prerequisite_candidate(candidate, chunks)
+    assert scored["confidence"] < 0.65
+    assert scored["signals"]["graph"] == 0.20
+
+
+def test_specialization_subdivision_cue():
+    """Verify discourse cue detector captures specialization and subdivision phrasing."""
+    from cloud.extraction.prerequisite_inference import DiscourseCueDetector
+    detector = DiscourseCueDetector()
+
+    # Specialization: General -> Specialized
+    text = "Transformers are manufactured to be step up transformers or step down transformers."
+    score, pat, snip = detector.detect(text, "Transformer", "Step Up Transformer")
+    assert score >= 0.85
+    assert pat == "specialization_subdivision"
+
+    # Type of: Specialized is a type of General
+    text2 = "A step down transformer is a type of transformer designed to reduce voltage."
+    score2, pat2, snip2 = detector.detect(text2, "Transformer", "Step Down Transformer")
+    assert score2 >= 0.85
+    assert pat2 == "specialization_type_of"
+
+
+def test_compound_term_regex_matching():
+    """Verify acronym and connector variations in term regex."""
+    from cloud.extraction.prerequisite_inference import _build_term_regex
+    import re
+
+    re_ac = _build_term_regex("Alternating Current")
+    assert re.search(r"\b" + re_ac + r"\b", "works with AC power", re.IGNORECASE)
+    assert re.search(r"\b" + re_ac + r"\b", "uses alternating current", re.IGNORECASE)
+
+    re_delta_y = _build_term_regex("Delta Y Connection")
+    assert re.search(r"\b" + re_delta_y + r"\b", "known as delta y", re.IGNORECASE)
+    assert re.search(r"\b" + re_delta_y + r"\b", "wired in delta-y connection", re.IGNORECASE)
+
+
+def test_generic_current_negative_lookbehind():
+    """Error 2 regression: verify generic 'Current' does not match compound terms."""
+    from cloud.extraction.prerequisite_inference import _build_term_regex
+    import re
+
+    re_current = _build_term_regex("Current")
+    current_pattern = re.compile(r"\b" + re_current + r"\b", re.IGNORECASE)
+
+    # Standalone 'current' must match
+    assert current_pattern.search("current flows through the coil")
+    assert current_pattern.search("the electric current is measured in amperes")
+    assert current_pattern.search("induced currents create opposing fields")
+
+    # Compound terms must NOT match generic Current
+    assert not current_pattern.search("alternating current flows through the coil")
+    assert not current_pattern.search("alternating-current supply is connected")
+    assert not current_pattern.search("AC current flows through the coil")
+    assert not current_pattern.search("AC-current flows...")
+    assert not current_pattern.search("eddy current losses are significant")
+    assert not current_pattern.search("eddy currents are produced in the iron core")
+    assert not current_pattern.search("eddy-current heating occurs")
+    assert not current_pattern.search("direct current is provided by a battery")
+    assert not current_pattern.search("DC current flows...")
+
+
+def test_a9_relation_prompt_and_schema():
+    """Error 1 regression: verify A9 prompt and schema distinguish educational relations."""
+    from cloud.extraction.relation_extractor import RELATION_EXTRACTION_PROMPT
+    from schemas.enums import RelationType
+
+    # Check that schema contains all 6 relation types
+    for rel in ["PREREQUISITE_OF", "USED_BY", "EXPLAINS", "DERIVED_FROM", "INTRODUCED_BEFORE", "VISUALIZED_BY"]:
+        assert rel in [t.value for t in RelationType]
+
+    # Check prompt contains strict definition and exclusions for PREREQUISITE_OF
+    assert "PREREQUISITE_OF" in RELATION_EXTRACTION_PROMPT
+    assert "foundational concept" in RELATION_EXTRACTION_PROMPT
+    assert "A -> B" in RELATION_EXTRACTION_PROMPT
+    assert "Strict Exclusion" in RELATION_EXTRACTION_PROMPT
+    assert "Iron Core" in RELATION_EXTRACTION_PROMPT
+    assert "Eddy Currents" in RELATION_EXTRACTION_PROMPT
+    assert "Voltage" in RELATION_EXTRACTION_PROMPT
+    assert "Current" in RELATION_EXTRACTION_PROMPT
+    assert "Sinusoidal Waveform" in RELATION_EXTRACTION_PROMPT
+
+
+def test_discourse_causal_statements_not_overinferred():
+    """Error 3 regression: verify non-prerequisite causal/topological statements are rejected."""
+    from cloud.extraction.prerequisite_inference import DiscourseCueDetector
+    detector = DiscourseCueDetector()
+
+    # 1. Coil -> EMF: sentence ending in coil followed by force causes electrons to move
+    text_coil_emf = "It is connected to the secondary coil. This force causes the electrons to move, creating an electromotive force."
+    score_coil_emf, pat_coil_emf, _ = detector.detect(text_coil_emf, "Coil", "Electromotive Force")
+    assert score_coil_emf == 0.0, f"Expected 0.0, got {score_coil_emf} via {pat_coil_emf}"
+
+    # 2. Coil -> Delta Y: "connect coils in a configuration known as delta y"
+    text_coil_dy = "We connect the coils in a configuration known as delta y connection."
+    score_coil_dy, pat_coil_dy, _ = detector.detect(text_coil_dy, "Coil", "Delta Y Connection")
+    assert score_coil_dy == 0.0, f"Expected 0.0, got {score_coil_dy} via {pat_coil_dy}"
+
+    # 3. Coil -> Magnetic Field: "first coil then the magnetic field will be stronger"
+    text_coil_mf = "We wrap wire around the first coil then the magnetic field will be stronger."
+    score_coil_mf, pat_coil_mf, _ = detector.detect(text_coil_mf, "Coil", "Magnetic Field")
+    assert score_coil_mf == 0.0, f"Expected 0.0, got {score_coil_mf} via {pat_coil_mf}"
+
+    # Verify genuine pedagogical discourse cues still match
+    text_genuine_mf_emf = "Change in the intensity and direction of the magnetic field produces an electromotive force."
+    score_genuine, pat_genuine, _ = detector.detect(text_genuine_mf_emf, "Magnetic Field", "Electromotive Force")
+    assert score_genuine >= 0.85
+    assert pat_genuine in {"inductive_generation", "causal_generation"}
+
+    text_genuine_dy = "A three phase configuration is known as a delta y connection."
+    score_dy, pat_dy, _ = detector.detect(text_genuine_dy, "Three Phase Configuration", "Delta Y Connection")
+    assert score_dy >= 0.85
+    assert pat_dy == "topological_configuration"
+
+
+def test_pedagogical_inversion_strong_vs_weak():
+    """Error 4 regression: verify t(A) > t(B) is allowed with strong evidence but rejected with weak."""
+    from cloud.extraction.prerequisite_inference import score_prerequisite_candidate
+
+    chunks = []
+
+    # Case 1: t(A) = 300, t(B) = 60, but explicit PREREQUISITE_OF relation in graph
+    candidate_strong = {
+        "source_id": "ent_A",
+        "source_name": "Foundational Concept",
+        "source_type": "Concept",
+        "target_id": "ent_B",
+        "target_name": "Advanced Topic",
+        "target_type": "Concept",
+        "t_source": 300.0,
+        "t_target": 60.0,
+        "source_chunk_id": "chunk_05",
+        "source_in_headings": True,
+        "source_in_first_segment": False,
+        "existing_forward_relations": ["PREREQUISITE_OF"],
+        "existing_reverse_relations": [],
+    }
+    scored_strong = score_prerequisite_candidate(candidate_strong, chunks)
+    assert scored_strong["confidence"] >= 0.65, f"Strong inversion should pass threshold, got {scored_strong['confidence']}"
+
+    # Case 2: t(A) = 300, t(B) = 60, with weak relation (e.g. USED_BY weight 0.20) and no discourse
+    candidate_weak = {
+        "source_id": "ent_A",
+        "source_name": "Physical Component",
+        "source_type": "Component",
+        "target_id": "ent_B",
+        "target_name": "Machine",
+        "target_type": "Device",
+        "t_source": 300.0,
+        "t_target": 60.0,
+        "source_chunk_id": "chunk_05",
+        "source_in_headings": False,
+        "source_in_first_segment": False,
+        "existing_forward_relations": ["USED_BY"],
+        "existing_reverse_relations": [],
+    }
+    scored_weak = score_prerequisite_candidate(candidate_weak, chunks)
+    assert scored_weak["confidence"] < 0.65, f"Weak inversion must not pass threshold, got {scored_weak['confidence']}"
+
+
+def test_dag_cycle_and_self_loop_elimination():
+    """Verify that cycle resolution enforces a strict DAG with no cycles and no self-loops."""
+    from cloud.extraction.prerequisite_inference import enforce_dag_cycles
+    from evaluation.knowledge_graph.prerequisite_auditor import _detect_cycles
+
+    # Graph with a 3-cycle: A -> B -> C -> A, plus self loop D -> D
+    edges = [
+        {"source_id": "A", "target_id": "B", "confidence": 0.90},
+        {"source_id": "B", "target_id": "C", "confidence": 0.85},
+        {"source_id": "C", "target_id": "A", "confidence": 0.70},  # weakest in cycle
+        {"source_id": "D", "target_id": "D", "confidence": 0.95},  # self-loop
+    ]
+
+    pruned = enforce_dag_cycles(edges)
+
+    # Check no self loops
+    for e in pruned:
+        assert e["source_id"] != e["target_id"]
+
+    # Check acyclicity using DFS cycle detection
+    directed_pairs = [(e["source_id"], e["target_id"]) for e in pruned]
+    detected_cycles = _detect_cycles(directed_pairs)
+    assert len(detected_cycles) == 0
+
+

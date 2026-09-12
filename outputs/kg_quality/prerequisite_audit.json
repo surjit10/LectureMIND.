@@ -1,0 +1,239 @@
+{
+  "total_prerequisites": 9,
+  "is_dag": true,
+  "cycle_count": 0,
+  "self_loop_count": 0,
+  "temporal_inversion_count": 0,
+  "unsupported_count": 0,
+  "pedagogical_count": 9,
+  "gold_prerequisite_precision": 0.7778,
+  "gold_prerequisite_recall": 0.7,
+  "gold_prerequisite_f1": 0.7369,
+  "gold_evaluation_method": "Strict 1-to-1 exact matching against reference labels",
+  "gold_prerequisite_count": 10,
+  "matched_gold_prerequisite_count": 7,
+  "tp_prerequisite_count": 7,
+  "fuzzy_prerequisite_precision": 0.7778,
+  "fuzzy_prerequisite_recall": 0.7,
+  "fuzzy_prerequisite_f1": 0.7369,
+  "cycles_detected": [],
+  "issues": [],
+  "edge_details": [
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000001",
+      "source_name": "Sinusoidal Waveform",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000003",
+      "target_name": "Alternating Current",
+      "confidence": 0.925,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000001",
+      "source_name": "Sinusoidal Waveform",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000004",
+      "target_name": "Magnetic Field",
+      "confidence": 0.785,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.8,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
+      "source_name": "Transformer",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000007",
+      "target_name": "Step Up Transformer",
+      "confidence": 0.7498,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.7323
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
+      "source_name": "Transformer",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000008",
+      "target_name": "Step Down Transformer",
+      "confidence": 0.925,
+      "signals": {
+        "discourse": 0.9,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
+      "source_name": "Transformer",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000013",
+      "target_name": "Three Phase Configuration",
+      "confidence": 0.855,
+      "signals": {
+        "discourse": 0.9,
+        "graph": 0.0,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000003",
+      "source_name": "Alternating Current",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
+      "target_name": "Transformer",
+      "confidence": 0.925,
+      "signals": {
+        "discourse": 0.95,
+        "graph": 0.2,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000003",
+      "source_name": "Alternating Current",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000004",
+      "target_name": "Magnetic Field",
+      "confidence": 0.82,
+      "signals": {
+        "discourse": 0.85,
+        "graph": 0.0,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000004",
+      "source_name": "Magnetic Field",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000005",
+      "target_name": "Electromotive Force",
+      "confidence": 0.9029,
+      "signals": {
+        "discourse": 0.9,
+        "graph": 0.0,
+        "prominence": 1.0,
+        "temporal": 0.8195
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000010",
+      "source_name": "Coil",
+      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000007",
+      "target_name": "Step Up Transformer",
+      "confidence": 0.8898,
+      "signals": {
+        "discourse": 0.85,
+        "graph": 0.2,
+        "prominence": 1.0,
+        "temporal": 0.7323
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "tp_prerequisites": [
+        "Transformer -> Step Down Transformer",
+        "Alternating Current -> Transformer",
+        "Magnetic Field -> Electromotive Force",
+        "Coil -> Step Up Transformer",
+        "Transformer -> Three Phase Configuration",
+        "Alternating Current -> Magnetic Field",
+        "Transformer -> Step Up Transformer"
+      ],
+      "fp_prerequisites": [
+        "Sinusoidal Waveform -> Alternating Current",
+        "Sinusoidal Waveform -> Magnetic Field"
+      ],
+      "fn_prerequisites": [
+        "Coil -> Transformer",
+        "Electromotive Force -> Transformer",
+        "Three Phase Configuration -> Delta Y Connection"
+      ],
+      "strict_metrics": {
+        "tp": 7,
+        "fp": 2,
+        "fn": 3,
+        "precision": 0.7778,
+        "recall": 0.7,
+        "f1": 0.7369
+      },
+      "fuzzy_metrics": {
+        "tp": 7,
+        "fp": 2,
+        "fn": 3,
+        "precision": 0.7778,
+        "recall": 0.7,
+        "f1": 0.7369,
+        "tp_prerequisites": [
+          "Transformer -> Step Down Transformer",
+          "Alternating Current -> Transformer",
+          "Magnetic Field -> Electromotive Force",
+          "Coil -> Step Up Transformer",
+          "Transformer -> Three Phase Configuration",
+          "Alternating Current -> Magnetic Field",
+          "Transformer -> Step Up Transformer"
+        ],
+        "fp_prerequisites": [
+          "Sinusoidal Waveform -> Alternating Current",
+          "Sinusoidal Waveform -> Magnetic Field"
+        ],
+        "fn_prerequisites": [
+          "Coil -> Transformer",
+          "Electromotive Force -> Transformer",
+          "Three Phase Configuration -> Delta Y Connection"
+        ]
+      }
+    }
+  ]
+}
