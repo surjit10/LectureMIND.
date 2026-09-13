@@ -14,10 +14,12 @@
 - [3. Knowledge Package Import Pipeline](#3-knowledge-package-import-pipeline)
 - [4. Knowledge Package Activation Pipeline](#4-knowledge-package-activation-pipeline)
 - [5. Conversational Query Pipeline](#5-conversational-query-pipeline)
-- [6. Active Learning Pipeline](#6-active-learning-pipeline-flashcards-notes-quizzes)
-- [7. LLM Provider Switching Pipeline](#7-llm-provider-switching-pipeline)
-- [8. Provider Status Check Pipeline](#8-provider-status-check-pipeline)
-- [9. Configuration Loading Pipeline](#9-configuration-loading-pipeline)
+- [6. Socratic Prerequisite Back-Tracking Pipeline](#6-socratic-prerequisite-back-tracking-pipeline)
+- [7. Knowledge Graph Quality & Prerequisite Audit Pipeline](#7-knowledge-graph-quality--prerequisite-audit-pipeline)
+- [8. Active Learning Pipeline](#8-active-learning-pipeline-flashcards-notes-quizzes)
+- [9. LLM Provider Switching Pipeline](#9-llm-provider-switching-pipeline)
+- [10. Provider Status Check Pipeline](#10-provider-status-check-pipeline)
+- [11. Configuration Loading Pipeline](#11-configuration-loading-pipeline)
 
 ---
 
@@ -30,19 +32,21 @@
 
 ```mermaid
 flowchart TD
-    A1[A1 Metadata extraction FFprobe] --> A2[A2 Audio transcription Faster-Whisper]
-    A1 --> A3[A3 Frame extraction]
-    A3 --> A4[A4 Visual captioning Qwen2-VL]
-    A3 --> A5[A5 OCR PaddleOCR]
-    A2 --> A6[A6 Multimodal fusion transcript + visual + OCR]
-    A4 --> A6
-    A5 --> A6
-    A6 --> A7[A7 Topic segmentation]
-    A7 --> A8[A8 Entity + relation extraction]
-    A8 --> A9[A9 Embedding generation bge-large 1024-d]
-    A9 --> A10[A10 Triplet generation for reranker training]
-    A10 --> A11[A11 Validation + package export ZIP]
-    A11 --> PKG[Knowledge Package .zip]
+    A1[A1 Metadata Extraction FFprobe] --> A2[A2 Audio Transcription Faster-Whisper]
+    A1 --> A3[A3 Frame Extraction]
+    A3 --> A4[A4 Visual Captioning Qwen2-VL]
+    A3 --> A5[A5 OCR PaddleOCR Subprocess]
+    A2 & A4 & A5 --> A6[A6 Multimodal Fusion ±2 s Window]
+    A6 --> A7[A7 Topic Segmentation Qwen2.5-7B]
+    A7 --> A8[A8 Entity Extraction Qwen2.5-7B]
+    A8 & A6 --> A9[A9 Sliding-Window Relation Extraction Compact Aliases]
+    A8 & A9 & A6 --> A10[A10 Prerequisite Inference Multi-Signal + DFS DAG]
+    A6 --> B0[B0 Embedding Generation bge-large 1024-d]
+    A7 & A6 --> B1[B1 Triplet Generation Reranker Data]
+    B1 -.->|optional| B2[B2 Reranker Fine-tuning]
+    A6 & A7 & A8 & A9 & A10 & B0 & B1 --> C1[C1 Schema & Referential Validation]
+    C1 --> C2[C2 Package Export ZIP Deflate 9]
+    C2 --> PKG[Knowledge Package .zip 202–428 KB]
 ```
 
 The cloud orchestrator runs the pipeline in the following sequential stages:
@@ -50,7 +54,7 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A1 — Metadata Extraction
-**Module:** Cloud orchestrator initial step  
+**Module:** `cloud/ingestion/metadata/metadata_extractor.py`  
 **Input:** Video file path  
 **Output:** `metadata.json`  
 **Algorithm:** Extracts video duration, title, resolution, and codec information using FFprobe/OpenCV header reading. Writes a structured JSON with lecture metadata.
@@ -58,13 +62,13 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A2 — Audio Transcription (runs concurrently with A3)
-**Module:** Faster-Whisper ASR  
+**Module:** `cloud/ingestion/whisper_pipeline/transcriber.py`  
 **Input:** Audio track extracted from video (FFmpeg)  
 **Output:** `transcript.json` — array of `{ text, start, end }` timestamp segments  
 **Algorithm:**
 1. FFmpeg strips the audio channel from the video into a WAV/PCM stream.
 2. Faster-Whisper (GPU-accelerated CTranslate2 backend) runs beam-search ASR on the audio.
-3. The result is a list of timed segments. Each segment contains the spoken text and precise start/end timestamps in seconds.
+3. The result is a list of timed segments with millisecond-accurate start/end timestamps.
 4. The full `transcript.json` is written to the lecture output directory.
 
 **Why it exists:** Timestamped transcripts allow the system to correlate spoken content with video frames and create temporally coherent chunks.
@@ -72,12 +76,12 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A3 — Video Frame Extraction (runs concurrently with A2)
-**Module:** OpenCV / FFmpeg frame extractor  
+**Module:** `cloud/ingestion/frame_extraction/frame_extractor.py`  
 **Input:** Video file  
 **Output:** `frames/` directory — extracted keyframes as JPEG images (`frame_0001.jpg`, etc.) + `frames.json` (timestamp-to-filename mapping)  
 **Algorithm:**
-1. FFmpeg decodes the video at a configurable FPS (e.g., 1 frame per second, or at scene-change boundaries).
-2. Frames are filtered for uniqueness (scene-change detection) to avoid redundant OCR on static slides.
+1. FFmpeg decodes the video at scene-change boundaries and periodic intervals.
+2. Frames are filtered for uniqueness (structural similarity threshold) to avoid redundant OCR on static slides.
 3. Each extracted frame is stored with a timestamp that links it to the transcript.
 
 **Why it exists:** Lecture slides contain critical information (equations, diagrams, labels) that is not present in the audio transcript. Frame extraction feeds the visual processing stages.
@@ -85,24 +89,24 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A4 — Visual Captioning (VLM)
-**Module:** `Qwen2-VL` (Vision-Language Model)  
+**Module:** `cloud/ingestion/qwen_pipeline/visual_understanding.py` (`Qwen2-VL`)  
 **Input:** Selected keyframes from `frames/`  
 **Output:** `vlm_output.jsonl` — one JSON record per frame with generated caption  
 **Algorithm:**
-1. Each selected frame is passed to Qwen2-VL with a structured prompt (e.g., "Describe the content of this lecture slide in detail").
+1. Each selected frame is passed to Qwen2-VL with a structured prompt.
 2. Qwen2-VL generates a rich natural-language description of diagrams, charts, equations, and text visible on the slide.
-3. Captions are written as JSONL (one JSON object per line), indexed by frame timestamp.
+3. Captions are written as JSONL, indexed by frame timestamp.
 
 **Why it exists:** Qwen2-VL produces semantically rich descriptions of visual content — diagrams, formulas, flowcharts — that are impossible to capture through OCR alone.
 
 ---
 
 ### Stage A5 — OCR Extraction
-**Module:** `PaddleOCR` (runs in a subprocess for GPU isolation)  
+**Module:** `cloud/ingestion/paddleocr_pipeline/ocr_engine.py` (`PaddleOCR`)  
 **Input:** Selected keyframes from `frames/`  
 **Output:** `ocr_output.jsonl` — one JSON record per frame with extracted raw text  
 **Algorithm:**
-1. PaddleOCR is invoked as a subprocess (to prevent CUDA context contamination with other models).
+1. PaddleOCR is invoked inside an isolated subprocess (preventing CUDA context contamination with HuggingFace/PyTorch models).
 2. For each frame, PaddleOCR detects and recognizes text regions, returning bounding boxes and text strings.
 3. The raw text strings are concatenated per frame and written to `ocr_output.jsonl`.
 
@@ -111,13 +115,13 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A6 — Multimodal Fusion
-**Module:** `cloud/ingestion/fusion.py` (inferred)  
+**Module:** `cloud/ingestion/fusion/multimodal_fusion.py`  
 **Input:** `transcript.json` + `vlm_output.jsonl` + `ocr_output.jsonl` + `frames.json`  
-**Output:** `multimodal_chunks.json` — array of chunk objects  
+**Output:** `multimodal_chunks.json` — array of multimodal chunk objects  
 **Algorithm:**
-1. The transcript is split into time-bounded windows. For each window, the corresponding visual content (VLM caption + OCR text) is identified by matching timestamps.
-2. Each fused unit becomes a **chunk**: a single text block combining spoken words + visual descriptions for that time window.
-3. Chunks are enriched with metadata: `chunk_id`, `start_time`, `end_time`, `source` (transcript/visual), and the raw text.
+1. The transcript is segmented into time-bounded windows. For each window, the corresponding visual content (VLM caption + OCR text) is attached using a temporal alignment window (±2 s of keyframes).
+2. Each fused unit becomes a **chunk**: a single text block combining spoken words + visual descriptions + slide OCR text.
+3. Chunks are enriched with metadata: `chunk_id`, `start_time`, `end_time`, and modality flags.
 4. Chunks are written to `multimodal_chunks.json`.
 
 **Why it exists:** Multimodal fusion ensures that queries about visual content (e.g., "What did the diagram on slide 5 show?") can be answered from the vector index, even though the visual information was never spoken aloud.
@@ -125,36 +129,68 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 ---
 
 ### Stage A7 — Topic Segmentation
-**Module:** Cloud segmenter  
+**Module:** `cloud/segmentation/segmenter.py` (Qwen2.5-7B-Instruct)  
 **Input:** `multimodal_chunks.json`  
 **Output:** `segments.json` — array of topic segments, each containing a list of chunk IDs  
 **Algorithm:**
-1. Chunks are grouped into coherent topic segments using semantic similarity or sliding-window topic detection.
-2. Each segment represents a logical section of the lecture (e.g., "Introduction to Photosynthesis", "Light-Dependent Reactions").
-3. Segment boundaries are determined to prevent context fragmentation during graph construction.
+1. Chunks are grouped into coherent topic segments using semantic boundary detection.
+2. Qwen2.5-7B-Instruct generates descriptive, human-readable segment titles.
+3. Segment boundaries prevent context fragmentation during graph construction.
 
 **Why it exists:** Segments provide the organizational structure for graph nodes and are the unit of analysis for the triplet generator.
 
 ---
 
-### Stage A8 — Knowledge Graph Construction
-**Module:** Cloud graph extractor  
+### Stage A8 — Entity Extraction
+**Module:** `cloud/extraction/entity_extractor.py` (Qwen2.5-7B-Instruct)  
 **Input:** `segments.json` + `multimodal_chunks.json`  
-**Output:**
-- `entities.json` — named entities (concepts, terms, people)
-- `relations.json` — directed relationships between entities
-
+**Output:** `entities.json` — array of typed named entities (concepts, architectures, algorithms, mechanisms)  
 **Algorithm:**
-1. For each segment, Qwen2.5-7B-Instruct extracts named entities (A8).
-2. Relation extraction (A9) identifies directed relationships between entities within and across segments (e.g., `[Operating System] --EXPLAINS--> [Kernel]`).
-3. Entities and relations are serialized as JSON; the local importer (`neo4j_loader.py`) loads them into Neo4j as nodes/edges on package import.
+1. For each segment, Qwen2.5-7B-Instruct extracts core domain concepts and entities.
+2. Entities are assigned canonical names, definitions, entity types, and source chunk anchors.
+3. Strict deduplication ensures entity names are unified across segments.
 
-**Why it exists:** The knowledge graph enables relationship-aware retrieval — answering "How does concept A relate to concept C?" by traversing graph edges rather than relying on textual similarity alone.
+**Why it exists:** Entities form the nodes of the knowledge graph and anchor prerequisite dependencies.
 
 ---
 
-### Stage A9 — Embedding Generation
-**Module:** `BAAI/bge-large-en-v1.5` via HuggingFace  
+### Stage A9 — Relation Extraction (Sliding-Window + Compact Aliases)
+**Module:** `cloud/extraction/relation_extractor.py` (Qwen2.5-7B-Instruct)  
+**Input:** `entities.json` + `multimodal_chunks.json`  
+**Output:** `relations.json` — array of typed directed relations  
+**Algorithm:**
+1. **Sliding-Window Chunk Context:** Chunks are processed in sliding windows to capture both intra-chunk and inter-chunk relational context without exceeding LLM context limits.
+2. **Compact Entity Alias Remapping:** Entities active in the window are mapped to compact aliases (`E1, E2, ... En`). This cuts prompt token usage by ~65%, allowing the LLM to process long 85-minute lectures without truncation.
+3. **Structured Prompting with Schema Constraints:** The LLM outputs relation triples using compact aliases (`E1 -> REL -> E2`), which are dynamically remapped to canonical entity names.
+4. **Pedagogical Exclusion Rules:** Strict filters reject low-signal or non-pedagogical relations (e.g., trivial mentions or physical slide layout).
+5. **8192-Token Retry Budget:** Dynamic retry mechanism recovers valid relations even under dense extraction conditions.
+6. **Referential Integrity Enforcement:** Every relation endpoint is verified against `entities.json`, ensuring a **0.0% dangling relation rate** (395 verified relations across benchmark lectures).
+
+**Why it exists:** The knowledge graph enables relationship-aware traversal — answering "How does concept A relate to concept C?" by traversing graph edges rather than relying on textual similarity alone.
+
+---
+
+### Stage A10 — Prerequisite Inference & DAG Enforcement
+**Module:** `cloud/extraction/prerequisite_extractor.py` and `local/loaders/prerequisite_enricher.py`  
+**Input:** `entities.json` + `relations.json` + `multimodal_chunks.json`  
+**Output:** `prerequisites.json` — strictly acyclic directed prerequisite graph (`PREREQUISITE_OF`)  
+**Algorithm:**
+1. **Candidate Pair Generation & Search Space Pruning:** Entity pairs are generated where candidate $A$ precedes or co-occurs with $B$. Segment containment and temporal precedence gates filter out 60%+ unpromising pairs.
+2. **Multi-Signal Scoring Function:** Computes a composite confidence score ($S \in [0, 1]$):
+   - **Chronological Precedence ($W=0.30$):** Earlier first-introduction timestamp gives a directional bonus.
+   - **Lexical Co-occurrence with Negative Lookbehinds ($W=0.30$):** Textual co-occurrence regex ensures candidate mentions are not mere substrings of larger terms.
+   - **Segment Containment ($W=0.25$):** Concepts spanning prerequisite introductory segments score higher.
+   - **Pedagogical Inversion Guard:** Enforces that fundamental foundational concepts are prerequisites to derived mechanisms, reversing inverted co-occurrence artifacts.
+3. **Thresholding ($\ge 0.65$):** Pairs meeting or exceeding the calibrated threshold are retained.
+4. **Deterministic DFS Cycle Resolution:** Evaluates the graph for cycles; any detected mutual cycle ($A \to B \to A$) or multi-hop loop has its lower-scoring edge pruned deterministically.
+5. **Acyclicity Verification:** Guarantees **Strict DAG = True, 0 cycles, 0 self-loops**.
+
+**Why it exists:** Provides the mathematical backbone for curriculum sequencing and Socratic back-tracking — enabling students who don't understand concept $B$ to traverse backward to its required foundational concepts $A$.
+
+---
+
+### Stage B0 — Embedding Generation
+**Module:** `cloud/embeddings/embedding_generator.py` (`BAAI/bge-large-en-v1.5`)  
 **Input:** `multimodal_chunks.json` (text fields of each chunk)  
 **Output:**
 - `embeddings.npy` — NumPy array of shape `[N, 1024]` (N = number of chunks)
@@ -162,33 +198,51 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 
 **Algorithm:**
 1. Each chunk's text is encoded by `bge-large-en-v1.5` into a 1024-dimensional dense vector.
-2. Encoding is done in batches for GPU efficiency.
+2. Encoding is batched on GPU with FP16 precision.
 3. The embedding matrix is saved as a NumPy `.npy` file; the corresponding `chunk_id` order is saved to `embedding_ids.json`.
 
-**Dimension enforcement:** `SharedSettings.EMBEDDING_DIMENSION = 1024` with a Pydantic validator (`must_be_1024`) ensures this dimension is never accidentally changed to an incompatible value (768 from an older `bge-base` model would cause silent mismatches at query time).
+**Dimension enforcement:** `SharedSettings.EMBEDDING_DIMENSION = 1024` with a Pydantic validator (`must_be_1024`) guarantees compatibility with local Qdrant collections.
 
 ---
 
-### Stage A10 — Triplet Generation (for offline reranker training)
-**Module:** `cloud/training/triplet_generator.py`  
+### Stage B1 — Triplet Generation (for offline reranker training)
+**Module:** `cloud/training/triplet_generator.py` (Qwen2.5-7B-Instruct)  
 **Input:** `segments.json` + `multimodal_chunks.json`  
 **Output:** `triplets.json` — array of `RerankerTriplet` objects  
 **Algorithm:**
-1. For each segment, `generate_triplets()` is called.
-2. **Query synthesis:** `Qwen2.5-7B-Instruct` generates 3–5 realistic student questions that a student might ask about the content in that segment.
-3. **Positive pairing:** Each synthesized question is paired with a chunk from the same segment (the positive example).
-4. **Hard negative pairing:** A chunk from a *different* segment (a sibling in the topic hierarchy) is selected as the hard negative — semantically related but not the correct answer.
-5. Each triplet `{ query, positive_chunk_id, negative_chunk_id }` is validated against the `RerankerTriplet` Pydantic schema (no empty strings, valid chunk IDs).
-6. Valid triplets are written to `triplets.json`.
+1. **Query synthesis:** Qwen2.5-7B-Instruct generates 3–5 realistic student questions for each segment.
+2. **Positive pairing:** Each question is paired with a chunk from the same segment.
+3. **Hard negative pairing:** A chunk from a sibling topic segment is selected as the hard negative — semantically related but factually distinct.
+4. Triplet schema validation ensures `{ query, positive_chunk_id, negative_chunk_id }` integrity.
 
-**Why it exists:** Triplets are the training signal for fine-tuning the cross-encoder reranker offline. Collecting them per-lecture allows the system to accumulate a lecture-specific training set over time.
+**Why it exists:** Triplets provide the contrastive training signal for fine-tuning the cross-encoder reranker.
 
 ---
 
-### Stage A11 — Package Export
+### Stage B2 — Reranker Fine-tuning (optional)
+**Module:** `cloud/training/reranker_trainer.py`  
+**Input:** Accumulated `triplets.json`  
+**Output:** Fine-tuned cross-encoder checkpoint (`reranker_model/`) + `training_metrics.json`  
+**Algorithm:** Runs cross-entropy contrastive fine-tuning on `BAAI/bge-reranker-base`. Disabled by default in single-lecture runs to save compute.
+
+---
+
+### Stage C1 — Validation
+**Module:** `cloud/packaging/validator.py`  
+**Input:** All generated artifacts in the lecture output directory  
+**Output:** Validation report (`status: "valid"`)  
+**Algorithm:**
+- Verifies that all required files exist and are non-empty.
+- Validates JSON schemas for `manifest.json`, `segments.json`, `entities.json`, `relations.json`, `multimodal_chunks.json`.
+- Validates embedding matrix shape `(N, 1024)` against `embedding_ids.json` count.
+- Confirms referential integrity: 0.0% dangling relations.
+
+---
+
+### Stage C2 — Package Export
 **Module:** `cloud/packaging/exporter.py`  
-**Input:** All output files in the lecture output directory  
-**Output:** `lecture_{id}.zip` — the Knowledge Package archive  
+**Input:** Validated lecture output directory  
+**Output:** `lecture_{id}_knowledge_package.zip` — compressed archive (**202–428 KB**, ~2,800× smaller than source video)  
 
 **`PACKAGE_FILES` list (files included in the ZIP):**
 ```
@@ -196,20 +250,21 @@ manifest.json
 segments.json
 entities.json
 relations.json
-embeddings.npy
+prerequisites.json     ← strictly acyclic prerequisite DAG
+embeddings.npy         ← 1024-dim dense vectors
 embedding_ids.json
 multimodal_chunks.json
-triplets.json          ← optional, included if generated
+triplets.json          ← included for downstream fine-tuning
 ```
 
 **`EXCLUDED_FILES` list (stripped from ZIP to reduce size):**
 ```
-vlm_output.jsonl       ← intermediate VLM output (not needed at runtime)
-ocr_output.jsonl       ← intermediate OCR output (not needed at runtime)
-transcript.json        ← legacy; optional at load time
-metadata.json          ← legacy; optional at load time
+vlm_output.jsonl       ← intermediate VLM output
+ocr_output.jsonl       ← intermediate OCR output
+transcript.json        ← intermediate audio transcript
+metadata.json          ← intermediate FFprobe metadata
 frames.json            ← intermediate frame index
-frames/                ← raw video keyframes (large, not needed)
+frames/                ← raw video keyframes (1+ GB)
 ```
 
 **Package validation:** `cloud/packaging/validator.py` verifies that all `PACKAGE_FILES` exist and are non-empty before creating the ZIP.
@@ -279,6 +334,14 @@ frames/                ← raw video keyframes (large, not needed)
          • Executes Cypher MERGE/CREATE statements to populate Neo4j
          • Creates indexes on entity names for fast Cypher lookup
          • Nodes/edges are scoped by (entity_id, lecture_id) for isolation
+
+[Step 5b] Prerequisite graph import & enrichment
+         • Checks for prerequisites.json in the extracted package directory
+         • If absent (legacy package): local/loaders/prerequisite_enricher.py infers
+           prerequisites on the fly and saves prerequisites.json
+         • neo4j_loader.py loads all PREREQUISITE_OF directed edges into Neo4j
+         • Creates indexes on PREREQUISITE_OF relationship types for sub-millisecond
+           back-tracking traversal
 
 [Step 6] Read metadata.json (optional)
          • If metadata_path.exists(): reads JSON for title, duration, etc.
@@ -452,7 +515,91 @@ The route returns JSON:
 
 ---
 
-## 6. Active Learning Pipeline (Flashcards, Notes, Quizzes)
+## 6. Socratic Prerequisite Back-Tracking Pipeline
+
+**Trigger:** `GET /lectures/{lecture_id}/prerequisites/{concept_name}`  
+**Module:** `serving/fastapi/routes/prerequisites.py`
+
+### 6.1 Flow Overview
+```
+[1] GET /lectures/{lecture_id}/prerequisites/{concept_name}
+        │
+        ├── [2] Connect to Neo4j & query inbound PREREQUISITE_OF edges
+        │       • MATCH (prereq:Entity)-[:PREREQUISITE_OF*1..4]->(target:Entity)
+        │       • WHERE toLower(target.name) = toLower($concept_name)
+        │       • Returns paths, distance (depth), confidence scores, and relation metadata
+        │
+        ├── [3] Fallback to prerequisites.json (if Neo4j unavailable)
+        │       • Reads data/packages/lecture_{id}/prerequisites.json from disk
+        │       • Runs in-memory reverse breadth-first traversal
+        │
+        ├── [4] Build Dependency Subgraph & Topological Ordering
+        │       • Constructs directed acyclic dependency subgraph
+        │       • Computes Kahn's topological sort (earliest prerequisite first)
+        │       • Groups prerequisites by dependency depth (depth 1 = immediate, depth 2 = transitive)
+        │
+        ├── [5] Retrieve Chronological Anchor Chunks
+        │       • Scans multimodal_chunks.json for earliest mention of each prerequisite concept
+        │       • Extracts chunk_id, timestamp, text snippet, and slide visual context
+        │
+        └── [6] Return Structured Socratic Learning Response
+                • JSON {
+                    lecture_id,
+                    target_concept,
+                    total_prerequisites,
+                    max_depth,
+                    prerequisite_chain: [{ concept, depth, confidence, anchor_chunks[] }],
+                    topological_order: ["Kernel", "Virtual Memory", "Operating System"],
+                    learning_pathway: "To understand Operating System, first review Kernel, then Virtual Memory."
+                  }
+```
+
+---
+
+## 7. Knowledge Graph Quality & Prerequisite Audit Pipeline
+
+**Trigger:** `evaluation/knowledge_graph/audit_package.py`  
+**Purpose:** Comprehensive offline validation of knowledge graph integrity, prerequisite topological correctness, and GraphRAG downstream retrieval quality.
+
+```bash
+./.venv/bin/python evaluation/knowledge_graph/audit_package.py \
+  --package 0-output/CS162_Lecture_1_What_is_an_Operating_System_720P_knowledge_package.zip \
+  --output-dir outputs/kg_quality_cs162/
+```
+
+### 7.1 Pipeline Execution Stages
+```
+[Step 1] Package Extraction & Artifact Loading
+         • Loads entities.json, relations.json, prerequisites.json, multimodal_chunks.json
+
+[Step 2] Entity Fragment & Orphan Rate Audit
+         • Computes average entity name length (excludes trivial stop-fragments)
+         • Audits orphan rate: entities without at least one relation or prerequisite edge
+
+[Step 3] Relation Referential Integrity Audit
+         • Validates that source and target of every relation exist in entities.json
+         • Measured: 0.0% dangling relation rate (395/395 valid across 3 benchmark lectures)
+         • Audits inverse consistency and schema type compliance
+
+[Step 4] Bipartite Prerequisite Matching against Gold Labels
+         • Normalizes entity names (case-insensitive, lemmatized, punctuation-stripped)
+         • Bipartite maximum-weight matching against gold annotations (prerequisite_gold.json)
+         • Computes Strict Precision (77.8%), Strict Recall (70.0%), and Strict F1 (73.7%)
+
+[Step 5] Deterministic Graph Topology Audit
+         • Builds directed NetworkX DiGraph from inferred edges
+         • Checks acyclicity: strict DAG = True
+         • Evaluates cycle count: 0 cycles, 0 self-loops
+         • Verifies that mutual cycles were deterministically pruned
+
+[Step 6] Downstream GraphRAG Retrieval Test
+         • Simulates 1-hop and 2-hop entity neighbor retrieval for concept queries
+         • Confirms chunks associated with graph neighbors improve context coverage
+```
+
+---
+
+## 8. Active Learning Pipeline (Flashcards, Notes, Quizzes)
 
 **Trigger:** learning endpoints under `serving/fastapi/learning_service.py`  
 **Module:** `serving/fastapi/learning_service.py`
@@ -474,7 +621,7 @@ The route returns JSON:
 
 ---
 
-## 7. LLM Provider Switching Pipeline
+## 9. LLM Provider Switching Pipeline
 
 **Trigger:** `PATCH /settings` with `{ "inference_mode": "online", "active_provider_id": "gemini" }`
 
@@ -492,7 +639,7 @@ The route returns JSON:
 
 ---
 
-## 8. Provider Status Check Pipeline
+## 10. Provider Status Check Pipeline
 
 **Trigger:** `GET /settings/status`
 
@@ -515,7 +662,7 @@ The route returns JSON:
 
 ---
 
-## 9. Configuration Loading Pipeline
+## 11. Configuration Loading Pipeline
 
 **Module:** `config.py`  
 **Triggered:** At Python module import time (once per process)

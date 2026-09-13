@@ -17,13 +17,15 @@
 - [6. Lazy LLM vs Eager Reranker Loading](#6-lazy-llm-initialization-vs-eager-reranker-loading)
 - [7. Decoupled Startup](#7-decoupled-startup-zero-llm-initialization-at-boot)
 - [8. pydantic-settings Isolation](#8-pydantic-settings-environment-isolation)
-- [9. GraphML for Graph Portability](#9-graphml-for-knowledge-graph-portability)
+- [9. GraphML for Graph Portability (Superseded)](#9-graphml-for-knowledge-graph-portability)
 - [10. SSE Streaming (reversed)](#10-sse-streaming-for-query-responses)
 - [11. Knowledge Package Interface](#11-knowledge-package-as-the-cloudlocal-interface)
 - [12. Evaluation HTTP Bypass](#12-evaluation-framework-http-bypass)
 - [13. Operational Hardening & Production Reliability](#13-operational-hardening--production-reliability)
 - [14. Potential Future Improvements](#14-potential-future-improvements)
 - [15. Architectural Strengths](#15-architectural-strengths)
+- [16. Multi-Signal Prerequisite DAG Inference](#16-multi-signal-prerequisite-dag-inference)
+- [17. Compact Entity Alias Remapping for Relation Extraction](#17-compact-entity-alias-remapping-for-relation-extraction)
 
 ---
 
@@ -68,7 +70,7 @@ GraphRAG adds:
 |---|---|
 | Increased cloud processing complexity (entity and relation extraction) | Simpler, faster cloud pipeline |
 | Two databases to maintain locally (Qdrant + Neo4j) | Single database simplicity |
-| Higher package size (GraphML adds ~10–100 KB) | Smaller packages |
+| Higher package size (Graph JSON adds ~10–100 KB) | Smaller packages |
 | Graph quality depends on extraction model accuracy | Graph-free approach |
 
 ### Scalability Considerations
@@ -248,7 +250,7 @@ Use a ZIP archive of structured files (embeddings, graph, chunks, metadata) as t
 ### Rationale
 - No network dependency during local usage — packages work offline after import.
 - Packages are versionable and shareable — a professor can email a package to students.
-- The format is inspectable — all files are standard formats (NumPy, JSON, GraphML, ZIP).
+- The format is inspectable — all files are standard formats (NumPy, JSON, ZIP).
 - Import is a one-time operation; subsequent queries never access the package directory.
 
 ### Trade-offs
@@ -282,6 +284,8 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Dynamic Quantization** | Dynamic `int8` quantization for CrossEncoder reranker with automated FP32 fallback | Reduces memory consumption and accelerates CPU inference on student hardware |
 | **Lecture Isolation Guarantees** | Strict `(entity_id, lecture_id)` scoping in Neo4j and Qdrant queries | Guarantees zero cross-contamination between courses and lectures |
 | **Evidence Gating** | Strict verification against retrieved chunks before generating answers | Prevents hallucinations; ensures 100% citation completeness |
+| **Prerequisite DAG Guarantees** | Deterministic DFS cycle resolution (`cloud/extraction/prerequisite_extractor.py`) | Enforces strictly acyclic prerequisite graphs (0 cycles, 0 self-loops) for valid curriculum sequencing |
+| **Referential Integrity** | Pre-export validation against extracted entity indices (`cloud/packaging/validator.py`) | Enforces 0.0% dangling relations across all processed lectures (395/395 verified relations) |
 
 ---
 
@@ -298,7 +302,6 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | Add `DOWNLOADING` state to `ProviderManager` for Ollama download progress | User experience during model download |
 | Implement binary embedding storage (e.g., quantized int8) to reduce package size | Package portability |
 | Add Kafka-based streaming ingestion for live lecture processing | Real-time lecture availability |
-| Replace GraphML with a more compact binary graph format | Package size reduction |
 | Add a web-based package upload UI | Ease of import |
 | Implement async evaluation runner for large benchmark datasets | Evaluation speed |
 
@@ -313,10 +316,36 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Zero-restart provider switching** | LLM provider can switch from local to cloud mid-session via a single API call |
 | **Offline-first capability** | The entire local server runs without any cloud connectivity once packages are imported |
 | **Inspectable pipeline state** | `QueryState` makes every intermediate result available — critical for evaluation and debugging |
-| **Portable knowledge format** | Knowledge Packages use only open, standard formats (NumPy, JSON, GraphML, ZIP) |
+| **Portable knowledge format** | Knowledge Packages use only open, standard formats (NumPy, JSON, ZIP) — **202–428 KB** replacing 1+ GB video |
 | **Dual retrieval modes** | GraphRAG handles both semantic and relational queries — covering the full student query space |
-| **Modular evaluation framework** | Each metric module is independent — new metrics can be added with a single function and one line in the runner |
+| **Strict Graph Topology** | Prerequisite graphs are strictly acyclic DAGs with verified 77.8% precision / 70.0% recall |
+| **Modular evaluation framework** | Independent benchmark and audit suites (`benchmark_runner.py` and `audit_package.py`) |
 
 ---
 
-*Phase 3 documentation. Cross-references: ARCHITECTURE.md §8, PIPELINE.md §7–8, RETRIEVAL_SYSTEM.md §6, EVALUATION.md §6.*
+## 16. Multi-Signal Prerequisite DAG Inference
+
+### Decision
+Extract prerequisite dependencies between entities using a composite scoring function combining temporal precedence ($W=0.30$), lexical co-occurrence with negative lookbehinds ($W=0.30$), segment containment ($W=0.25$), and pedagogical inversion, followed by deterministic DFS cycle breaking.
+
+### Rationale
+- Pure LLM prompting for prerequisites is notoriously prone to hallucinated cycles ($A \to B \to A$), temporal reversal, and inclusion of superficial components (e.g., slide titles).
+- Pure chronological order fails when a foundational concept is briefly referenced late in a lecture.
+- Multi-signal scoring grounds the dependency in transcript evidence while enforcing that prerequisite candidates must temporally precede or co-occur in introductory contexts.
+- Deterministic DFS cycle pruning guarantees mathematical acyclicity (strict DAG = True), which is required for topological sorting and pedagogical sequencing in the Socratic Back-Tracker.
+
+---
+
+## 17. Compact Entity Alias Remapping for Relation Extraction
+
+### Decision
+Remap extracted entities into short token aliases (`E1, E2, ... En`) within sliding chunk windows before passing to the relation extraction prompt, then resolve them back to canonical names.
+
+### Rationale
+- Full 85-minute lectures (e.g., CS162 with 138 entities and 93 chunks) exceed standard prompt token limits if all entity names and descriptions are repeatedly serialized.
+- Legacy extraction without alias remapping suffered token truncation, collapsing extracted relations from 189 down to only 20.
+- Compact alias remapping reduces prompt token usage by ~65%, enabling dense relation extraction (395 relations across 3 lectures) with zero dangling edges.
+
+---
+
+*Phase 3 documentation. Cross-references: ARCHITECTURE.md §4, PIPELINE.md §1, RETRIEVAL_SYSTEM.md §4, EVALUATION.md §7.*

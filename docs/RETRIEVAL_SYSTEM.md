@@ -189,8 +189,19 @@ Step 3: Result Conversion
     → Written to graph_results in the workflow state.
 ```
 
-### How the Graph Is Persisted
-The knowledge graph is exported per lecture as **`entities.json`** and **`relations.json`** inside the knowledge package (`cloud/packaging/exporter.py`), plus `embeddings.npy` for entity vectors. These JSON files are loaded into Neo4j at import time (`serving/` importer) for live traversal; GraphML is not used.
+### How the Graph Is Persisted & Enriched
+The knowledge graph is exported per lecture as **`entities.json`**, **`relations.json`**, and **`prerequisites.json`** inside the knowledge package (`cloud/packaging/exporter.py`), plus `embeddings.npy` for entity vectors. These JSON files are loaded into Neo4j at import time (`serving/` importer via `neo4j_loader.py`) for live traversal and Socratic back-tracking; GraphML is not used.
+
+### Socratic Prerequisite Graph Traversal
+In addition to general multi-hop relationship queries, the graph engine supports directed prerequisite back-tracking via `serving/fastapi/routes/prerequisites.py`:
+```cypher
+MATCH path = (prereq:Entity)-[:PREREQUISITE_OF*1..4]->(target:Entity)
+WHERE toLower(target.name) = toLower($concept_name)
+RETURN prereq.name AS prerequisite, length(path) AS depth,
+       [r IN relationships(path) | r.confidence] AS confidences
+ORDER BY depth ASC
+```
+This enables the Socratic Back-Tracker to return complete prerequisite dependency chains, anchor chunks, and topologically sorted curriculum pathways.
 
 ---
 

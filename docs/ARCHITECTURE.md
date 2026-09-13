@@ -62,65 +62,68 @@ computation.
 graph TD
     subgraph Cloud[" Cloud Runtime (Kaggle / GPU)"]
         Video[" Lecture Video"]
-        Whisper["Faster-Whisper\n(Transcription)"]
+        Whisper["Faster-Whisper\n(Audio Transcription)"]
+        Frames["Frame Extractor\n(Keyframe Detection)"]
         VLM["Qwen2-VL\n(Visual Captioning)"]
-        OCR["PaddleOCR\n(Text Extraction)"]
-        Fusion["Multimodal Fusion\n& Segmentation"]
-        GraphExt["Entity + Relation\nExtraction"]
-        Embedder["BAAI/bge-large-en-v1.5\n(Embedding — 1024-dim)"]
-        TripletGen["Triplet Generator\n(B1)"]
-        Exporter["Package Exporter\n(C1 validate → C2 zip)"]
+        OCR["PaddleOCR\n(Dedicated Subprocess)"]
+        Fusion["A6 Multimodal Fusion\n(±2 s Alignment Window)"]
+        Seg["A7 Topic Segmentation\n(Qwen2.5-7B-Instruct)"]
+        Entities["A8 Entity Extraction\n(Typed Concepts)"]
+        Relations["A9 Sliding-Window Relations\n(Compact Aliases E1, E2...)"]
+        Prereqs["A10 Prerequisite Inference\n(Multi-Signal + DFS Cycle Resolution)"]
+        Embedder["B0 BAAI/bge-large-en-v1.5\n(1024-dim Dense Vectors)"]
+        TripletGen["B1 Triplet Generator\n(Reranker Training Data)"]
+        Exporter["C1 Validate → C2 Zip\n(Knowledge Package Exporter)"]
 
         Video --> Whisper
-        Video --> VLM
-        Video --> OCR
-        Whisper --> Fusion
-        VLM --> Fusion
-        OCR --> Fusion
+        Video --> Frames
+        Frames --> VLM
+        Frames --> OCR
+        Whisper & VLM & OCR --> Fusion
+        Fusion --> Seg
+        Seg --> Entities
+        Entities & Fusion --> Relations
+        Entities & Relations & Fusion --> Prereqs
         Fusion --> Embedder
-        Fusion --> GraphExt
-        Fusion --> TripletGen
-        Embedder --> Exporter
-        GraphExt --> Exporter
-        TripletGen --> Exporter
+        Seg & Fusion --> TripletGen
+        Embedder & Entities & Relations & Prereqs & Seg & Fusion --> Exporter
     end
 
-    Exporter -->|"Knowledge Package (.zip)"| LocalServer
+    Exporter -->|"Knowledge Package (.zip)\n[202–428 KB]"| LocalServer
 
     subgraph LocalServer[" Local Runtime (FastAPI + QueryWorkflow)"]
-        Import["Package Import\n(Qdrant + Neo4j load)"]
+        Import["Package Import\n(Qdrant + Neo4j + Prereq Loader)"]
         Course["Course Index\n(course_registry + fan-out)"]
-        QueryWorkflow["QueryWorkflow\n(Single-pass)"]
-        Planner["QueryPlanner\n(route + intent)"]
-        VecRet["vector_retriever_node\n(Qdrant, lecture-scoped)"]
-        GraphRet["graph_retriever_node\n(Neo4j, lecture-scoped)"]
-        Rerank["reranker_node\n(Global CrossEncoder)"]
-        Ctx["ContextBuilder\n(dedupe/merge/budget)"]
-        Gen["answer_generator_node\n(evidence-gated)"]
+        QueryWorkflow["QueryWorkflow\n(Single-pass Orchestrator)"]
+        Planner["QueryPlanner\n(route + intent + need_visual)"]
+        VecRet["vector_retriever_node\n(Qdrant + BM25 Lexical Fusion)"]
+        GraphRet["graph_retriever_node\n(Neo4j Bounded Traversal)"]
+        Rerank["reranker_node\n(Global Cross-Encoder BGE)"]
+        Ctx["ContextBuilder\n(Dedupe/Merge/Chronological)"]
+        Gen["answer_generator_node\n(Evidence-Gated Generation)"]
+        BackTracker["Socratic Back-Tracker\n(/lecture/{id}/prerequisites/{concept})"]
         ProvReg["ProviderRegistry\n(data/llm_config.json)"]
-        Ollama["OllamaBackend\n(Local)"]
-        Online["OnlineBackend\n(Cloud APIs)"]
+        Ollama["OllamaBackend\n(Local Private)"]
+        Online["OnlineBackend\n(Cloud APIs / Groq / Gemini)"]
         Learning["LearningService\n(Notes/Quiz/Flashcards)"]
-        Eval["Evaluation\n(Benchmark + RAGAS + LoadTest)"]
-        Dash["Benchmark Dashboard\n(HTML, from outputs)"]
+        Eval["Evaluation & Quality Auditing\n(BenchmarkRunner + RAGAS + KG Audit Suite)"]
 
         Import --> QueryWorkflow
         Import --> Course
+        Import --> BackTracker
         Course --> QueryWorkflow
         QueryWorkflow --> Planner --> VecRet & GraphRet
         VecRet --> Rerank
         GraphRet --> Rerank
         Rerank --> Ctx --> Gen
         Gen --> ProvReg
-        ProvReg --> Ollama
-        ProvReg --> Online
+        ProvReg --> Ollama & Online
         Learning --> ProvReg
         Eval --> QueryWorkflow
-        Eval --> Dash
     end
 
     subgraph Frontend[" Next.js Frontend"]
-        UI["Web UI\n(Chat / Learning / Settings / Dev Mode)"]
+        UI["Web UI\n(Chat / Socratic Learning / Settings / Dev Mode)"]
     end
 
     Frontend -->|"HTTP REST (JSON)"| LocalServer
@@ -138,21 +141,25 @@ Runs on GPU-equipped infrastructure (Kaggle). Stages (A1–C2):
 - **A2+A3 Transcription + Frame Extraction** (concurrent) — Faster-Whisper → `transcript.json`;
   keyframe extraction → `frames/`
 - **A4 Visual Captioning** — Qwen2-VL → `vlm_output.jsonl` (slide descriptions)
-- **A5 OCR** — PaddleOCR (CPU subprocess, to avoid CUDA-context contamination) → `ocr_output.jsonl`
+- **A5 OCR** — PaddleOCR (dedicated subprocess, avoiding CUDA-context contamination) → `ocr_output.jsonl`
 - **A6 Multimodal Fusion** — rule-based attachment of visual/OCR to transcript chunks within
   ±2 s of keyframes → `multimodal_chunks.json`
 - **A7 Segmentation** — Qwen2.5-7B-Instruct → `segments.json`, `chunk_segment_map.json`
-- **A8/A9 Entity + Relation Extraction** — Qwen2.5-7B-Instruct → `entities.json`, `relations.json`
+- **A8 Entity Extraction** — Qwen2.5-7B-Instruct → `entities.json` (typed domain concepts)
+- **A9 Relation Extraction** — Qwen2.5-7B-Instruct with sliding-window chunk context, compact entity alias remapping (`E1, E2...`), 8192-token retry budgets, and strict pedagogical exclusion rules → `relations.json` (395 verified relations across benchmark lectures, 0.0% dangling edges)
+- **A10 Prerequisite Inference & DAG Enforcement** — Multi-Signal Fuser (`cloud/extraction/prerequisite_extractor.py` and `local/loaders/prerequisite_enricher.py`) combining lexical mentions, segment containment, temporal precedence, negative lookbehinds, and pedagogical inversion, followed by deterministic DFS cycle resolution → `prerequisites.json` (guaranteed strict DAG, 0 cycles, 77.8% precision / 70.0% recall)
 - **B0 Embeddings** — `BAAI/bge-large-en-v1.5` (1024-dim) → `embeddings.npy`, `embedding_ids.json`
 - **B1 Triplet Generation** — `triplets.json` (reranker training data)
 - **B2 Reranker Fine-tune** *(optional, off by default)* — `reranker_model/`, `training_metrics.json`
-- **C1/C2 Validation + Export** — validate → ZIP the Knowledge Package
+- **C1 Validation** — schema validator enforcing referential integrity and data completeness
+- **C2 Package Export** — exports self-contained portable ZIP archive (`lecture_{id}_knowledge_package.zip`)
 
 ### 4.2 Local Inference Server (`serving/fastapi/`)
 Lightweight FastAPI application. Responsibilities:
 - Importing and activating Knowledge Packages (`local/loaders/`, `local/storage/lecture_registry.py`).
 - Serving conversational queries through the single-pass workflow (JSON responses with
   timestamped sources + an additive `debug` trace for Developer Mode).
+- Serving Socratic prerequisite back-tracking requests (`/lectures/{id}/prerequisites/{concept}`).
 - Managing LLM provider configuration (Ollama + cloud APIs via `ProviderRegistry`).
 - Exposing active-learning endpoints (flashcards, notes, quizzes) via `learning_service.py`.
 - Course index endpoints (metadata-only fan-out across lectures).
@@ -162,6 +169,7 @@ Lightweight FastAPI application. Responsibilities:
 |---|---|
 | `POST /upload` | Imports a Knowledge Package ZIP |
 | `GET /lectures` / `POST /lectures/{id}/load` | Lists / activates packages |
+| `GET /lectures/{id}/prerequisites/{concept}` | Socratic Prerequisite Back-Tracker: reverse BFS/DFS prerequisite chain, topological sequence, anchor chunks |
 | `POST /query` | Conversational query → JSON `{answer, sources[], graph_path[], debug{}}` |
 | `POST /courses/query` | Course fan-out query |
 | `GET/POST /settings/...` | Provider config, status, model management |
@@ -186,7 +194,7 @@ The core reasoning engine. `QueryWorkflow` is a **single-pass** orchestrator
   over Qdrant payloads, fused with dense candidates via Reciprocal Rank Fusion before
   reranking (default-on).
 - **Graph Retrieval** (`retrieval/graph_retriever/neo4j_retriever.py`) — bounded Cypher
-  traversal, all 6 relation types, exact→partial match.
+  traversal across typed relationships and prerequisite dependencies.
 - **Fusion + Rerank** (`retrieval/reranker/rerank_service.py`) — merges fused + graph results,
   dedupes by `chunk_id`, scores with the global cross-encoder (optional int8 quantization).
 - **Context Assembly** (`retrieval/context_builder.py`) — dedupe, chronological sort,
@@ -208,20 +216,19 @@ Implements the **Strategy Pattern** with Dependency Inversion via the `LLMBacken
 - `ProviderManager` — runtime health checker mapping SDK errors to `ProviderStatus`.
 
 ### 4.6 Evaluation Framework (`evaluation/`)
-Offline benchmark system that directly invokes `QueryWorkflow` (bypassing HTTP):
+Offline benchmark system that directly invokes `QueryWorkflow` (bypassing HTTP) and performs full knowledge graph verification:
 - `BenchmarkRunner` — dataset iteration + workflow invocation + state extraction; injectable
   Qdrant / embedding / reranker / Neo4j / LLM dependencies.
+- `evaluation/knowledge_graph/audit_package.py` — Knowledge Graph Quality & Prerequisite Audit Suite: strict bipartite matching against gold annotations, DAG topological validation, cycle detection, orphan/fragment quantification, and downstream GraphRAG hit testing.
 - Metric modules: planner (routing + visual routing), retrieval, reranker, answer, citation,
-  latency.
+  latency, and prerequisite precision/recall/F1.
 - `ReportGenerator` — mean/p95/min/max/n per metric + per-type/difficulty breakdowns →
   CSV / JSON / Markdown.
-- `Dashboard` — self-contained HTML renderer over existing outputs (never re-runs evals).
-- Real dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` (curated 50 questions).
+- Real dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` (curated 50 questions) + `evaluation/knowledge_graph/prerequisite_gold.json` (ground-truth prerequisite graph).
 
 ### 4.7 Frontend (`frontend/`)
 Next.js 14 + React 18 + TypeScript web UI. Communicates with the FastAPI server over HTTP
-(JSON). Supports chat, active-learning tools, provider settings, knowledge-graph visualization
-(reactflow), and a Developer Mode that renders the per-query pipeline trace.
+(JSON). Supports chat, active-learning tools, provider settings, interactive knowledge-graph and prerequisite visualization, and a Developer Mode that renders the per-query pipeline trace.
 
 ---
 
@@ -232,9 +239,9 @@ Next.js 14 + React 18 + TypeScript web UI. Communicates with the FastAPI server 
 | `cloud/` | Cloud-side ingestion pipeline (orchestration, extraction, fusion, packaging, reranker training) |
 | `agent/` | Query orchestration: `dspy/planner.py`, `langgraph/workflow.py`, `langgraph/nodes/` |
 | `retrieval/` | Vector / graph / course retrievers, reranker service, context builder |
-| `local/` | LLM backends + provider registry, loaders, storage registries, services, docker compose |
-| `serving/` | FastAPI app, routes, learning service |
-| `evaluation/` | Benchmark runner, metrics, reports, dashboard, datasets, load testing, RAGAS |
+| `local/` | LLM backends + provider registry, loaders (`prerequisite_enricher.py`), storage registries, docker compose |
+| `serving/` | FastAPI app, routes (`query.py`, `prerequisites.py`, `lectures.py`), learning service |
+| `evaluation/` | Benchmark runner, metrics, reports, dashboard, datasets, load testing, RAGAS, and `knowledge_graph/` quality audit suite |
 | `frontend/` | Next.js web UI |
 | `schemas/` | Shared Pydantic models + closed enums |
 | `scripts/` | `train_global_reranker.py`, `trace_query.py`, validators |
@@ -282,12 +289,25 @@ POST /query (HTTP Request)
                                   → evidence-gated answer + sources + graph_path
 ```
 
-### 6.3 Inter-Module Communication
+### 6.3 Prerequisite Back-Tracking Path
+
+```
+GET /lectures/{id}/prerequisites/{concept} (HTTP Request)
+    └── routes/prerequisites.py
+            ├── Queries Neo4j for reverse PREREQUISITE_OF edges (bounded BFS/DFS)
+            │   └── Fallback to package prerequisites.json if Neo4j unavailable
+            ├── Computes topological ordering and prerequisite depth
+            ├── Retrieves chronological anchor chunks for each prerequisite
+            └── Returns JSON {concept, total_prerequisites, prerequisite_chain[], topological_order[]}
+```
+
+### 6.4 Inter-Module Communication
 
 | From | To | Mechanism |
 |---|---|---|
 | Frontend | FastAPI | HTTP REST (JSON) |
 | `routes/query.py` | `QueryWorkflow` | Direct Python instantiation |
+| `routes/prerequisites.py` | Neo4j / `prerequisites.json` | Driver query + fallback JSON read |
 | `QueryWorkflow` | `ProviderRegistry` | Singleton accessor function call |
 | `ProviderRegistry` | `LLMBackend` | Factory instantiation (lazy, ephemeral) |
 | `vector_retriever_node` | Qdrant | `qdrant_client` Python SDK |
@@ -296,6 +316,7 @@ POST /query (HTTP Request)
 | `LearningService` | `ProviderRegistry` | Same path as query pipeline |
 | Cloud → Local | Knowledge Package | ZIP / directory transfer |
 | `BenchmarkRunner` | `QueryWorkflow` | Direct Python instantiation (no HTTP) |
+| `audit_package.py` | Package ZIP / Gold labels | Offline graph topology & bipartite matcher |
 
 ---
 
@@ -306,6 +327,7 @@ POST /query (HTTP Request)
 | Local inference server | `uvicorn serving.fastapi.app:app` | Start local API |
 | Cloud ingestion pipeline | `cloud/orchestration/run_ingestion_pipeline.py` | Run cloud processing on GPU (Kaggle) |
 | Evaluation benchmark | `evaluation/benchmark_runner.py` | Offline RAG quality measurement |
+| Knowledge Graph auditor | `evaluation/knowledge_graph/audit_package.py` | Audit package graph topology, prerequisites, and DAG compliance |
 | Dashboard | `python -m evaluation.dashboard.dashboard_generator` | Render eval outputs → HTML |
 
 ---
@@ -330,3 +352,5 @@ POST /query (HTTP Request)
 1. **Per-Provider Rate Limiting & Backoff:** The rate limiter (`local/llm/rate_limiter.py`) dynamically enforces token and request quotas with exponential jitter backoff, ensuring uninterrupted high-concurrency workloads.
 2. **Hybrid Lexical & Semantic Retrieval:** Dense vector representations (`bge-large-en-v1.5`) combined with BM25 lexical indexing and Reciprocal Rank Fusion (RRF) capture both contextual semantics and exact numeric/entity tokens.
 3. **Strict Scoping & Zero-Data Leakage:** Neo4j constraints and Qdrant payload filters strictly scope all operations by `(entity_id, lecture_id)`, ensuring complete multi-tenant isolation.
+4. **Strict Prerequisite DAG Guarantees:** Acyclic prerequisite structures are enforced deterministically using depth-first search cycle breaking. Mutual cycles and circular dependencies are pruned before ingestion, guaranteeing 0 graph cycles and 100% topological sortability.
+5. **Zero Dangling Relations:** All relation edges are referentially validated against the extracted entity index during stage C1 and loader ingestion, eliminating dangling pointer errors across all processed lectures.

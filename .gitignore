@@ -194,3 +194,4 @@ Thumbs.db
 # Delete this folder once the archive is no longer needed.
 # ------------------------------------------------------------
 0-not-required/
+outputs/kg_quality_*/
