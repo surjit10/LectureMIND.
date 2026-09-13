@@ -22,15 +22,16 @@
 
 | Dimension | Value | Evidence |
 |---|---|---|
-| Architecture layers | Multimodal ingestion → segmentation → entity/relation extraction → hybrid GraphRAG (vector + BM25 + graph) → cross-encoder rerank → evidence-gated generation | `cloud/`, `retrieval/`, `agent/langgraph/` |
+| Architecture layers | Multimodal ingestion → segmentation → entity/relation extraction → prerequisite DAG inference → hybrid GraphRAG (vector + BM25 + graph) → cross-encoder rerank → evidence-gated generation | `cloud/`, `retrieval/`, `agent/langgraph/` |
 | Modalities captured | Audio (100% chunk coverage) + slide visuals + OCR at slide keyframes | `multimodal_fusion.py`, live scan |
 | Serving model | Local Ollama `qwen2.5:3b` (offline, fully private) **or** cloud APIs — OpenAI, Gemini, Groq, OpenRouter, Anthropic — hot-swappable via `ProviderRegistry` | `local/llm/provider_registry.py` |
 | Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
 | Reranker | Global cross-encoder `BAAI/bge-reranker-base` (XLM-R), CPU, process singleton; dynamic int8 quantization (`RERANKER_QUANTIZE`) with automatic FP32 fallback | `rerank_service.py`, `reranker_loader.py`, `app.py` |
 | Hybrid retrieval | Dense (`bge-large-en-v1.5`) + BM25 lexical candidates fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking; enabled by default (`ENABLE_HYBRID_RETRIEVAL`) | `retrieval/hybrid/bm25_retriever.py`, `config.py` |
-| Knowledge graph | Demo lecture: 128 entities / 20 relations; collection scan: 930 nodes / 127 edges; 6 relation types traversed | Neo4j live query |
-| Content scale | 725 knowledge packages on disk (~85 MB total); demo lecture: 97 semantic chunks / 16 segments | `data/packages/` |
-| Automated tests | **492 passing** (planner, retrieval, hybrid retrieval, reranker, loader, isolation, pipeline, extraction) | `pytest -q` |
+| Knowledge graph | Production run: CS162 (138 entities / 189 relations), MIT (78 entities / 92 relations), Self-Attention (60 entities / 114 relations); **395 total relations**, 0.0% dangling rate | Kaggle package audit (`audit_package.py`) |
+| Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 27 prerequisites (CS162), 11 (MIT), 3 (Self-Attention); benchmark F1: **73.7%** (77.8% precision / 70.0% recall, 0 cycles) | `evaluation/knowledge_graph/` |
+| Content scale | Ingested long-lecture packages (46–93 chunks / 40–85 min); package size: **202–428 KB** (replacing 1+ GB video) | `0-output/` |
+| Automated tests | **569 passing** (planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction) | `pytest` |
 
 ---
 
@@ -118,28 +119,56 @@ Citation completeness of 1.0 means every cited source was actually present in th
 
 ### 2.5 Storage & compression
 
-LectureMIND replaces raw video with structured knowledge. The demo lecture is an **83-minute, 720p video (~1.2 GB at a typical 2 Mbps encode)**; its knowledge package is **436 KB** (446,576 bytes, 725 KB unpacked):
+LectureMIND replaces raw video with structured knowledge. An **85-minute, 720p lecture (~1.2 GB at typical encoding)** compresses into a **~428 KB knowledge package** (~2,800× smaller):
 
 | Artifact | Size | Notes |
 |---|---|---|
-| Source video (83 min, 720p) | ≈ 1.2 GB | Not stored or shipped |
-| Knowledge package (unpacked) | 725 KB | transcript, OCR, visual captions, embeddings, entities/relations, triplets |
-| Knowledge package (zip) | **436 KB** | ZIP ratio 1.6×; **≈2,800× smaller than the source video** |
+| Source video (85 min, 720p) | ≈ 1.2 GB | Not stored or shipped |
+| CS162 Knowledge package (`.zip`) | **428 KB** | 93 chunks, 138 entities, 189 relations, 27 prerequisites (~2,800× smaller than video) |
+| MIT 6.S191 Knowledge package (`.zip`) | **308 KB** | 69 chunks, 78 entities, 92 relations, 11 prerequisites |
+| Self-Attention Knowledge package (`.zip`)| **202 KB** | 46 chunks, 60 entities, 114 relations, 3 prerequisites |
 | Per-query LLM context | ≈ 3.5 KB | the only text the model reads per question |
-| Code snapshot (`dist/lecturemind-code-kaggle.zip`) | 125 KB | 81 files, 303 KB of source → 2.4× zip ratio |
+| Code snapshot (`dist/lecturemind-code-kaggle.zip`) | **131.89 KB** | 64 files, 335 KB of source → 2.5× zip ratio |
 | Whole corpus (725 packages) | ≈ 85 MB | replaces an estimated 100+ GB of source video |
 
-This is the storage story the architecture is built around: the expensive, bulky artifact (video) is processed **once** in the cloud, and everything a student needs — searchable chunks, embeddings, graph, captions — ships as a small portable ZIP that runs fully offline on a laptop. The problem being solved is not video compression but *knowledge extraction*: gigabytes of unstructured video become kilobytes of structured, queryable data.
+This is the storage story the architecture is built around: the expensive, bulky artifact (video) is processed **once** in the cloud, and everything a student needs — searchable chunks, embeddings, graph, captions, prerequisites — ships as a small portable ZIP that runs fully offline on a laptop.
 
-### 2.6 Scale & content coverage
+### 2.6 Knowledge Graph Quality & Prerequisite DAG Metrics (Live Audited)
+
+Source: `evaluation/knowledge_graph/audit_package.py` — audited across the benchmark package and newly ingested long-lecture packages:
+
+| Metric | Measured Value | Benchmark Baseline | Delta / Health Status |
+|---|---|---|---|
+| **Prerequisite Strict Precision** | **77.8%** (7/9) | 53.8% (7/13) | **+24.0% absolute gain** |
+| **Prerequisite Strict Recall** | **70.0%** (7/10) | 70.0% (7/10) | **100% preserved (zero regression)** |
+| **Prerequisite Strict F1** | **73.7%** | 60.9% | **+12.8% absolute gain** |
+| **Strict DAG Guarantee** | **True** | True | 100% acyclic across all packages |
+| **Cycle Count** | **0** | 0 | Mutual cycles deterministically pruned |
+| **Self-Loop Count** | **0** | 0 | Zero self-dependencies ($A \to A$) |
+| **Pedagogical Relevance** | **100%** | 93.3% | Zero physical parts/losses mislabeled as prerequisites |
+| **Dangling Relation Rate** | **0.0%** (0/395) | 0.0% | 100% referential integrity to `entities.json` |
+| **Relation Inverse Consistency** | **100%** | 100% | Symmetric and reverse mappings verified |
+
+#### Multi-Lecture Extraction Yield (Full Cloud Execution)
+
+Comparison between legacy run (truncated by token caps) and the current sliding-window + compact alias pipeline:
+
+| Lecture Package | Duration | Entities (Old $\to$ New) | Relations (Old $\to$ New) | Inferred Prerequisites | Extraction Gain |
+|---|---|---|---|---|---|
+| **CS162 Operating Systems** | ~85 min (93 chunks) | $128 \to \mathbf{138}$ | $20 \to \mathbf{189}$ | **27** | **+845% (+169 relations)** |
+| **MIT 6.S191 Deep Learning** | ~60 min (69 chunks) | $75 \to \mathbf{78}$ | $20 \to \mathbf{92}$ | **11** | **+360% (+72 relations)** |
+| **Self-Attention in Transformers**| ~40 min (46 chunks) | $43 \to \mathbf{60}$ | $10 \to \mathbf{114}$ | **3** | **+1040% (+104 relations)** |
+| **Total Across Corpus** | **208 chunks** | **276 entities** | **395 relations** | **41 prerequisites** | **+690% (+345 relations)** |
+
+### 2.7 Scale & content coverage
 
 | Metric | Value |
 |---|---|
 | Videos ingested | 725 knowledge packages on disk (Kaggle-produced) |
-| Avg chunks / lecture | Demo lecture: **97 semantic chunks / 16 segments** |
+| Avg chunks / lecture | Long lectures: **46–93 multimodal chunks / 4–14 segments** |
 | Transcript coverage | 100% of chunks carry transcript |
 | Visual + OCR coverage | Fused at slide keyframes; 5 of 50 benchmark questions target slide content |
-| Graph density | Demo lecture: 128 entities / 20 relations; collection scan: 930 nodes / 127 edges |
+| Graph density | 276 entities / 395 relations across 3 recent full lectures; 0.0% dangling edges |
 
 ---
 

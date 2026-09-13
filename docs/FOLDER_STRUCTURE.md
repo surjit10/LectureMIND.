@@ -21,7 +21,7 @@ lecturemind/
 ├── cloud/                     # Cloud ingestion pipeline (heavy GPU processing)
 ├── local/                     # Local inference business logic
 │   ├── llm/                   # LLM abstraction layer
-│   ├── loaders/               # Knowledge Package importer, Ollama loader
+│   ├── loaders/               # Knowledge Package importer, prerequisite enricher, Ollama loader
 │   └── docker/
 │       └── local_runtime/     # Docker volume mounts (data persistence)
 │           ├── models/        # Cached model weights
@@ -31,19 +31,20 @@ lecturemind/
 │   └── langgraph/
 │       ├── nodes/             # Individual DAG node implementations
 │       └── workflow.py        # Graph definition and QueryWorkflow class
-├── retrieval/                 # Vector and graph retrieval clients
+├── retrieval/                 # Vector, graph, hybrid BM25, and course retrieval clients
 ├── serving/
 │   └── fastapi/
 │       ├── app.py             # FastAPI application, lifespan, startup
-│       ├── routes/            # HTTP route handlers
+│       ├── routes/            # HTTP route handlers (query, prerequisites, lectures, settings)
 │       ├── learning_service.py# Flashcard / notes / quiz generation
 │       └── rerank_service.py  # Global reranker singleton wrapper
 ├── frontend/                  # Web UI (student-facing interface)
 ├── schemas/                   # Shared Pydantic models (cross-module DTOs)
-├── evaluation/                # Offline benchmark framework
+├── evaluation/                # Offline benchmark & auditing framework
 │   ├── benchmark_runner.py    # Main evaluation orchestrator
 │   ├── dataset_loader.py      # BenchmarkSample loading + validation
-│   ├── datasets/              # QA sets (cs162_lecture1_qa_50.json — curated 50; sample_dataset.json)
+│   ├── datasets/              # QA sets (cs162_lecture1_qa_50.json; sample_dataset.json)
+│   ├── knowledge_graph/       # Knowledge Graph Quality & Prerequisite Audit Suite
 │   ├── dashboard/             # HTML dashboard generator (renders outputs only)
 │   ├── load_testing/          # 100/500/1000-user load test
 │   ├── ragas/                 # RAGAS answer-quality scoring
@@ -55,7 +56,7 @@ lecturemind/
 │   ├── lecture_registry.json  # Imported lecture metadata
 │   ├── courses.json           # Course index (metadata only)
 │   └── packages/              # Knowledge Package directories
-│       └── lecture_{id}/      # Per-lecture package (embeddings + graph + chunks)
+│       └── lecture_{id}/      # Per-lecture package (embeddings + graph + prereqs + chunks)
 ├── config.py                  # Pydantic-settings environment configuration
 ├── requirements.txt           # Cloud + full dependency set
 └── local_requirements.txt     # Minimal local-only dependencies
@@ -104,8 +105,11 @@ The LLM abstraction layer. Contains:
 
 #### `local/loaders/`
 Package and model management:
-- `ollama_loader.py`: `check_model_ready()` and `pull_model_if_needed()` — queries the Ollama daemon for model availability and initiates downloads. Accepts `model_name` as a parameter (decoupled from `config.py` defaults).
-- Package importer/validator: reads a Knowledge Package directory, validates required files (`metadata.json`, `graph.graphml`, `vector_index/`), and imports into the local databases.
+- `ollama_loader.py`: `check_model_ready()` and `pull_model_if_needed()` — queries the Ollama daemon for model availability and initiates downloads. Accepts `model_name` as a parameter.
+- `package_validator.py`: verifies required package files (`manifest.json`, `entities.json`, `relations.json`, `embeddings.npy`, `multimodal_chunks.json`).
+- `neo4j_loader.py`: loads entities, relations, and `PREREQUISITE_OF` directed edges into Neo4j with lecture-scoped property indexing.
+- `qdrant_loader.py`: creates lecture-scoped collections and upserts 1024-dim dense vectors from `embeddings.npy` and chunk text payloads.
+- `prerequisite_enricher.py`: infers prerequisite dependencies and writes companion `prerequisites.json` if missing.
 
 #### `local/docker/local_runtime/`
 Docker bind-mount targets for persistent data:
@@ -152,7 +156,7 @@ Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by
 
 **What lives here:**
 - `vector_retriever/qdrant_retriever.py`: Wraps the `qdrant_client` SDK. Performs approximate nearest-neighbor search using 1024-dim query embeddings. Returns ranked `(chunk_id, score, payload)` tuples.
-- `graph_retriever/neo4j_retriever.py`: Wraps the `neo4j` Python driver. Executes Cypher queries to traverse entity–relationship paths. Returns matching chunk IDs and relationship context.
+- `graph_retriever/neo4j_retriever.py`: Wraps the `neo4j` Python driver. Executes Cypher queries to traverse entity–relationship paths and prerequisite dependencies.
 - `hybrid/bm25_retriever.py`: Lazy per-lecture BM25 index built from Qdrant payloads; fuses dense + lexical results with Reciprocal Rank Fusion (RRF) before reranking (default-on via `ENABLE_HYBRID_RETRIEVAL`).
 - `reranker/rerank_service.py`: Global cross-encoder singleton (optional int8 quantization) + candidate deduplication + graph-path rendering into context.
 - `context_builder.py`: Dedupe → chronological sort → adjacent merge → OCR-noise filter → budget enforcement; selects evidence by rerank score and renders it chronologically.
@@ -175,6 +179,7 @@ Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by
 | File | Routes | Purpose |
 |---|---|---|
 | `query.py` | `POST /query` | Runs the single-pass workflow; returns JSON `{answer, sources[], graph_path[], debug{}}` |
+| `prerequisites.py` | `GET /lectures/{id}/prerequisites/{concept}` | Socratic Back-Tracker: reverse prerequisite dependency traversal, anchor chunks, and topological sequence |
 | `lectures.py` | `POST /upload`, `GET /lectures`, `POST /lectures/{id}/load`, learning endpoints | Package import, listing, activation, active-learning content |
 | `courses.py` | `POST /courses`, `POST /courses/query` | Course index + fan-out query (Feature 1) |
 | `reranker.py` | `POST /api/reranker/upload`, status/reload | Global reranker upload → atomic replace → hot reload |
@@ -199,6 +204,7 @@ Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by
 
 **Features exposed:**
 - Chat interface (grounded answers with timestamped sources + Developer-Mode pipeline trace).
+- Socratic learning interface (backward prerequisite traversal and curriculum sequencing).
 - Active learning tools (flashcards, structured notes, quizzes).
 - Provider settings panel (switch between Ollama / cloud APIs, manage API keys, trigger model downloads).
 - Lecture management (import and activate Knowledge Packages).
@@ -209,23 +215,21 @@ Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by
 
 **Purpose:** Shared Pydantic data models used across both the cloud and local sides of the system. Prevents model duplication and ensures consistent validation.
 
-**Likely contents:**
-- `QueryState` (TypedDict or Pydantic model for LangGraph state).
-- `BenchmarkSample` (dataset schema for evaluation).
-- Request/response DTOs for FastAPI routes.
-- `ProviderStatus` enum definitions.
-- Knowledge Package metadata schema.
-
 ---
 
 ### `evaluation/`
 
-**Purpose:** Offline RAG quality benchmark framework. Completely decoupled from FastAPI — invokes `QueryWorkflow` directly.
+**Purpose:** Offline RAG quality benchmark and knowledge graph quality audit framework.
 
 #### `evaluation/benchmark_runner.py`
 - `BenchmarkRunner(dataset_path, output_dir)` — main orchestrator.
 - Iterates over `BenchmarkSample` objects from a JSON dataset.
 - For each sample: invokes `QueryWorkflow.run()`, extracts `QueryState`, computes metrics.
+
+#### `evaluation/knowledge_graph/`
+- `audit_package.py`: Knowledge Graph Quality & Prerequisite Audit Suite CLI — validates schema integrity, orphan rate, referential consistency (0.0% dangling edges), strict DAG topology (0 cycles), and bipartite prerequisite matching against gold labels.
+- `prerequisite_evaluator.py`: Bipartite matching algorithm and metric computer.
+- `prerequisite_gold.json`: Ground-truth benchmark prerequisite dependencies.
 
 #### `evaluation/metrics/`
 | Module | Metrics Computed |
@@ -256,6 +260,7 @@ Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by
 | `data/packages/lecture_{id}/segments.json` | Topic segments + `chunk_segment_map.json` |
 | `data/packages/lecture_{id}/entities.json` | Extracted entities (typed) |
 | `data/packages/lecture_{id}/relations.json` | Extracted typed relations (entity → relation → entity) |
+| `data/packages/lecture_{id}/prerequisites.json` | Strictly acyclic prerequisite DAG (prerequisite → concept) |
 | `data/packages/lecture_{id}/embeddings.npy` + `embedding_ids.json` | 1024-dim chunk embeddings + ids (loads into Qdrant) |
 | `data/packages/lecture_{id}/triplets.json` | Relation triplets for offline reranker training |
 

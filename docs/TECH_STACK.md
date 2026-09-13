@@ -53,14 +53,15 @@
 | **BAAI/bge-reranker-base** | Cross-encoder reranker — re-scores retrieved chunks for precision before LLM generation; optional dynamic int8 quantization (`RERANKER_QUANTIZE`) with FP32 fallback |
 | **BM25 (pure Python, stdlib)** | `retrieval/hybrid/bm25_retriever.py` — lexical retrieval fused with dense candidates via Reciprocal Rank Fusion (no external dependency) |
 
-### 3.2 Cloud Ingestion Models
+### 3.2 Cloud Ingestion Models & Heuristic Engines
 
-| Model | Role |
+| Model / Engine | Role |
 |---|---|
 | **Faster-Whisper** | ASR (Automatic Speech Recognition) — transcribes lecture audio to timestamped text |
 | **Qwen2-VL** | Vision-Language Model — generates structured slide *descriptions* (visual captioning, stage A4) |
-| **PaddleOCR** | OCR engine — extracts raw on-screen text from slide frames (stage A5, CPU subprocess to avoid CUDA-context contamination) |
-| **Qwen2.5-7B-Instruct** | Cloud-side LLM — segmentation (A7), entity extraction (A8), relation extraction (A9), triplet generation (B1) |
+| **PaddleOCR** | OCR engine — extracts raw on-screen text from slide frames (stage A5, dedicated subprocess to avoid CUDA-context contamination) |
+| **Qwen2.5-7B-Instruct** | Cloud-side LLM — segmentation (A7), entity extraction (A8), sliding-window relation extraction with compact aliases (A9), triplet generation (B1) |
+| **Multi-Signal Prerequisite Fuser & DFS DAG Breaker** | Heuristic prerequisite inference (`cloud/extraction/prerequisite_extractor.py`, `local/loaders/prerequisite_enricher.py`) — temporal precedence + lexical mentions (negative lookbehinds) + segment containment + pedagogical inversion + DFS cycle resolution |
 
 ### 3.3 LLM Backends
 
@@ -82,17 +83,17 @@
 | Database | Type | Role |
 |---|---|---|
 | **Qdrant** | Vector database | Stores 1024-dim chunk embeddings; serves semantic nearest-neighbor queries at inference time |
-| **Neo4j** | Graph database | Stores entity-relationship knowledge graph extracted from lecture transcripts; serves Cypher traversal queries |
+| **Neo4j** | Graph database | Stores entity-relationship knowledge graph and strictly acyclic `PREREQUISITE_OF` dependencies; serves Cypher traversal and Socratic back-tracking queries |
 
 **Client libraries:**
-- `qdrant-client` (Python SDK) — used in `retrieval/vector_retriever.py`
-- `neo4j` (official Python driver) — used in `retrieval/graph_retriever.py`
+- `qdrant-client` (Python SDK) — used in `retrieval/vector_retriever/qdrant_retriever.py`
+- `neo4j` (official Python driver) — used in `retrieval/graph_retriever/neo4j_retriever.py` and `serving/fastapi/routes/prerequisites.py`
 
 **Persistence:**
 - Both databases run in Docker containers with bind mounts to `local/docker/local_runtime/qdrant_data/` and `local/docker/local_runtime/neo4j_data/`.
 - Data persists across container restarts and server shutdowns.
 - Qdrant knowledge is loaded from `embeddings.npy` + `embedding_ids.json` contained in Knowledge Packages.
-- Neo4j knowledge is loaded from `entities.json` + `relations.json` contained in Knowledge Packages.
+- Neo4j knowledge is loaded from `entities.json`, `relations.json`, and `prerequisites.json` contained in Knowledge Packages.
 
 ---
 
@@ -150,7 +151,7 @@
 | Technology | Usage |
 |---|---|
 | **JSON** | `data/llm_config.json` — LLM provider config; `transcript.json` — transcription output |
-| **JSON** | `entities.json` / `relations.json` — serialized knowledge graph (nodes + typed edges) inside Knowledge Packages |
+| **JSON** | `entities.json` / `relations.json` / `prerequisites.json` — serialized knowledge graph (nodes + typed edges + prerequisite DAG) inside Knowledge Packages |
 | **Pydantic JSON Schema** | Validation of Knowledge Package metadata and API request/response bodies |
 | **`.env` files** | Environment variable injection for `pydantic-settings` (`LocalSettings`, `CloudSettings`) |
 
@@ -167,6 +168,7 @@
 | `NORMAL_TOP_K` / `LECTURE_WIDE_TOP_K` | `15` | `agent/dspy/planner.py` — retrieval candidate pool. The reranker sees 15 candidates; the LLM still receives a budget-capped context. |
 | `MIN_TRANSCRIPT_CHARS` / `RETRIEVAL_FETCH_SLACK` | `15` / `15` | `retrieval/vector_retriever/qdrant_retriever.py` — transcript-only filler filter + fetch slack so filtering never shrinks the pool. |
 | Context budget | `4,000` chars normal / `6,000` lecture-wide | `agent/dspy/planner.py`; `rerank_service.MAX_CONTEXT_CHARS = 4000` fallback. |
+| Prerequisite threshold | `0.65` | `cloud/extraction/prerequisite_extractor.py` — minimum multi-signal score for prerequisite edge admission. |
 
 ---
 
