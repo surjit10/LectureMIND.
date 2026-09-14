@@ -13,6 +13,7 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
@@ -51,7 +52,11 @@ RELATION_EXTRACTION_PROMPT = (
     "* Never use entity names as identifiers\n"
     "* Return only valid JSON\n"
     "* Do not invent entities\n"
-    "* Do not create duplicate edges\n\n"
+    "* Do not create duplicate edges\n"
+    "* EVIDENCE RULE: every relation MUST include an \"evidence\" field containing a "
+    "verbatim quote (max ~30 words, copied exactly) from the lecture context that "
+    "directly states or clearly implies the relationship. Relations without a "
+    "verbatim quote from the context will be rejected.\n\n"
     "Allowed relation types and strict directional definitions:\n"
     "- PREREQUISITE_OF: Concept A is a foundational concept that the learner needs to understand before Concept B can be understood.\n"
     "  Direction: A PREREQUISITE_OF B means A is the foundational concept and B is the advanced dependent topic (A -> B).\n"
@@ -70,7 +75,7 @@ RELATION_EXTRACTION_PROMPT = (
     "Available entities:\n{entity_list}\n\n"
     "Lecture context:\n{context}\n\n"
     "Output format:\n"
-    '[{{"source_entity_id":"E1","relation":"RELATION_TYPE","target_entity_id":"E2"}}]\n\n'
+    '[{{"source_entity_id":"E1","relation":"RELATION_TYPE","target_entity_id":"E2","evidence":"<verbatim quote from context>"}}]\n\n'
     "IMPORTANT:\n"
     "* Return ONLY a JSON array.\n"
     "* Do NOT include explanations.\n"
@@ -176,6 +181,8 @@ def _remap_relations(
                 "source_entity_id": src,
                 "relation": rel["relation"],
                 "target_entity_id": tgt,
+                # Preserve the evidence quote through alias remapping.
+                **({"evidence": rel["evidence"]} if rel.get("evidence") else {}),
             })
         else:
             if stats is not None:
@@ -423,10 +430,16 @@ def _parse_relation_json_with_status(
         src = item.get("source_entity_id", "").strip()
         rel = item.get("relation", "").strip()
         tgt = item.get("target_entity_id", "").strip()
+        evidence = str(item.get("evidence", "")).strip()
 
         if not src or not rel or not tgt:
             continue
 
+        # EVIDENCE RULE (audit fix, 2026-09-14): the strict gate lives in
+        # extract_relations() (ingestion path), NOT here — the parse layer
+        # stays evidence-tolerant for unit-testability. extract_relations()
+        # drops evidence-less relations and verifies quotes against the
+        # actual chunk text via _verify_relation_evidence().
         normalized = normalize_relation_type(rel)
         if normalized is None:
             if stats is not None:
@@ -446,11 +459,69 @@ def _parse_relation_json_with_status(
             "source_entity_id": src,
             "relation": normalized,
             "target_entity_id": tgt,
+            "evidence": evidence,
         })
 
     if stats is not None:
         stats.accepted += len(valid_relations)
     return valid_relations, status
+
+
+def _normalize_for_match(text: str) -> str:
+    """Aggressive normalization for evidence-quote verification."""
+    s = text.lower()
+    s = re.sub(r"[^\w\s]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _verify_relation_evidence(
+    relations: List[Dict[str, str]],
+    chunks: List[Dict[str, Any]],
+    stats: Optional[ExtractionStats] = None,
+) -> Tuple[List[Dict[str, str]], int]:
+    """Verify each relation's evidence quote exists verbatim in the lecture text.
+
+    The quote is normalized (case/punctuation) and must appear in some chunk's
+    transcript/OCR/visual text. Relations with unverifiable quotes are dropped.
+    Relations without an evidence field (legacy callers / extractor_fn) pass
+    through unverified — the strict prompt+parse path always populates it.
+
+    Returns (verified_relations, dropped_count).
+    """
+    if not chunks:
+        return relations, 0
+
+    corpus = [
+        _normalize_for_match(
+            (c.get("transcript", "") or "") + " "
+            + (c.get("visual_context", "") or "") + " "
+            + (c.get("ocr_text", "") or "")
+        )
+        for c in chunks
+    ]
+    corpus_blob = " | ".join(corpus)
+
+    verified: List[Dict[str, str]] = []
+    dropped = 0
+    for rel in relations:
+        evidence = rel.get("evidence", "")
+        if not evidence:
+            # Legacy path (extractor_fn / tests) without evidence: keep as-is.
+            verified.append(rel)
+            continue
+        needle = _normalize_for_match(evidence)
+        if needle and needle in corpus_blob:
+            verified.append(rel)
+        else:
+            dropped += 1
+            if stats is not None:
+                stats.rejected += 1
+            logger.warning(
+                "A9: Dropping relation %s -%s-> %s: evidence quote not found in lecture text: %r",
+                rel.get("source_entity_id"), rel.get("relation"), rel.get("target_entity_id"),
+                evidence[:80],
+            )
+    return verified, dropped
 
 
 def _validate_entity_references(
@@ -733,8 +804,27 @@ def extract_relations(
             remapped = _remap_relations(rel_list, alias_map, valid_entity_ids=entity_ids, stats=stats)
             raw_relations.extend(remapped)
 
+        # EVIDENCE GATE (audit fix, 2026-09-14): in the live LLM path, every
+        # relation must carry an evidence quote (the prompt demands one).
+        # Evidence-less responses are dropped BEFORE validation so the saved
+        # graph only contains grounded relations.
+        no_evidence = [r for r in raw_relations if not r.get("evidence")]
+        if no_evidence:
+            stats.rejected += len(no_evidence)
+            logger.warning(
+                "A9: dropping %d/%d relations with no evidence quote (evidence rule)",
+                len(no_evidence), len(raw_relations),
+            )
+            raw_relations = [r for r in raw_relations if r.get("evidence")]
+
     # Validate entity references.
     raw_relations = _validate_entity_references(raw_relations, entity_ids, stats=stats)
+
+    # EVIDENCE VERIFICATION (audit fix, 2026-09-14): quotes must exist verbatim
+    # in the lecture text. Hallucinated citations are dropped here.
+    raw_relations, dropped_evidence = _verify_relation_evidence(raw_relations, chunks_data, stats=stats)
+    if dropped_evidence:
+        logger.warning("A9: dropped %d relations with unverifiable evidence quotes", dropped_evidence)
 
     # Deduplicate.
     raw_relations = _deduplicate_relations(raw_relations, stats=stats)

@@ -20,6 +20,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from evaluation.knowledge_graph.name_matching import GoldNameIndex
+
 logger = logging.getLogger(__name__)
 
 # Sentence fragment starters / connectors
@@ -223,45 +225,42 @@ def audit_entities(
             gold_data = json.load(fp)
         
         gold_list = gold_data.get("entities", [])
-        gold_names_map: Dict[str, Set[str]] = {}
-        for g in gold_list:
-            cname = g["canonical_name"].lower()
-            aliases = {a.lower() for a in g.get("aliases", [])}
-            aliases.add(cname)
-            gold_names_map[cname] = aliases
+        gold_index = GoldNameIndex(gold_list)
 
         # One-to-one greedy matching: each predicted entity can be a TP for at
         # most one gold concept, and each gold concept can be claimed at most
         # once. Duplicate predictions of the same concept yield exactly one TP
         # plus (n-1) FPs — precision is no longer inflated by duplicates.
-        matched_gold_keys: Set[str] = set()
+        # Matching is alias/lemma-aware (see name_matching.py) so plural
+        # variants like "transformers" vs gold "Transformer" count as TPs
+        # instead of inflating false negatives.
         tp = 0
+        match_types: Dict[str, int] = {}
         for e in entities:
-            ename = e.get("name", "").strip().lower()
-            matched_cname = None
-            for cname, alias_set in gold_names_map.items():
-                if cname in matched_gold_keys:
-                    continue
-                if ename in alias_set or any(normalize_entity_name(ename) == normalize_entity_name(a) for a in alias_set):
-                    matched_cname = cname
-                    break
-            if matched_cname is not None:
+            hit = gold_index.match(e.get("name", ""))
+            if hit is not None:
+                canonical_key, match_type = hit
+                gold_index.claim(canonical_key)
                 tp += 1
-                matched_gold_keys.add(matched_cname)
+                match_types[match_type] = match_types.get(match_type, 0) + 1
 
         fp = total - tp
-        fn = len(gold_names_map) - len(matched_gold_keys)
+        fn = gold_index.size() - gold_index.claimed_count()
 
         prec = tp / total if total > 0 else 0.0
-        rec = tp / len(gold_names_map) if len(gold_names_map) > 0 else 0.0
+        rec = tp / gold_index.size() if gold_index.size() > 0 else 0.0
         f1 = (2 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0
 
+        result.gold_evaluation_method = (
+            f"one-to-one alias/lemma-aware matching ({json.dumps(match_types)}; "
+            f"{gold_index.size()} gold concepts); labels: "
+            + gold_data.get("metadata", {}).get("annotation_method", "LLM-assisted reference labels, pending human verification")
+        )
         result.gold_entity_precision = round(prec, 4)
         result.gold_entity_recall = round(rec, 4)
         result.gold_entity_f1 = round(f1, 4)
-        result.gold_evaluation_method = gold_data.get("metadata", {}).get("annotation_method", "LLM-assisted reference labels, pending human verification")
-        result.gold_entity_count = len(gold_names_map)
-        result.matched_gold_entity_count = len(matched_gold_keys)
+        result.gold_entity_count = gold_index.size()
+        result.matched_gold_entity_count = tp
         result.tp_entity_count = tp
 
     return result

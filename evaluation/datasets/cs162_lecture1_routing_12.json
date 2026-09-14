@@ -1,0 +1,215 @@
+[
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Which concepts depend on virtual memory according to the lecture?",
+    "ground_truth_answer": "The lecture presents virtual memory as an abstraction the OS provides on top of physical memory, built with page tables and TLBs; it is one of the core OS abstractions alongside processes and files.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000019"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "memory-management",
+    "keywords": [
+      "virtual memory",
+      "page tables",
+      "TLBs"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What topics are related to concurrency in the roadmap for this course?",
+    "ground_truth_answer": "The course roadmap lists concurrency as a major early theme: how threads work, scheduling, locks, deadlock, scalability, and fairness.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "concurrency",
+    "keywords": [
+      "concurrency",
+      "threads",
+      "scheduling",
+      "deadlock"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What is the path from the process abstraction to the resources it uses?",
+    "ground_truth_answer": "The lecture describes the process as the OS abstraction for a running program, and the OS as a referee and resource manager that grants programs access to resources like memory, storage, and devices.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "conceptual",
+    "difficulty": "hard",
+    "topic": "processes",
+    "keywords": [
+      "process",
+      "abstraction",
+      "resources",
+      "referee"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What was taught before the discussion of deadlock in the course roadmap?",
+    "ground_truth_answer": "Before covering deadlock, the roadmap lists how threads work, scheduling, and locks as the early concurrency topics in the class.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "concurrency",
+    "keywords": [
+      "threads",
+      "scheduling",
+      "locks",
+      "deadlock"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "How is the thread concept connected to the kernel and the address space?",
+    "ground_truth_answer": "The lecture presents threads as the unit of execution inside the kernel's view of running programs, with each thread executing within an address space provided by the OS abstractions.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "conceptual",
+    "difficulty": "hard",
+    "topic": "processes",
+    "keywords": [
+      "thread",
+      "address space"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Explain the relationship between processes and threads and describe what each one means",
+    "ground_truth_answer": "A process is the OS abstraction for a running program with its own address space, while threads are the execution units within a process; the lecture introduces threads as an extension of the process abstraction for concurrency.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+    ],
+    "expected_route": "graph+vector",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "process",
+      "thread",
+      "abstraction",
+      "concurrency"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Explain how virtual memory and page tables work together and what each provides",
+    "ground_truth_answer": "Virtual memory gives each program the illusion of owning all of memory; page tables and TLBs are the hardware/OS mechanisms that translate virtual addresses to physical ones to implement that illusion.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000019",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "memory-management",
+    "keywords": [
+      "virtual memory",
+      "page tables",
+      "TLBs"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Explain what the kernel provides and how file systems are connected to it",
+    "ground_truth_answer": "The kernel is the core of the OS that provides services to programs; the file system is one of the OS abstractions the kernel manages, giving programs a clean file view instead of raw disk blocks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+    ],
+    "expected_route": "graph+vector",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "kernel",
+    "keywords": [
+      "kernel",
+      "file system",
+      "abstraction"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What was said about CPU scheduling later in the term?",
+    "ground_truth_answer": "The lecture mentions that the class will talk about cloud scheduling a little later in the term, after students build apps that utilize the operating system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "scheduling",
+    "keywords": [
+      "cloud scheduling",
+      "later in the term"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "How does the lecture describe protecting programs from each other?",
+    "ground_truth_answer": "Protection is described through the OS's referee role: the OS isolates compiled programs from one another so they cannot interfere, which is where protection mechanisms come into play.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "protection",
+    "keywords": [
+      "protect",
+      "referee",
+      "isolation"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What was said about why many layers of abstraction are necessary?",
+    "ground_truth_answer": "Squashing all the layers down, as is sometimes done in very specialized environments, leads to undesirable outcomes; the lecture argues the middle layers of abstraction exist for good reasons.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "abstraction",
+    "keywords": [
+      "layers",
+      "abstraction",
+      "specialized environments"
+    ]
+  },
+  {
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Describe the devices the lecture says the OS must tie together",
+    "ground_truth_answer": "The lecture lists page tables and TLBs for virtual memory, storage such as disk drives, and devices like networks, displays, and inputs, with the OS tying all of them together.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "devices",
+    "keywords": [
+      "page tables",
+      "TLBs",
+      "disk drives",
+      "networks",
+      "displays"
+    ]
+  }
+]

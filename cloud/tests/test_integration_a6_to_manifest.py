@@ -107,18 +107,22 @@ def _mock_entity_llm():
 
 def _mock_relation_llm(entity_ids):
     mock = MagicMock()
-    # Build relations using actual entity_ids.
+    # Build relations using actual entity_ids; every relation carries an
+    # evidence quote verbatim from the fixture chunks (evidence rule).
     if len(entity_ids) >= 3:
         relation_json = json.dumps([
             {"source_entity_id": entity_ids[0], "relation": "PREREQUISITE_OF",
-             "target_entity_id": entity_ids[1]},
+             "target_entity_id": entity_ids[1],
+             "evidence": "BFS uses queue for breadth first traversal"},
             {"source_entity_id": entity_ids[2], "relation": "DERIVED_FROM",
-             "target_entity_id": entity_ids[0]},
+             "target_entity_id": entity_ids[0],
+             "evidence": "DFS uses stack for depth first traversal"},
         ])
     else:
         relation_json = json.dumps([
             {"source_entity_id": entity_ids[0], "relation": "EXPLAINS",
-             "target_entity_id": entity_ids[-1]},
+             "target_entity_id": entity_ids[-1],
+             "evidence": "BFS explores nodes level by level"},
         ])
     def gen(prompts, **kwargs):
         return [relation_json for _ in prompts]

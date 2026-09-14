@@ -157,6 +157,7 @@ def run_full_audit(
         entities=entities,
         chunks=chunks,
         gold_relations_path=gold_relations_path,
+        gold_entities_path=gold_entities_path if gold_applies else None,
     )
 
     # 3. Prerequisite Inference & DAG Audit
@@ -174,6 +175,7 @@ def run_full_audit(
         entities=entities,
         chunks=chunks,
         gold_prerequisites_path=gold_prerequisites_path,
+        gold_entities_path=gold_entities_path if gold_applies else None,
     )
 
     # 4. Ontology Diagnostic Analysis
