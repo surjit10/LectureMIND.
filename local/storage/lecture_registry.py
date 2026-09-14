@@ -94,6 +94,7 @@ class LectureRegistry:
         language: str = "",
         pipeline_version: str = "",
         package_version: str = "",
+        package_sha256: str = "",
     ) -> None:
         self._registry["lectures"][lecture_id] = {
             "lecture_id": lecture_id,
@@ -112,6 +113,9 @@ class LectureRegistry:
             "language": language,
             "pipeline_version": pipeline_version,
             "package_version": package_version,
+            # Content integrity: SHA-256 of the package artifact (zip or dir).
+            # Verified by audit() → report["hash_mismatches"].
+            "package_sha256": package_sha256,
         }
         self._save()
         logger.info("[registry] Package registered: %s ('%s')", lecture_id, display_name or title)
@@ -201,6 +205,7 @@ class LectureRegistry:
             "missing_dirs": [],
             "orphaned_dirs": [],
             "duplicate_names": [],
+            "hash_mismatches": [],
         }
 
         logger.info("[registry] Starting consistency audit (packages_dir=%s).", packages_dir)
@@ -245,6 +250,23 @@ class LectureRegistry:
             else:
                 seen_names[name] = lid
 
+        # ── Check 4: content-hash integrity (if a hash is recorded) ─────
+        for lid, entry in self._registry["lectures"].items():
+            expected_hash = entry.get("package_sha256")
+            if not expected_hash:
+                continue  # legacy entry without a hash — nothing to verify
+            pkg_path = Path(entry.get("package_path", ""))
+            actual_hash = _hash_package_dir(pkg_path)
+            if actual_hash is None:
+                continue  # missing dir already handled by Check 1
+            if actual_hash != expected_hash:
+                logger.warning(
+                    "[registry] Audit: content hash mismatch for '%s' "
+                    "(expected %s..., got %s...). Package changed since import.",
+                    lid, expected_hash[:12], actual_hash[:12],
+                )
+                report["hash_mismatches"].append(lid)
+
         total_issues = sum(len(v) for v in report.values())
         if total_issues == 0:
             logger.info("[registry] Audit complete — no issues found.")
@@ -254,6 +276,41 @@ class LectureRegistry:
                 total_issues, report,
             )
         return report
+
+
+def _hash_package_dir(package_path: Path) -> Optional[str]:
+    """Deterministic SHA-256 over a package directory's JSON/metadata files.
+
+    Files are hashed in sorted-name order with their relative path prefixed,
+    so any content change (or file addition/removal) changes the digest.
+    Binary blobs (embeddings.npy) are included — they are part of the package.
+    Returns None if the directory does not exist.
+    """
+    import hashlib
+
+    package_path = Path(package_path)
+    if not package_path.is_dir():
+        return None
+    h = hashlib.sha256()
+    for f in sorted(p for p in package_path.iterdir() if p.is_file()):
+        h.update(f"#{f.name}#".encode("utf-8"))
+        h.update(f.read_bytes())
+    return h.hexdigest()
+
+
+def compute_package_hash(package_path: str | Path) -> Optional[str]:
+    """Public helper: content hash of an imported package directory."""
+    return _hash_package_dir(Path(package_path))
+
+
+def compute_package_zip_hash(zip_path: str | Path) -> Optional[str]:
+    """Public helper: SHA-256 of a knowledge-package ZIP artifact."""
+    import hashlib
+
+    p = Path(zip_path)
+    if not p.is_file():
+        return None
+    return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
 # ---------------------------------------------------------------------------

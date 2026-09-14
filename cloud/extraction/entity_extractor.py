@@ -207,6 +207,36 @@ def _parse_entity_json(
     return valid_entities
 
 
+def is_fragment_entity(name: str) -> bool:
+    """Detect clause-fragment / extraction-artifact entity names.
+
+    Audit finding (2026-09-14): names like "us a sinusoidal waveform. This is
+    important because" (a clause spanning a sentence boundary) were saved as
+    entities, entered the graph, and polluted relations. A defensible entity
+    name is a short noun phrase. This check is intentionally conservative —
+    it only rejects clear artifacts, never legitimate multi-word concepts.
+    """
+    n = (name or "").strip()
+    if not n:
+        return True
+    # Sentence-boundary punctuation inside the name → clause fragment.
+    if re.search(r"[.!?]\s|\.$", n) and not n.endswith(("Inc.", "Corp.", "vs.", "e.g.", "i.e.")):
+        return True
+    # Starts with a lowercase pronoun/conjunction/article-clause opener.
+    if re.match(
+        r"^(us|we|they|it|he|she|you|this|that|these|those|which|who|because|since|although|but|and|or|so|then)\b",
+        n.lower(),
+    ):
+        return True
+    # Contains internal clause punctuation like " — " or " ; ".
+    if re.search(r"\s[;—]\s", n):
+        return True
+    # Absurdly long for a concept name (> 12 words).
+    if len(n.split()) > 12:
+        return True
+    return False
+
+
 def _deduplicate_entities(
     raw_entities: List[Dict[str, str]],
     stats: Optional[ExtractionStats] = None,
@@ -217,6 +247,10 @@ def _deduplicate_entities(
     for ent in raw_entities:
         normalized = ent["name"].strip().lower()
         if normalized and normalized not in seen:
+            if is_fragment_entity(ent["name"]):
+                if stats is not None:
+                    stats.fragments += 1
+                continue
             seen.add(normalized)
             unique.append(ent)
         elif stats is not None:

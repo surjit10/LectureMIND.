@@ -152,7 +152,10 @@ def _mock_relation_llm(entity_ids):
         {"source_entity_id": entity_ids[1], "relation": "MODIFIES",  # invalid type
          "target_entity_id": entity_ids[2]},
         {"source_entity_id": entity_ids[1], "relation": "PREREQUISITE_OF",
-         "target_entity_id": entity_ids[0]},
+         "target_entity_id": entity_ids[0],
+         # Evidence rule (2026-09-14): quote is verbatim from the transcript
+         # fixture so the evidence-verification gate accepts it.
+         "evidence": "BFS uses a queue data structure to explore nodes level by level."},
     ])
     def gen(prompts, **kwargs):
         return [relation_json for _ in prompts]

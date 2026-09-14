@@ -22,6 +22,7 @@ class ExtractionStats:
         self.normalized = 0   # items accepted via type normalization
         self.rejected = 0     # items dropped by validation
         self.duplicates = 0   # duplicate items dropped
+        self.fragments = 0    # clause-fragment names dropped (A8 pre-filter)
         # Reserved for a future retry policy (none exists in the pipeline today).
         self.retries = 0
 
@@ -50,5 +51,5 @@ class ExtractionStats:
             f"(parse_ok={ok_rate:.1%} repaired={repair_rate:.1%}) "
             f"accepted={self.accepted} normalized={self.normalized} "
             f"rejected={self.rejected} duplicates={self.duplicates} "
-            f"retries={self.retries}"
+            f"fragments={self.fragments} retries={self.retries}"
         )

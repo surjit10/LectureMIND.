@@ -3,7 +3,7 @@ import json
 import csv
 import logging
 import statistics
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from pathlib import Path
 from datetime import datetime
 
@@ -25,8 +25,14 @@ class ReportGenerator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    def generate(self, results: List[Dict[str, Any]]) -> None:
-        """Generates evaluation reports in JSON, CSV, and Markdown formats."""
+    def generate(self, results: List[Dict[str, Any]], provenance: Optional[Dict[str, Any]] = None) -> None:
+        """Generates evaluation reports in JSON, CSV, and Markdown formats.
+
+        ``provenance`` (optional) is embedded into the JSON report so every
+        number can be tied to the exact data it was computed on — e.g.
+        ``{"packages": {"<lecture_id>": {"path": ..., "sha256": ...}},
+        "dataset": {"path": ..., "sha256": ...}}``.
+        """
         if not results:
             logger.warning("No results to generate reports for.")
             return
@@ -34,7 +40,7 @@ class ReportGenerator:
         aggregated_metrics = self._aggregate_metrics(results)
         breakdowns = self._breakdowns(results)
 
-        self._generate_json(results, aggregated_metrics, breakdowns)
+        self._generate_json(results, aggregated_metrics, breakdowns, provenance)
         self._generate_csv(results)
         self._generate_markdown(aggregated_metrics, breakdowns, results)
 
@@ -104,6 +110,7 @@ class ReportGenerator:
         results: List[Dict[str, Any]],
         aggregated_metrics: Dict[str, Any],
         breakdowns: Dict[str, Any],
+        provenance: Optional[Dict[str, Any]] = None,
     ) -> None:
         output_path = self.output_dir / f"evaluation_report_{self.timestamp}.json"
         report_data = {
@@ -111,6 +118,7 @@ class ReportGenerator:
             "total_samples": len(results),
             "successful_samples": sum(1 for r in results if not r.get("error")),
             "failed_samples": sum(1 for r in results if r.get("error")),
+            "provenance": provenance or {},
             "aggregated_metrics": aggregated_metrics,
             "breakdowns": breakdowns,
             "results": results

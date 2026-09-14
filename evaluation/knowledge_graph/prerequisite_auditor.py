@@ -17,6 +17,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from evaluation.knowledge_graph.name_matching import lemma_key, names_match, normalize_name
+
 logger = logging.getLogger(__name__)
 
 
@@ -106,6 +108,7 @@ def audit_prerequisites(
     chunks: List[Dict[str, Any]],
     gold_prerequisites_path: Optional[str | Path] = None,
     non_pedagogical_target_markers: Optional[List[str]] = None,
+    gold_entities_path: Optional[str | Path] = None,
 ) -> PrerequisiteAuditResult:
     """
     Perform a comprehensive read-only audit of prerequisite dependencies.
@@ -266,11 +269,46 @@ def audit_prerequisites(
 
         gold_list = gold_data.get("prerequisites", [])
 
-        def _norm(name: str) -> str:
-            return re.sub(r"\s+", " ", (name or "").lower().strip())
+        # Name normalization is lemma/alias-aware so plural variants
+        # ("transformers" vs gold "Transformer") match as the same concept
+        # instead of inflating false negatives. See name_matching.py.
+        def _match_name(pred: str, gold_name: str) -> bool:
+            matched, _ = names_match(pred, gold_name)
+            return matched
+
+        # Gold alias lookup: gold prerequisites reference canonical concept
+        # names; the entity gold carries the aliases. Merge them so an edge
+        # endpoint like "AC" matches gold "Alternating Current".
+        gold_alias_map: Dict[str, List[str]] = {}
+        if gold_entities_path and Path(gold_entities_path).exists():
+            try:
+                with open(gold_entities_path, "r", encoding="utf-8") as efp:
+                    for g_entity in (json.load(efp).get("entities") or []):
+                        cname = normalize_name(g_entity.get("canonical_name", ""))
+                        for alias in g_entity.get("aliases", []) or []:
+                            akey = normalize_name(alias)
+                            if akey and cname:
+                                gold_alias_map.setdefault(akey, []).append(cname)
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        def _resolve_candidates(name: str) -> List[str]:
+            """All gold-name spellings this predicted name can equal."""
+            candidates = [name]
+            candidates.extend(gold_alias_map.get(name, []))
+            return candidates
+
+        def _edge_match(s_pred: str, t_pred: str, gs: str, gt: str) -> bool:
+            for s_cand in _resolve_candidates(s_pred):
+                if not _match_name(s_cand, gs):
+                    continue
+                for t_cand in _resolve_candidates(t_pred):
+                    if _match_name(t_cand, gt):
+                        return True
+            return False
 
         gold_edges_norm = [
-            (_norm(gp.get("source_name", "")), _norm(gp.get("target_name", "")), gp)
+            (normalize_name(gp.get("source_name", "")), normalize_name(gp.get("target_name", "")), gp)
             for gp in gold_list
         ]
 
@@ -297,15 +335,15 @@ def audit_prerequisites(
         strict_fp_list = []
 
         for inf_idx, edge in sorted_inferred:
-            s_norm = _norm(edge.get("source_name", ""))
-            t_norm = _norm(edge.get("target_name", ""))
+            s_norm = normalize_name(edge.get("source_name", ""))
+            t_norm = normalize_name(edge.get("target_name", ""))
             edge_str = f"{edge['source_name']} -> {edge['target_name']}"
 
             found_gold_idx = None
             for g_idx, (gs_norm, gt_norm, gp) in enumerate(gold_edges_norm):
                 if g_idx in strict_matched_gold_indices:
                     continue
-                if s_norm == gs_norm and t_norm == gt_norm:
+                if _edge_match(s_norm, t_norm, gs_norm, gt_norm):
                     found_gold_idx = g_idx
                     break
 
@@ -337,16 +375,16 @@ def audit_prerequisites(
         fuzzy_fp_list = []
 
         for inf_idx, edge in sorted_inferred:
-            s_norm = _norm(edge.get("source_name", ""))
-            t_norm = _norm(edge.get("target_name", ""))
+            s_norm = normalize_name(edge.get("source_name", ""))
+            t_norm = normalize_name(edge.get("target_name", ""))
             edge_str = f"{edge['source_name']} -> {edge['target_name']}"
 
             found_gold_idx = None
-            # Prioritize exact match
+            # Prioritize exact/lemma match
             for g_idx, (gs_norm, gt_norm, gp) in enumerate(gold_edges_norm):
                 if g_idx in fuzzy_matched_gold_indices:
                     continue
-                if s_norm == gs_norm and t_norm == gt_norm:
+                if _edge_match(s_norm, t_norm, gs_norm, gt_norm):
                     found_gold_idx = g_idx
                     break
 
@@ -382,7 +420,7 @@ def audit_prerequisites(
         result.gold_prerequisite_recall = strict_rec
         result.gold_prerequisite_f1 = strict_f1
         result.gold_evaluation_method = (
-            "Strict 1-to-1 exact matching against reference labels"
+            "Strict 1-to-1 alias/lemma-aware matching against reference labels"
         )
         result.gold_prerequisite_count = total_gold
         result.matched_gold_prerequisite_count = strict_tp

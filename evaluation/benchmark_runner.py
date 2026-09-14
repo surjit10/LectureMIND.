@@ -252,5 +252,45 @@ class BenchmarkRunner:
         return result_record
 
     def generate_report(self):
-        """Generates the evaluation report."""
-        self.report_generator.generate(self.results)
+        """Generates the evaluation report with data provenance.
+
+        Provenance pins the exact artifacts behind the numbers: the dataset
+        file's SHA-256, and for every lecture_id referenced by the samples,
+        the registered package path + hash from the lecture registry (when
+        available). This is what makes a stored report byte-attributable to
+        the data it was computed on.
+        """
+        provenance = self._collect_provenance()
+        self.report_generator.generate(self.results, provenance=provenance)
+
+    def _collect_provenance(self) -> Dict[str, Any]:
+        provenance: Dict[str, Any] = {"dataset": {"path": str(self.dataset_loader.dataset_path)},
+                                      "packages": {}}
+
+        def _sha256_file(p: Path) -> Optional[str]:
+            import hashlib
+            try:
+                return hashlib.sha256(p.read_bytes()).hexdigest()
+            except OSError:
+                return None
+
+        ds_path = Path(self.dataset_loader.dataset_path)
+        if ds_path.exists():
+            provenance["dataset"]["sha256"] = _sha256_file(ds_path)
+
+        try:
+            from local.storage.lecture_registry import LectureRegistry
+            registry = LectureRegistry()
+        except Exception:  # pragma: no cover - registry is best-effort provenance
+            return provenance
+
+        referenced_ids = {r.get("lecture_id") for r in self.results if r.get("lecture_id")}
+        for lid in sorted(x for x in referenced_ids if x):
+            entry = registry.get_lecture(lid)
+            if entry:
+                provenance["packages"][lid] = {
+                    "path": entry.get("package_path", ""),
+                    "sha256": entry.get("package_sha256", ""),
+                    "package_version": entry.get("package_version", ""),
+                }
+        return provenance

@@ -57,6 +57,9 @@ def _make_mock_llm():
     The prompt now uses compact aliases (E1, E2, E3, ...) so the mock
     must respond with the same alias style.  The relation extractor
     remaps these back to real entity_ids via _remap_relations().
+    Since the evidence rule (2026-09-14), every relation must also carry
+    an ``evidence`` quote found verbatim in the lecture text — quotes
+    here are copied from the fixture chunks so the gate accepts them.
     """
     mock = MagicMock()
 
@@ -65,11 +68,13 @@ def _make_mock_llm():
             "source_entity_id": "E1",
             "relation": "PREREQUISITE_OF",
             "target_entity_id": "E2",
+            "evidence": "BFS uses queue for traversal",
         },
         {
             "source_entity_id": "E3",
             "relation": "DERIVED_FROM",
             "target_entity_id": "E1",
+            "evidence": "Breadth First Search O(V+E)",
         },
     ])
 
@@ -474,8 +479,10 @@ class TestCompactEntityAliases:
         mock_llm = MagicMock()
         def generate_fn(prompts, **kwargs):
             prompts_seen.extend(prompts)
-            # Emits valid relation using compact aliases
-            return [json.dumps([{"source_entity_id": "E1", "relation": "PREREQUISITE_OF", "target_entity_id": "E2"}]) for _ in prompts]
+            # Emits valid relation using compact aliases; evidence quote is a
+            # verbatim chunk transcript so the evidence gate accepts it.
+            return [json.dumps([{"source_entity_id": "E1", "relation": "PREREQUISITE_OF", "target_entity_id": "E2",
+                                 "evidence": "Discussing Alternating Current and Transformers in chunk 1"}]) for _ in prompts]
         mock_llm.generate.side_effect = generate_fn
 
         cloud_settings.EXTRACTION_WINDOW_TOKEN_BUDGET = 50
@@ -525,8 +532,10 @@ class TestCompactEntityAliases:
         mock_llm = MagicMock()
         def generate_fn(prompts, **kwargs):
             prompts_seen.extend(prompts)
-            # Emits: Page Table (E1) USED_BY Page Fault (E3) from Window 2
-            return [json.dumps([{"source_entity_id": "E1", "relation": "USED_BY", "target_entity_id": "E3"}]) for _ in prompts]
+            # Emits: Page Table (E1) USED_BY Page Fault (E3) from Window 2;
+            # evidence quote is verbatim from chunk 3 (inside window 2).
+            return [json.dumps([{"source_entity_id": "E1", "relation": "USED_BY", "target_entity_id": "E3",
+                                 "evidence": "A Page Fault occurs when the required page in Virtual Memory is not present."}]) for _ in prompts]
         mock_llm.generate.side_effect = generate_fn
 
         # Budget set to force windowing: Window 1 (Chunks 1 & 2), Window 2 (Chunks 2 & 3)

@@ -21,6 +21,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from schemas.enums import RelationType
 
+from evaluation.knowledge_graph.name_matching import names_match, normalize_name
+
 logger = logging.getLogger(__name__)
 
 # Relational action verbs indicating direct syntactic/semantic links
@@ -208,6 +210,7 @@ def audit_relations(
     gold_relations_path: Optional[str | Path] = None,
     direction_rules: Optional[List[Dict[str, str]]] = None,
     non_factual_name_markers: Optional[List[str]] = None,
+    gold_entities_path: Optional[str | Path] = None,
 ) -> RelationAuditResult:
     """
     Perform a comprehensive, read-only audit of extracted relations.
@@ -421,11 +424,35 @@ def audit_relations(
             gold_data = json.load(fp)
 
         gold_rels = gold_data.get("relations", [])
+        # Lemma/alias-aware endpoint matching: gold relation endpoints are
+        # matched against predicted names with plural folding so
+        # "magnetic fields" == gold "Magnetic Field". Predicate comparison
+        # stays exact (relation types are a closed vocabulary).
+        gold_alias_map: Dict[str, List[str]] = {}
+        if gold_entities_path and Path(gold_entities_path).exists():
+            try:
+                with open(gold_entities_path, "r", encoding="utf-8") as efp:
+                    for g_entity in (json.load(efp).get("entities") or []):
+                        cname = normalize_name(g_entity.get("canonical_name", ""))
+                        for alias in g_entity.get("aliases", []) or []:
+                            akey = normalize_name(alias)
+                            if akey and cname:
+                                gold_alias_map.setdefault(akey, []).append(cname)
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        def _endpoint_matches(pred: str, gold_name: str) -> bool:
+            for cand in [pred] + gold_alias_map.get(pred, []):
+                matched, _ = names_match(cand, gold_name)
+                if matched:
+                    return True
+            return False
+
         gold_pairs: Set[Tuple[str, str, str]] = set()
         for gr in gold_rels:
-            s = gr["source_name"].lower().strip()
+            s = normalize_name(gr["source_name"])
             r = gr["relation"].strip()
-            t = gr["target_name"].lower().strip()
+            t = normalize_name(gr["target_name"])
             gold_pairs.add((s, r, t))
 
         tp = 0
@@ -435,48 +462,65 @@ def audit_relations(
         unmatched_list = []
         claimed_gold: Set[Tuple[str, str, str]] = set()
 
+        def _find_matching_gold(s: str, rel: str, t: str) -> Optional[Tuple[str, str, str]]:
+            """First unclaimed gold triple whose endpoints match (lemma/alias-aware)."""
+            for gs, gr, gt in gold_pairs:
+                if (gs, gr, gt) in claimed_gold:
+                    continue
+                if gr == rel and _endpoint_matches(s, gs) and _endpoint_matches(t, gt):
+                    return (gs, gr, gt)
+            return None
+
         for r_detail in details:
-            s = r_detail["source_name"].lower().strip()
+            s = normalize_name(r_detail["source_name"])
             rel = r_detail["relation"].strip()
-            t = r_detail["target_name"].lower().strip()
+            t = normalize_name(r_detail["target_name"])
             rel_repr = f"{r_detail['source_name']} ==[{rel}]==> {r_detail['target_name']}"
 
             # Exact forward match (each gold triple may be claimed at most once,
             # across ALL match branches — exact, reverse, and fuzzy — so a
             # duplicate prediction can never score a second TP for one gold).
-            if (s, rel, t) in gold_pairs and (s, rel, t) not in claimed_gold:
-                claimed_gold.add((s, rel, t))
+            matched_gold = _find_matching_gold(s, rel, t)
+            if matched_gold is not None:
+                claimed_gold.add(matched_gold)
                 tp += 1
                 correct_direction_count += 1
-                correct_list.append({"relation": rel_repr, "match_type": "EXACT_FORWARD"})
-            elif (t, rel, s) in gold_pairs and (t, rel, s) not in claimed_gold:
-                claimed_gold.add((t, rel, s))
-                # Direct reverse match in gold
-                reversed_direction_count += 1
-                reversed_list.append({"relation": rel_repr, "gold_relation": f"{t} ==[{rel}]==> {s}"})
+                correct_list.append({"relation": rel_repr, "match_type": "EXACT_FORWARD", "gold_match": matched_gold})
             else:
-                # Check relation type mismatch on exact entity pair
-                same_pair_gold = [g for g in gold_pairs if (g[0] == s and g[2] == t) or (g[0] == t and g[2] == s)]
-                if same_pair_gold:
-                    relation_type_mismatch_count += 1
-                    type_mismatch_list.append({"relation": rel_repr, "gold_matches": same_pair_gold})
+                matched_reverse = _find_matching_gold(t, rel, s)
+                if matched_reverse is not None:
+                    claimed_gold.add(matched_reverse)
+                    # Direct reverse match in gold
+                    reversed_direction_count += 1
+                    reversed_list.append({"relation": rel_repr, "gold_relation": f"{matched_reverse[0]} ==[{rel}]==> {matched_reverse[2]}"})
                 else:
-                    # Check fuzzy match against gold relations. Shares the same
-                    # claimed_gold set as the exact/reverse branches.
-                    fuzzy_matched = False
-                    for gs, gr, gt in gold_pairs:
-                        if (gs, gr, gt) in claimed_gold:
-                            continue
-                        if gr == rel and (gs in s or s in gs) and (gt in t or t in gt):
-                            claimed_gold.add((gs, gr, gt))
-                            tp += 1
-                            correct_direction_count += 1
-                            correct_list.append({"relation": rel_repr, "match_type": "FUZZY_FORWARD", "gold_match": (gs, gr, gt)})
-                            fuzzy_matched = True
-                            break
-                    if not fuzzy_matched:
-                        unmatched_relation_count += 1
-                        unmatched_list.append({"relation": rel_repr, "reason": "Not present in gold reference set (or gold triple already matched)"})
+                    # Check relation type mismatch on exact entity pair
+                    same_pair_gold = [
+                        g for g in gold_pairs
+                        if (g[0] == s and g[2] == t) or (g[0] == t and g[2] == s)
+                        or (_endpoint_matches(s, g[0]) and _endpoint_matches(t, g[2]))
+                        or (_endpoint_matches(t, g[0]) and _endpoint_matches(s, g[2]))
+                    ]
+                    if same_pair_gold:
+                        relation_type_mismatch_count += 1
+                        type_mismatch_list.append({"relation": rel_repr, "gold_matches": same_pair_gold})
+                    else:
+                        # Fuzzy substring fallback (diagnostic; shares claimed_gold
+                        # with the exact/reverse branches so no double-claiming).
+                        fuzzy_matched = False
+                        for gs, gr, gt in gold_pairs:
+                            if (gs, gr, gt) in claimed_gold:
+                                continue
+                            if gr == rel and (gs in s or s in gs) and (gt in t or t in gt):
+                                claimed_gold.add((gs, gr, gt))
+                                tp += 1
+                                correct_direction_count += 1
+                                correct_list.append({"relation": rel_repr, "match_type": "FUZZY_FORWARD", "gold_match": (gs, gr, gt)})
+                                fuzzy_matched = True
+                                break
+                        if not fuzzy_matched:
+                            unmatched_relation_count += 1
+                            unmatched_list.append({"relation": rel_repr, "reason": "Not present in gold reference set (or gold triple already matched)"})
 
         prec = tp / total if total > 0 else 0.0
         rec = tp / len(gold_pairs) if len(gold_pairs) > 0 else 0.0
