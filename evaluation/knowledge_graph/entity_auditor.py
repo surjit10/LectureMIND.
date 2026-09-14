@@ -230,19 +230,24 @@ def audit_entities(
             aliases.add(cname)
             gold_names_map[cname] = aliases
 
-        # Count true positives (predictions matching a gold concept)
-        matched_gold_keys = set()
+        # One-to-one greedy matching: each predicted entity can be a TP for at
+        # most one gold concept, and each gold concept can be claimed at most
+        # once. Duplicate predictions of the same concept yield exactly one TP
+        # plus (n-1) FPs — precision is no longer inflated by duplicates.
+        matched_gold_keys: Set[str] = set()
         tp = 0
         for e in entities:
             ename = e.get("name", "").strip().lower()
-            matched = False
+            matched_cname = None
             for cname, alias_set in gold_names_map.items():
+                if cname in matched_gold_keys:
+                    continue
                 if ename in alias_set or any(normalize_entity_name(ename) == normalize_entity_name(a) for a in alias_set):
-                    matched = True
-                    matched_gold_keys.add(cname)
+                    matched_cname = cname
                     break
-            if matched:
+            if matched_cname is not None:
                 tp += 1
+                matched_gold_keys.add(matched_cname)
 
         fp = total - tp
         fn = len(gold_names_map) - len(matched_gold_keys)

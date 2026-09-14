@@ -161,7 +161,10 @@ binary: a chunk is relevant iff its `chunk_id` is in `expected_chunk_ids`.
 - `precision@5` — of the top-5 retrieved, the fraction that are relevant.
 - `recall@5` — of all relevant chunks, the fraction in the top-5.
 - `hit@5` — 1.0 if any relevant chunk appears in the top-5.
-- `mrr` — reciprocal rank of the first relevant chunk.
+- `mrr_at_5` — reciprocal rank of the first relevant chunk, **capped at k=5** (a relevant chunk
+  at rank > 5 contributes 0). This is the strict MRR@5 reported in headline tables.
+- `mrr` — untruncated reciprocal rank of the first relevant chunk (diagnostic only; shows where
+  relevant chunks rank beyond position 5).
 - `ndcg_at_5` — position-weighted gain, normalized.
 
 ### 4.3 Reranker Metrics (`reranker_metrics.py`)
@@ -223,7 +226,7 @@ limiter. Dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` (23 factual / 
 |---|---|---|
 | Routing accuracy | 0.980 (49/50) | 1.000 |
 | Visual routing accuracy | 1.000 | 1.000 |
-| MRR@5 | **0.788** | 1.000 |
+| MRR@5 | **0.785** | 1.000 |
 | Hit@5 | **0.980** | 1.000 |
 | NDCG@5 | **0.767** | 1.000 |
 | Recall@5 | **0.862** | 1.000 |
@@ -250,13 +253,33 @@ Graph paths are rendered into the LLM context (`[Graph] EntityA -RELATION-> Enti
 
 ## 7. Knowledge Graph Quality & Prerequisite Audit (Live Measured)
 
-Audited via `evaluation/knowledge_graph/audit_package.py` on the benchmark lecture against ground-truth human annotations (`evaluation/knowledge_graph/prerequisite_gold.json`):
+Audited via `evaluation/knowledge_graph/audit_package.py`. Reference labels (`evaluation/knowledge_graph/*_gold.json`) are **LLM-assisted labels pending human verification**, annotated for the 6.5-minute **Transformer lecture only** — the auditor computes gold metrics **only when the audited package matches that lecture** (`gold_applies` flag); for every other package gold metrics are reported as `null`, and the composite score counts only measurable components.
+
+Regenerated audits (2026-09-14, honest one-to-one matching, no fallback substitution, computed from the **latest `0-output/` packages**):
+
+| Package | Entity F1 | Relation F1 | Prereq F1 | DAG / cycles | Prereq edges | Composite |
+|---|---|---|---|---|---|---|
+| Transformer (gold applies) | **40.0%** (P 55.6 / R 31.3) | **0.0%** (0/5) | **0.0%** (0/3) | True / 0 | 3 | 32.1 / 100 |
+| CS162 (93 chunks) | n/a | n/a | n/a | True / 0 | 27 | 28.0 / 45 |
+| MIT 6.S191 (69 chunks) | n/a | n/a | n/a | True / 0 | 11 | 24.6 / 45 |
+| Self-Attention (46 chunks) | n/a | n/a | n/a | True / 0 | 3 | 26.9 / 45 |
+
+All four audits were computed from the current packages in `0-output/` (the CS162 serving package `lecture_092f861b` is byte-identical to `0-output/CS162_...zip`), and all 50 benchmark anchor chunk IDs verify against that package.
+
+Structural properties measured across all audited packages (gold-independent): strict DAG, 0 cycles, 0 self-loops, 0.0% dangling relations. CS162 additionally has 27/27 pedagogically supported prerequisites.
+
+Historical audit of the (no-longer-preserved) original benchmark package, retained for traceability:
 
 | Metric | Measured Score | Diagnostic Context |
 |---|---|---|
-| **Prerequisite Strict Precision** | **77.8%** (7/9) | Strict 1-to-1 exact matching against gold labels |
-| **Prerequisite Strict Recall** | **70.0%** (7/10) | 100% of valid pedagogical dependencies recovered |
-| **Prerequisite Strict F1** | **73.7%** | Up from 60.9% baseline (+12.8% absolute gain) |
+| **Prerequisite Strict Precision** | 77.8% (7/9) | Strict 1-to-1 exact matching against gold labels |
+| **Prerequisite Strict Recall** | 70.0% (7/10) | 100% of valid pedagogical dependencies recovered |
+| **Prerequisite Strict F1** | 73.7% | Historical baseline comparison (+12.8% absolute gain) |
+| **Graph Topology (Strict DAG)** | **True** | Deterministic DFS cycle resolution guarantees acyclicity |
+| **Cycle Count** | **0** | Zero feedback loops in prerequisite graph |
+| **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |
+| **Pedagogical Relevance Rate** | **100%** | Zero physical components/losses mislabeled as prerequisites |
+| **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all extracted entities |
 | **Graph Topology (Strict DAG)** | **True** | Deterministic DFS cycle resolution guarantees acyclicity |
 | **Cycle Count** | **0** | Zero feedback loops in prerequisite graph |
 | **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |

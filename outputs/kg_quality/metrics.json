@@ -1,88 +1,93 @@
 {
   "lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
-  "composite_diagnostic_score": 77.0,
+  "composite_diagnostic_score": 32.1,
+  "composite_max": 100.0,
+  "gold_applies": true,
+  "gold_lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
+  "benchmark_applies": true,
+  "benchmark_lecture_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P",
   "score_breakdown": {
-    "entity_quality": 18.06,
-    "relation_quality": 16.17,
-    "direction_accuracy": 7.31,
-    "evidence_grounding": 9.23,
-    "prerequisite_dag": 11.05,
-    "cross_chunk_quality": 6.15,
-    "graphrag_usefulness": 9.05
+    "entity_quality": 8.0,
+    "relation_quality": 0.0,
+    "direction_accuracy": 0.0,
+    "evidence_grounding": 9.0,
+    "graph_coherence": 7.44,
+    "prerequisite_dag": 0.0,
+    "graphrag_usefulness": 7.68
   },
   "entity_metrics": {
-    "total_entities": 15,
-    "fragment_rate": 0.0667,
-    "orphan_rate": 0.1333,
-    "gold_precision": 0.9333,
-    "gold_recall": 0.875,
-    "gold_f1": 0.9032
+    "total_entities": 9,
+    "fragment_rate": 0.1111,
+    "orphan_rate": 0.1111,
+    "gold_precision": 0.5556,
+    "gold_recall": 0.3125,
+    "gold_f1": 0.4
   },
   "relation_metrics": {
-    "total_relations": 26,
-    "evidence_coverage_rate": 0.6154,
-    "cross_chunk_ratio": 0.3077,
-    "gold_precision": 0.7308,
-    "gold_recall": 0.9048,
-    "gold_f1": 0.8085,
-    "direction_accuracy": 0.7308
+    "total_relations": 5,
+    "evidence_coverage_rate": 0.6,
+    "cross_chunk_ratio": 0.2,
+    "gold_precision": 0.0,
+    "gold_recall": 0.0,
+    "gold_f1": 0.0,
+    "direction_accuracy": 0.0
   },
   "prerequisite_metrics": {
-    "total_prerequisites": 9,
+    "total_prerequisites": 3,
     "is_dag": true,
     "cycle_count": 0,
-    "gold_precision": 0.7778,
-    "gold_recall": 0.7,
-    "gold_f1": 0.7369
+    "gold_precision": 0.0,
+    "gold_recall": 0.0,
+    "gold_f1": 0.0
   },
   "graphrag_metrics": {
     "bm25": {
-      "Hit@1": 0.78,
-      "Hit@3": 0.96,
-      "Hit@5": 1.0,
-      "Recall@1": 0.5683,
-      "Recall@3": 0.8633,
-      "Recall@5": 0.94,
-      "Precision@1": 0.78,
-      "Precision@3": 0.42,
-      "Precision@5": 0.28,
-      "MRR": 0.879
+      "Hit@1": 0.68,
+      "Hit@3": 0.88,
+      "Hit@5": 0.98,
+      "Recall@1": 0.4883,
+      "Recall@3": 0.7333,
+      "Recall@5": 0.885,
+      "Precision@1": 0.68,
+      "Precision@3": 0.36,
+      "Precision@5": 0.264,
+      "MRR": 0.7962
     },
     "vector_rag": {
-      "Hit@1": 0.78,
-      "Hit@3": 0.96,
-      "Hit@5": 1.0,
-      "Recall@1": 0.5683,
-      "Recall@3": 0.8633,
-      "Recall@5": 0.94,
-      "Precision@1": 0.78,
-      "Precision@3": 0.42,
-      "Precision@5": 0.28,
-      "MRR": 0.879
+      "Hit@1": 0.68,
+      "Hit@3": 0.88,
+      "Hit@5": 0.98,
+      "Recall@1": 0.4883,
+      "Recall@3": 0.7333,
+      "Recall@5": 0.885,
+      "Precision@1": 0.68,
+      "Precision@3": 0.36,
+      "Precision@5": 0.264,
+      "MRR": 0.7962
     },
     "graph_rag": {
       "Hit@1": 0.1,
       "Hit@3": 0.38,
-      "Hit@5": 0.72,
+      "Hit@5": 0.62,
       "Recall@1": 0.0467,
       "Recall@3": 0.27,
-      "Recall@5": 0.6017,
+      "Recall@5": 0.5433,
       "Precision@1": 0.1,
       "Precision@3": 0.1533,
-      "Precision@5": 0.184,
-      "MRR": 0.3295
+      "Precision@5": 0.176,
+      "MRR": 0.3325
     },
     "hybrid_rag": {
-      "Hit@1": 0.26,
-      "Hit@3": 0.94,
-      "Hit@5": 1.0,
-      "Recall@1": 0.1733,
-      "Recall@3": 0.7767,
-      "Recall@5": 0.905,
-      "Precision@1": 0.26,
-      "Precision@3": 0.3667,
-      "Precision@5": 0.268,
-      "MRR": 0.5873
+      "Hit@1": 0.34,
+      "Hit@3": 0.82,
+      "Hit@5": 0.9,
+      "Recall@1": 0.2283,
+      "Recall@3": 0.6883,
+      "Recall@5": 0.7683,
+      "Precision@1": 0.34,
+      "Precision@3": 0.3267,
+      "Precision@5": 0.228,
+      "MRR": 0.5823
     }
   }
 }

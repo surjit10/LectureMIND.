@@ -2,7 +2,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is the Global Data Plane project?",
-    "ground_truth_answer": "The Global Data Plane is a project looking at hardened data containers \u2014 cryptographically hardened containers of data, like shipping containers at the Port of Oakland, that can be moved to edge devices and back into the cloud, ideal for edge computing.",
+    "ground_truth_answer": "The Global Data Plane is a project looking at hardened data containers — cryptographically hardened containers of data, like shipping containers at the Port of Oakland, that can be moved to edge devices and back into the cloud, ideal for edge computing.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
     ],
@@ -21,7 +21,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "How many devices could the original ARPANET handle?",
-    "ground_truth_answer": "The original ARPANET couldn't handle more than 256 devices; today there are billions \u2014 about four and a half billion devices penetrating maybe 60% of the world.",
+    "ground_truth_answer": "The original ARPANET couldn't handle more than 256 devices; today there are billions — about four and a half billion devices penetrating maybe 60% of the world.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
     ],
@@ -39,7 +39,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is the main challenge of operating systems that the lecture closes with?",
-    "ground_truth_answer": "The challenge is complexity: many software modules running on many devices and hardware platforms, running different applications at the same time, failing in unexpected ways and under attack from malicious people \u2014 and it is not feasible to test software for all possible environments and combinations of components.",
+    "ground_truth_answer": "The challenge is complexity: many software modules running on many devices and hardware platforms, running different applications at the same time, failing in unexpected ways and under attack from malicious people — and it is not feasible to test software for all possible environments and combinations of components.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
     ],
@@ -57,7 +57,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about how many processes typically run on a laptop?",
-    "ground_truth_answer": "There are many processes running all the time on typical laptops \u2014 often 50 or 100 of them. Mostly they're sleeping, but they are there to wake up and do some execution at some point.",
+    "ground_truth_answer": "There are many processes running all the time on typical laptops — often 50 or 100 of them. Mostly they're sleeping, but they are there to wake up and do some execution at some point.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030"
     ],
@@ -132,7 +132,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What did the lecture say about the honor code?",
-    "ground_truth_answer": "There is an academic honor code \u2014 as a member of the UC Berkeley community, one acts with honesty, integrity, and respect for others. The class is heavily collaborative within a group but not across groups or other people on homeworks.",
+    "ground_truth_answer": "There is an academic honor code — as a member of the UC Berkeley community, one acts with honesty, integrity, and respect for others. The class is heavily collaborative within a group but not across groups or other people on homeworks.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079"
@@ -206,7 +206,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about the word 'system'?",
-    "ground_truth_answer": "A system is something with many interrelated parts where the sum is much greater than the sum of its parts, and every interrelated part potentially interacts with others \u2014 at least N-squared complexity, which is why APIs and other techniques are needed to avoid it.",
+    "ground_truth_answer": "A system is something with many interrelated parts where the sum is much greater than the sum of its parts, and every interrelated part potentially interacts with others — at least N-squared complexity, which is why APIs and other techniques are needed to avoid it.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
     ],
@@ -242,7 +242,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is Alewife?",
-    "ground_truth_answer": "Alewife is a chip the instructor designed for his PhD work \u2014 one of the first shared-memory multiprocessors that also did message passing.",
+    "ground_truth_answer": "Alewife is a chip the instructor designed for his PhD work — one of the first shared-memory multiprocessors that also did message passing.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
     ],
@@ -260,7 +260,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about the number of computers per person?",
-    "ground_truth_answer": "The number of computers per person is increasing as devices get smaller \u2014 people carry cell phones and laptops and have little computers inside devices and thermostats; the trend is described with an inverse Moore's law style graph.",
+    "ground_truth_answer": "The number of computers per person is increasing as devices get smaller — people carry cell phones and laptops and have little computers inside devices and thermostats; the trend is described with an inverse Moore's law style graph.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006"
     ],
@@ -333,7 +333,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What happens when a program becomes a process?",
-    "ground_truth_answer": "A program becomes a process when its binary has been loaded into memory and into the proper OS structures \u2014 it needs a process structure allocated for it and must be put into the scheduler queue. After that the process is an instantiation of a running program.",
+    "ground_truth_answer": "A program becomes a process when its binary has been loaded into memory and into the proper OS structures — it needs a process structure allocated for it and must be put into the scheduler queue. After that the process is an instantiation of a running program.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
     ],
@@ -351,9 +351,9 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about the Mars Rover and its operating system?",
-    "ground_truth_answer": "The Mars Rover ran for a decade or more with very limited processing \u2014 20 megahertz processors and 128 megabytes of DRAM \u2014 running a real-time operating system. You can't hit reset or debug it easily, yet engineers debugged and repaired it remotely, including timing problems.",
+    "ground_truth_answer": "The Mars Rover ran for a decade or more with very limited processing — 20 megahertz processors and 128 megabytes of DRAM — running a real-time operating system. You can't hit reset or debug it easily, yet engineers debugged and repaired it remotely, including timing problems.",
     "expected_chunk_ids": [
-      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000094"
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
     ],
     "expected_route": "vector_only",
     "question_type": "factual",
@@ -369,7 +369,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about files being an abstraction?",
-    "ground_truth_answer": "Files are an abstraction of a bunch of individual blocks on a disk, put together with I-nodes to give you a file \u2014 so the OS hides whether data is on disk, a USB key, or cloud storage.",
+    "ground_truth_answer": "Files are an abstraction of a bunch of individual blocks on a disk, put together with I-nodes to give you a file — so the OS hides whether data is on disk, a USB key, or cloud storage.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
@@ -389,7 +389,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "How does the lecture describe networking as part of the internet system?",
-    "ground_truth_answer": "Networking is just one of the amazing aspects of the huge global computing system, and operating systems are what tie it all together \u2014 tying everybody else together is part of what's very cool about the internet.",
+    "ground_truth_answer": "Networking is just one of the amazing aspects of the huge global computing system, and operating systems are what tie it all together — tying everybody else together is part of what's very cool about the internet.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
     ],
@@ -406,7 +406,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "Why does the lecture describe the internet as looking like a brain?",
-    "ground_truth_answer": "The internet looks like a big brain because it has huge numbers of connections and interconnectivity with multiple redundancies \u2014 billions of people and devices interconnected in one huge system, so the brain analogy is not entirely off base.",
+    "ground_truth_answer": "The internet looks like a big brain because it has huge numbers of connections and interconnectivity with multiple redundancies — billions of people and devices interconnected in one huge system, so the brain analogy is not entirely off base.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
     ],
@@ -443,7 +443,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is the power density problem described in the lecture?",
-    "ground_truth_answer": "If processors had kept growing in performance at the same rate, chips would have reached the power density of a rocket nozzle \u2014 putting a laptop like that on your lap would be very uncomfortable. Power density and capacitance are what led the industry to multi-core processors instead of faster single cores.",
+    "ground_truth_answer": "If processors had kept growing in performance at the same rate, chips would have reached the power density of a rocket nozzle — putting a laptop like that on your lap would be very uncomfortable. Power density and capacitance are what led the industry to multi-core processors instead of faster single cores.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000088"
     ],
@@ -461,7 +461,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What collaboration is allowed and not allowed between groups?",
-    "ground_truth_answer": "Explaining a concept, discussing algorithms, testing strategies, or debugging approaches with another group is okay \u2014 but sharing code or test cases with another group, copying or reading another group's code, copying online code or previous years' test cases, and helping another group debug their code are not okay, because a long debugging session tends to make code look like your own.",
+    "ground_truth_answer": "Explaining a concept, discussing algorithms, testing strategies, or debugging approaches with another group is okay — but sharing code or test cases with another group, copying or reading another group's code, copying online code or previous years' test cases, and helping another group debug their code are not okay, because a long debugging session tends to make code look like your own.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080"
     ],
@@ -573,7 +573,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about the OS providing common services like file systems?",
-    "ground_truth_answer": "The OS provides a bunch of glue \u2014 common services: a file system (storage abstraction), windows that properly take in mouse clicks, and a networking system that talks from Berkeley to Beijing without worrying about packets. These common services are typically linked in with libraries that programmers depend on.",
+    "ground_truth_answer": "The OS provides a bunch of glue — common services: a file system (storage abstraction), windows that properly take in mouse clicks, and a networking system that talks from Berkeley to Beijing without worrying about packets. These common services are typically linked in with libraries that programmers depend on.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
@@ -593,7 +593,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is the kernel and why do people disagree about what it includes?",
-    "ground_truth_answer": "The kernel is the one program running at all times on the computer \u2014 the core of the operating system. Nobody disagrees the kernel is part of the OS, but people disagree widely about whether everything else a vendor ships should count.",
+    "ground_truth_answer": "The kernel is the one program running at all times on the computer — the core of the operating system. Nobody disagrees the kernel is part of the OS, but people disagree widely about whether everything else a vendor ships should count.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
@@ -614,7 +614,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about how to think like an engineer?",
-    "ground_truth_answer": "Making a system like the internet robust and failure-resistant requires an engineering mindset \u2014 students must start thinking like engineers, and the class gives tools to make complicated systems actually work.",
+    "ground_truth_answer": "Making a system like the internet robust and failure-resistant requires an engineering mindset — students must start thinking like engineers, and the class gives tools to make complicated systems actually work.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000016",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
@@ -634,7 +634,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "Who is the instructor of CS162 and what is his background?",
-    "ground_truth_answer": "The instructor is John Kubiatowicz (Professor Kuby). His background: hardware design \u2014 he designed the Alewife chip, one of the first shared-memory multiprocessors with message passing; OS development at Project Athena at MIT (device drivers and network file systems); clustered high-availability systems; the Tessellation OS for multi-core processors; peer-to-peer and cloud storage (OceanStore); quantum computing; and the Global Data Plane project on hardened data containers for edge computing.",
+    "ground_truth_answer": "The instructor is John Kubiatowicz (Professor Kuby). His background: hardware design — he designed the Alewife chip, one of the first shared-memory multiprocessors with message passing; OS development at Project Athena at MIT (device drivers and network file systems); clustered high-availability systems; the Tessellation OS for multi-core processors; peer-to-peer and cloud storage (OceanStore); quantum computing; and the Global Data Plane project on hardened data containers for edge computing.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000052",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
@@ -654,10 +654,9 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about Linux and other systems' lines of code?",
-    "ground_truth_answer": "The lecture shows millions of lines of code: Linux 2.2 and the Mars Rover are on the low end, Firefox, Android, Linux 3.1, and Windows 7 are mid-range, and Windows Vista, the Facebook system, and Mac OS are much larger \u2014 illustrating how complicated modern systems are.",
+    "ground_truth_answer": "The lecture shows millions of lines of code: Linux 2.2 and the Mars Rover are on the low end, Firefox, Android, Linux 3.1, and Windows 7 are mid-range, and Windows Vista, the Facebook system, and Mac OS are much larger — illustrating how complicated modern systems are.",
     "expected_chunk_ids": [
-      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000094",
-      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000093"
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000089"
     ],
     "expected_route": "vector_only",
     "question_type": "factual",
@@ -673,7 +672,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about whether the windowing system belongs in the kernel?",
-    "ground_truth_answer": "It depends on the OS: Windows NT initially was a microkernel-type OS with the windowing system outside the kernel, then Microsoft moved the windowing entirely inside the kernel for performance \u2014 so windowing can be both in and out of the kernel, with trade-offs involving protection, security, durability, and reliability.",
+    "ground_truth_answer": "It depends on the OS: Windows NT initially was a microkernel-type OS with the windowing system outside the kernel, then Microsoft moved the windowing entirely inside the kernel for performance — so windowing can be both in and out of the kernel, with trade-offs involving protection, security, durability, and reliability.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000048",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000047"
@@ -692,7 +691,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What did the lecture say about cameras being required for the class?",
-    "ground_truth_answer": "Cameras are required for discussion sessions, design reviews, and possibly office hours, and certainly for exams. The camera is a tool of collaboration \u2014 it lets the class approximate in-person interaction when everyone is remote.",
+    "ground_truth_answer": "Cameras are required for discussion sessions, design reviews, and possibly office hours, and certainly for exams. The camera is a tool of collaboration — it lets the class approximate in-person interaction when everyone is remote.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000062",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
@@ -712,7 +711,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What is the definition of an operating system according to the lecture?",
-    "ground_truth_answer": "There is no universally accepted definition \u2014 the operating system is whatever a vendor ships, ranging from a kernel (the one program running at all times) to the full set of bundled software. The lecture emphasizes that the kernel is unquestionably part of the OS, while everything else is debatable.",
+    "ground_truth_answer": "There is no universally accepted definition — the operating system is whatever a vendor ships, ranging from a kernel (the one program running at all times) to the full set of bundled software. The lecture emphasizes that the kernel is unquestionably part of the OS, while everything else is debatable.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012"
@@ -814,7 +813,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What abstractions and higher-level objects does the operating system provide to applications?",
-    "ground_truth_answer": "The OS acts as an illusionist: it provides clean, easy-to-use abstractions of physical resources \u2014 infinite memory, a machine dedicated to the user, and higher-level objects like files, users, and messages \u2014 masking hardware limitations via virtualization.",
+    "ground_truth_answer": "The OS acts as an illusionist: it provides clean, easy-to-use abstractions of physical resources — infinite memory, a machine dedicated to the user, and higher-level objects like files, users, and messages — masking hardware limitations via virtualization.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
@@ -838,7 +837,7 @@
   {
     "lecture_id": "lecture_cs162_v17",
     "query": "What does the lecture say about the OS being an illusionist?",
-    "ground_truth_answer": "The OS is an illusionist: it provides clean, easy-to-use abstractions of physical resources so that you can temporarily think you have infinite memory, a machine entirely dedicated to you, and higher-level objects like files, users, and messages \u2014 hiding hardware limitations via virtualization.",
+    "ground_truth_answer": "The OS is an illusionist: it provides clean, easy-to-use abstractions of physical resources so that you can temporarily think you have infinite memory, a machine entirely dedicated to you, and higher-level objects like files, users, and messages — hiding hardware limitations via virtualization.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
@@ -859,7 +858,7 @@
   },
   {
     "query": "What does the slide about network capacity show?",
-    "ground_truth_answer": "The slide shows a graph titled 'Network Capacity Still Increasing' from 1995 to 2020: 100 Gigabit Ethernet and core networking double roughly every 18 months, reaching rates around 1,000,000 Mbps, while server I/O doubles roughly every 24 months \u2014 illustrating that networking capacity keeps growing over time.",
+    "ground_truth_answer": "The slide shows a graph titled 'Network Capacity Still Increasing' from 1995 to 2020: 100 Gigabit Ethernet and core networking double roughly every 18 months, reaching rates around 1,000,000 Mbps, while server I/O doubles roughly every 24 months — illustrating that networking capacity keeps growing over time.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
     ],
@@ -878,7 +877,7 @@
   },
   {
     "query": "What does the slide say about societal-scale information systems?",
-    "ground_truth_answer": "The slide, titled 'Societal Scale Information Systems (or the Internet of Things?)', explains that the world is a large distributed system with microprocessors in everything and vast infrastructure behind them \u2014 internet connectivity, scalable reliable connectivity, secure services, databases, information collection, remote storage, online games and commerce, and MEMS for sensor networks.",
+    "ground_truth_answer": "The slide, titled 'Societal Scale Information Systems (or the Internet of Things?)', explains that the world is a large distributed system with microprocessors in everything and vast infrastructure behind them — internet connectivity, scalable reliable connectivity, secure services, databases, information collection, remote storage, online games and commerce, and MEMS for sensor networks.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000085"
     ],
@@ -916,7 +915,7 @@
   },
   {
     "query": "What does the diagram of a compiled program's view of the world show?",
-    "ground_truth_answer": "The diagram shows a compiled program using system libraries running inside a process \u2014 an execution environment with restricted rights provided by the OS \u2014 layered over threads, address spaces, files and sockets, with the operating system on the hardware below. Each running program runs in its own process, and processes provide nicer interfaces than raw hardware.",
+    "ground_truth_answer": "The diagram shows a compiled program using system libraries running inside a process — an execution environment with restricted rights provided by the OS — layered over threads, address spaces, files and sockets, with the operating system on the hardware below. Each running program runs in its own process, and processes provide nicer interfaces than raw hardware.",
     "expected_chunk_ids": [
       "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
     ],

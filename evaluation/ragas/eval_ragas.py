@@ -87,3 +87,65 @@ def _placeholder_scores(test_data: List[Dict]) -> Dict[str, float]:
         "Answer Relevancy": 0.0,
         "Context Precision": 0.0,
     }
+
+
+def main() -> int:
+    """CLI entry point: run RAGAS over a live LectureMIND server.
+
+    Usage:
+        python -m evaluation.ragas.eval_ragas [--api-url http://localhost:8000]
+
+    Requires:
+        - A running server (POST /query) with an active lecture.
+        - The optional dependencies ``ragas`` and ``datasets``
+          (pip install ragas datasets).
+
+    Writes evaluation/reports/ragas_report.json on success.
+    """
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="RAGAS answer-quality evaluation")
+    parser.add_argument("--api-url", default="http://localhost:8000")
+    args = parser.parse_args()
+
+    try:
+        import ragas  # noqa: F401
+        import datasets  # noqa: F401
+    except ImportError:
+        logger.error(
+            "ragas/datasets are not installed. Install them with: "
+            "pip install ragas datasets. Refusing to write a report of "
+            "placeholder zeros."
+        )
+        return 2
+
+    def _query(query: str) -> Dict[str, str]:
+        import urllib.request
+
+        data = json.dumps({"query": query}).encode()
+        req = urllib.request.Request(
+            f"{args.api_url}/query",
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            payload = json.loads(resp.read().decode())
+        return {
+            "answer": payload.get("answer", ""),
+            "context": "\n\n".join(
+                str(src.get("chunk_id", "")) for src in payload.get("sources", [])
+            ),
+        }
+
+    test_data = [
+        {"query": "What is the main topic of the lecture?", "ground_truth": ""},
+    ]
+    metrics = evaluate_ragas(test_data, _query)
+    print(json.dumps(metrics, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

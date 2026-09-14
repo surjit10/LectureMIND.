@@ -28,7 +28,8 @@ DEFAULT_OUT_HTML = Path(__file__).resolve().parent / "index.html"
 
 # Metrics worth a headline bar chart.
 _KEY_METRICS = [
-    ("mrr", "MRR"),
+    ("mrr_at_5", "MRR@5"),
+    ("mrr", "MRR (unbounded)"),
     ("recall_at_5", "Recall@5"),
     ("ndcg_at_5", "NDCG@5"),
     ("precision_at_5", "Precision@5"),
@@ -259,14 +260,14 @@ def _build_html(
                 [
                     rep.get("timestamp", ""),
                     rep.get("total_samples", ""),
-                    _fmt(_metric_value(m.get("mrr", "—"))),
+                    _fmt(_metric_value(m.get("mrr_at_5", m.get("mrr", "—")))),
                     _fmt(_metric_value(m.get("recall_at_5", "—"))),
                     _fmt(_metric_value(m.get("ndcg_at_5", "—"))),
                     _fmt(_metric_value(m.get("routing_accuracy", "—"))),
                 ]
             )
         sections.append(
-            _section("Run history", _table(["Timestamp", "Samples", "MRR", "Recall@5", "NDCG@5", "Routing"], rows))
+            _section("Run history", _table(["Timestamp", "Samples", "MRR@5", "Recall@5", "NDCG@5", "Routing"], rows))
         )
 
     css = """
