@@ -1,3 +1,4 @@
+# SMOKE SCRIPT (not a pytest test): manual live-server check; excluded from pytest via pytest.ini addopts.
 import logging
 import json
 import sys

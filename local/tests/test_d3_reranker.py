@@ -9,10 +9,26 @@
 
 import pytest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 import numpy as np
 
 from local.services.reranker_service import RerankerService
+
+# sentence-transformers (and its torch dependency) is optional at test time:
+# these tests mock CrossEncoder, but unittest.mock.patch requires the target
+# module to be importable. CI installs it via local_requirements.txt; locally
+# the tests skip instead of failing with ModuleNotFoundError.
+try:
+    import sentence_transformers  # noqa: F401
+    _HAS_ST = True
+except ImportError:
+    _HAS_ST = False
+
+_requires_st = pytest.mark.skipif(
+    not _HAS_ST,
+    reason="sentence-transformers not installed (optional heavy dependency)",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -21,6 +37,7 @@ from local.services.reranker_service import RerankerService
 
 class TestGlobalRerankerLoader:
 
+    @_requires_st
     def test_load_cross_encoder_calls_sentence_transformers(self, tmp_path):
         """_load_cross_encoder() invokes CrossEncoder with the given path."""
         model_dir = tmp_path / "global_reranker"
@@ -37,6 +54,7 @@ class TestGlobalRerankerLoader:
         mock_ce.assert_called_once_with(str(model_dir), device="cpu")
         assert result is mock_model
 
+    @_requires_st
     def test_load_cross_encoder_accepts_path_object(self, tmp_path):
         """_load_cross_encoder() accepts a Path without converting to str first."""
         model_dir = tmp_path / "global_reranker"
@@ -75,6 +93,7 @@ class TestGlobalRerankerLoader:
 
         return FakeCE()
 
+    @_requires_st
     def test_quantize_true_applies_int8(self, tmp_path):
         """quantize=True applies dynamic quantization and tags precision."""
         model_dir = tmp_path / "global_reranker"
@@ -101,6 +120,7 @@ class TestGlobalRerankerLoader:
         assert fake_ce[0].auto_model is quantized_mock
         assert result._precision == "int8_dynamic"
 
+    @_requires_st
     def test_quantize_failure_falls_back_to_fp32(self, tmp_path):
         """quantize=True but quantization raising must fall back to FP32, never raise."""
         model_dir = tmp_path / "global_reranker"
@@ -119,6 +139,7 @@ class TestGlobalRerankerLoader:
         assert result is fake_ce
         assert result._precision == "fp32"
 
+    @_requires_st
     def test_quantize_none_respects_config_flag_false(self, tmp_path):
         """quantize=None with RERANKER_QUANTIZE=False skips quantization."""
         model_dir = tmp_path / "global_reranker"
@@ -134,6 +155,7 @@ class TestGlobalRerankerLoader:
         mock_q.assert_not_called()
         assert result._precision == "fp32"
 
+    @_requires_st
     def test_quantize_none_respects_config_flag_true(self, tmp_path):
         """quantize=None with RERANKER_QUANTIZE=True applies quantization."""
         model_dir = tmp_path / "global_reranker"
@@ -169,12 +191,25 @@ class TestRerankerSingleton:
         _rs._GLOBAL_RERANKER_SERVICE = None
 
     def test_rerank_raises_when_singleton_not_set(self):
-        """rerank() must raise RuntimeError if singleton is None and no injection."""
+        """rerank() must raise RuntimeError if singleton is None and no injection.
+
+        The production behavior depends on ENABLE_AUTO_MODEL_RECOVERY: True →
+        raise, False → warn and keep original order. The test pins the flag
+        explicitly so it does not silently pass/fail based on the developer's
+        local .env (which sets it to false).
+        """
         from retrieval.reranker.rerank_service import rerank
-        with pytest.raises(RuntimeError, match="Global reranker singleton is not initialized"):
-            rerank("test query", graph_results=[], vector_results=[
-                {"chunk_id": "c1", "transcript": "BFS", "visual_context": "", "ocr_text": ""},
-            ])
+        # LocalSettings is a pydantic BaseSettings instance (values resolved at
+        # instantiation from .env), so patch the *class* the service reads:
+        # rerank() constructs a fresh LocalSettings() in two places; make the
+        # constructor return a stub with the flags pinned to the values this
+        # test requires, regardless of the developer's .env.
+        fake_settings = SimpleNamespace(ENABLE_AUTO_MODEL_RECOVERY=True, ENABLE_HYBRID_RETRIEVAL=False)
+        with patch("retrieval.reranker.rerank_service.LocalSettings", return_value=fake_settings):
+            with pytest.raises(RuntimeError, match="Global reranker singleton is not initialized"):
+                rerank("test query", graph_results=[], vector_results=[
+                    {"chunk_id": "c1", "transcript": "BFS", "visual_context": "", "ocr_text": ""},
+                ])
 
     def test_rerank_works_with_injected_service(self):
         """rerank() works when reranker_service is injected (test path)."""

@@ -274,14 +274,19 @@ python -m evaluation.dashboard.dashboard_generator
 ### 3. Run RAGAS Answer Quality Evaluation
 ```bash
 source .venv/bin/activate
-python -m evaluation.ragas.eval_ragas
+pip install ragas datasets   # optional dependency group
+python -m evaluation.ragas.eval_ragas --report evaluation/outputs/<benchmark_report>.json
 ```
+* Requires the optional `ragas` package and an LLM judge; exits with a clear message if missing.
+* No RAGAS report exists yet in this repository.
 
 ### 4. Run Load Testing
 ```bash
 source .venv/bin/activate
-python -m evaluation.load_testing.load_test
+python -m evaluation.load_testing.load_test --url http://localhost:8000 --users 100
 ```
+* Requires the FastAPI server to be running.
+* No load-test report exists yet in this repository.
 
 ---
 

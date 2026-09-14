@@ -115,3 +115,38 @@ def run_load_test(
 
     logger.info("Load test report saved to %s", csv_path)
     return all_results
+
+
+def main() -> int:
+    """CLI entry point: run the load test against a live server.
+
+    Usage:
+        python -m evaluation.load_testing.load_test [--api-url http://localhost:8000]
+
+    Writes evaluation/reports/load_test_report.csv on success.
+    """
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="LectureMIND load test (100/500/1000 users)")
+    parser.add_argument("--api-url", default="http://localhost:8000")
+    parser.add_argument(
+        "--user-levels",
+        default=",".join(str(u) for u in USER_LEVELS),
+        help="Comma-separated concurrency levels (default: 100,500,1000)",
+    )
+    args = parser.parse_args()
+
+    levels = [int(x) for x in args.user_levels.split(",") if x.strip()]
+    if not levels:
+        logger.error("No valid user levels given: %r", args.user_levels)
+        return 2
+
+    results = run_load_test(api_url=args.api_url, user_levels=levels)
+    total_errors = sum(r["errors"] for r in results)
+    print(f"Load test complete — {total_errors} errors across {len(results)} levels.")
+    return 0 if total_errors == 0 else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -33,6 +33,9 @@ _RELATION_INDICATORS = re.compile(
 
 # Known semantic direction constraints based on physical and causal principles:
 # Maps (source_concept, relation, target_concept) to expected validity.
+# This list is intentionally extendable per lecture/domain; the two entries
+# below encode Faraday-induction directions for the electrical-engineering
+# Transformer lecture and are kept as the built-in default.
 _PHYSICAL_DIRECTION_RULES = [
     # Faraday's law: Electromotive Force is derived from changing Magnetic Field
     {
@@ -203,9 +206,19 @@ def audit_relations(
     entities: List[Dict[str, Any]],
     chunks: List[Dict[str, Any]],
     gold_relations_path: Optional[str | Path] = None,
+    direction_rules: Optional[List[Dict[str, str]]] = None,
+    non_factual_name_markers: Optional[List[str]] = None,
 ) -> RelationAuditResult:
     """
     Perform a comprehensive, read-only audit of extracted relations.
+
+    Args:
+        direction_rules: Optional per-domain direction rules (same schema as
+            ``_PHYSICAL_DIRECTION_RULES``). Defaults to the built-in rules.
+        non_factual_name_markers: Optional list of substring markers; any
+            relation whose source name contains one is marked not factually
+            correct (used to flag known extraction artifacts, e.g. clausal
+            fragments like "us a sinusoidal ...").
     """
     total = len(relations)
     entity_map = {e["entity_id"]: e["name"] for e in entities}
@@ -222,6 +235,11 @@ def audit_relations(
 
     issues: List[RelationIssue] = []
     details: List[Dict[str, Any]] = []
+
+    if direction_rules is None:
+        direction_rules = _PHYSICAL_DIRECTION_RULES
+    if non_factual_name_markers is None:
+        non_factual_name_markers = ["us a sinusoidal"]
 
     valid_rel_types = {rt.value for rt in RelationType}
     seen_pairs: Set[Tuple[str, str, str]] = set()
@@ -305,11 +323,11 @@ def audit_relations(
         # 4. Semantic Direction Audit (Checks against physical & causal principles)
         is_suspicious_direction = False
         direction_reason = ""
-        for rule in _PHYSICAL_DIRECTION_RULES:
+        for rule in direction_rules:
             if (
-                rule["source"] in src_name.lower()
+                rule["source"].lower() in src_name.lower()
                 and rule["relation"] == rel_type
-                and rule["target"] in tgt_name.lower()
+                and rule["target"].lower() in tgt_name.lower()
             ):
                 is_suspicious_direction = True
                 direction_reason = rule["reason"]
@@ -343,8 +361,11 @@ def audit_relations(
         if lecture_supported:
             lecture_supported_count += 1
 
-        # Factual correctness check: false if direction is explicitly reversed or ungrounded gibberish
-        factually_correct = not is_suspicious_direction and ("us a sinusoidal" not in src_name.lower())
+        # Factual correctness check: false if direction is explicitly reversed
+        # or if the source name matches a known extraction-artifact marker.
+        factually_correct = not is_suspicious_direction and not any(
+            marker.lower() in src_name.lower() for marker in non_factual_name_markers
+        )
 
         if factually_correct:
             factually_correct_count += 1
@@ -412,6 +433,7 @@ def audit_relations(
         reversed_list = []
         type_mismatch_list = []
         unmatched_list = []
+        claimed_gold: Set[Tuple[str, str, str]] = set()
 
         for r_detail in details:
             s = r_detail["source_name"].lower().strip()
@@ -419,12 +441,16 @@ def audit_relations(
             t = r_detail["target_name"].lower().strip()
             rel_repr = f"{r_detail['source_name']} ==[{rel}]==> {r_detail['target_name']}"
 
-            # Exact forward match
-            if (s, rel, t) in gold_pairs:
+            # Exact forward match (each gold triple may be claimed at most once,
+            # across ALL match branches — exact, reverse, and fuzzy — so a
+            # duplicate prediction can never score a second TP for one gold).
+            if (s, rel, t) in gold_pairs and (s, rel, t) not in claimed_gold:
+                claimed_gold.add((s, rel, t))
                 tp += 1
                 correct_direction_count += 1
                 correct_list.append({"relation": rel_repr, "match_type": "EXACT_FORWARD"})
-            elif (t, rel, s) in gold_pairs:
+            elif (t, rel, s) in gold_pairs and (t, rel, s) not in claimed_gold:
+                claimed_gold.add((t, rel, s))
                 # Direct reverse match in gold
                 reversed_direction_count += 1
                 reversed_list.append({"relation": rel_repr, "gold_relation": f"{t} ==[{rel}]==> {s}"})
@@ -435,10 +461,14 @@ def audit_relations(
                     relation_type_mismatch_count += 1
                     type_mismatch_list.append({"relation": rel_repr, "gold_matches": same_pair_gold})
                 else:
-                    # Check fuzzy match against gold relations
+                    # Check fuzzy match against gold relations. Shares the same
+                    # claimed_gold set as the exact/reverse branches.
                     fuzzy_matched = False
                     for gs, gr, gt in gold_pairs:
+                        if (gs, gr, gt) in claimed_gold:
+                            continue
                         if gr == rel and (gs in s or s in gs) and (gt in t or t in gt):
+                            claimed_gold.add((gs, gr, gt))
                             tp += 1
                             correct_direction_count += 1
                             correct_list.append({"relation": rel_repr, "match_type": "FUZZY_FORWARD", "gold_match": (gs, gr, gt)})
@@ -446,7 +476,7 @@ def audit_relations(
                             break
                     if not fuzzy_matched:
                         unmatched_relation_count += 1
-                        unmatched_list.append({"relation": rel_repr, "reason": "Not present in gold reference set"})
+                        unmatched_list.append({"relation": rel_repr, "reason": "Not present in gold reference set (or gold triple already matched)"})
 
         prec = tp / total if total > 0 else 0.0
         rec = tp / len(gold_pairs) if len(gold_pairs) > 0 else 0.0

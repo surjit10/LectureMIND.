@@ -28,10 +28,10 @@
 | Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
 | Reranker | Global cross-encoder `BAAI/bge-reranker-base` (XLM-R), CPU, process singleton; dynamic int8 quantization (`RERANKER_QUANTIZE`) with automatic FP32 fallback | `rerank_service.py`, `reranker_loader.py`, `app.py` |
 | Hybrid retrieval | Dense (`bge-large-en-v1.5`) + BM25 lexical candidates fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking; enabled by default (`ENABLE_HYBRID_RETRIEVAL`) | `retrieval/hybrid/bm25_retriever.py`, `config.py` |
-| Knowledge graph | Production run: CS162 (138 entities / 189 relations), MIT (78 entities / 92 relations), Self-Attention (60 entities / 114 relations); **395 total relations**, 0.0% dangling rate | Kaggle package audit (`audit_package.py`) |
-| Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 27 prerequisites (CS162), 11 (MIT), 3 (Self-Attention); benchmark F1: **73.7%** (77.8% precision / 70.0% recall, 0 cycles) | `evaluation/knowledge_graph/` |
+| Knowledge graph | Production run: CS162 (138 entities / 189 relations), MIT (78 entities / 92 relations), Self-Attention (60 entities / 114 relations); **395 total relations**, 0 dangling — all re-verified by audit against the current packages in `0-output/` | Kaggle package audit (`audit_package.py`) |
+| Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 27 prerequisites (CS162), 11 (MIT), 3 (Self-Attention), 0 cycles / 0 self-loops across all packages (re-verified). Reference-label F1 is only defined for the Transformer lecture (the sole annotated one) — see §2.6 | `evaluation/knowledge_graph/` |
 | Content scale | Ingested long-lecture packages (46–93 chunks / 40–85 min); package size: **202–428 KB** (replacing 1+ GB video) | `0-output/` |
-| Automated tests | **569 passing** (planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction) | `pytest` |
+| Automated tests | **580 passing, 10 skipped** (skips: optional heavy deps absent locally / live-server scripts moved to `scripts/manual/`) — planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction | `pytest` |
 
 ---
 
@@ -47,6 +47,8 @@ Source: `data/packages/<lecture>/training_metrics.json` — ranking eval on gene
 | lecture_6a80d31a | 263 | **0.9981** | 1.000 | 1.000 | **0.9986** |
 | lecture_53b21041 | 11 | **1.000** | 1.000 | 1.000 | **1.000** |
 | **Aggregate** | **1,360** | **0.996** | **1.000** | **1.000** | **0.997** |
+
+> **Interpretation caveat (important):** this table evaluates the reranker **on its own training objective** — each query ranks exactly 2 candidates (1 positive / 1 negative) drawn from the same package used for training, with no held-out split and no hard guarantee of truly negative hard examples. Near-perfect scores here are expected and demonstrate training convergence only; they are **not** a generalization measure. The externally meaningful retrieval numbers are the 50-question live benchmark in §2.4.
 
 ### 2.2 Grounding, citations & hallucination resistance (live-verified)
 
@@ -83,7 +85,8 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 | Routing accuracy | **0.980** (49/50) | 1.000 |
 | Visual routing accuracy (`need_visual`) | **1.000** | 1.000 |
 | Hit@5 *(Primary Sufficiency)* | **0.980** | 1.000 |
-| MRR@5 *(Primary Rank-1)* | **0.788** | 1.000 |
+| MRR@5 *(Primary Rank-1, strict: reciprocal rank capped at k=5)* | **0.785** | 1.000 |
+| MRR *(untruncated diagnostic; some relevant chunks rank beyond position 5)* | **0.788** | 1.000 |
 | Recall@5 *(Primary Coverage)* | **0.862** | 1.000 |
 | NDCG@5 *(Primary Ranking Order)* | **0.767** | 1.000 |
 | Precision@5 *(Secondary IR)* | 0.280 | 0.400 |
@@ -95,14 +98,14 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 | Chunk coverage | **1.000** | 1.000 |
 | Mean end-to-end latency | 20.51 s | 22.82 s |
 
-> **Note on Precision@5 (0.280) vs. Primary Metrics**: In single-lecture QA, ground-truth evidence is localized. In `cs162_lecture1_qa_50.json`, 27 questions (54%) have only 1 relevant chunk and 12 questions (24%) have only 2. The absolute mathematical upper bound for Precision@5 across this dataset is **0.3520 (35.20%)**. A score of 0.280 represents **79.5% of the theoretical maximum achievable by any system**. For this reason, the primary retrieval evaluation metrics for LectureMIND are **Hit@5 (0.980)**, **MRR@5 (0.788)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
+> **Note on Precision@5 (0.280) vs. Primary Metrics**: In single-lecture QA, ground-truth evidence is localized. In `cs162_lecture1_qa_50.json`, 27 questions (54%) have only 1 relevant chunk and 12 questions (24%) have only 2. The absolute mathematical upper bound for Precision@5 across this dataset is **0.3520 (35.20%)**. A score of 0.280 represents **79.5% of the theoretical maximum achievable by any system**. For this reason, the primary retrieval evaluation metrics for LectureMIND are **Hit@5 (0.980)**, **MRR@5 (0.785 strict)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
 
-**By question type (measured):**
+**By question type (measured; rerank MRR = 1/rank of the first expected chunk in the final reranked order):**
 
 | Type | n | MRR@5 | Hit@5 | Answer F1 |
 |---|---|---|---|---|
 | factual | 23 | 0.844 | 1.000 | 0.422 |
-| conceptual | 17 | 0.805 | 0.941 | 0.406 |
+| conceptual | 17 | 0.804 | 0.941 | 0.406 |
 | visual (`need_visual`) | 5 | 0.567 | 1.000 | 0.631 |
 | definition | 4 | 0.750 | 1.000 | 0.632 |
 | summary (lecture-wide) | 1 | 0.500 | 1.000 | 0.682 |
@@ -135,19 +138,36 @@ This is the storage story the architecture is built around: the expensive, bulky
 
 ### 2.6 Knowledge Graph Quality & Prerequisite DAG Metrics (Live Audited)
 
-Source: `evaluation/knowledge_graph/audit_package.py` — audited across the benchmark package and newly ingested long-lecture packages:
+Source: `evaluation/knowledge_graph/audit_package.py` — audits regenerated 2026-09-14 from the **latest packages in `0-output/`** (Transformer lecture + CS162/MIT/Self-Attention long-lecture packages).
 
-| Metric | Measured Value | Benchmark Baseline | Delta / Health Status |
-|---|---|---|---|
-| **Prerequisite Strict Precision** | **77.8%** (7/9) | 53.8% (7/13) | **+24.0% absolute gain** |
-| **Prerequisite Strict Recall** | **70.0%** (7/10) | 70.0% (7/10) | **100% preserved (zero regression)** |
-| **Prerequisite Strict F1** | **73.7%** | 60.9% | **+12.8% absolute gain** |
-| **Strict DAG Guarantee** | **True** | True | 100% acyclic across all packages |
-| **Cycle Count** | **0** | 0 | Mutual cycles deterministically pruned |
-| **Self-Loop Count** | **0** | 0 | Zero self-dependencies ($A \to A$) |
-| **Pedagogical Relevance** | **100%** | 93.3% | Zero physical parts/losses mislabeled as prerequisites |
-| **Dangling Relation Rate** | **0.0%** (0/395) | 0.0% | 100% referential integrity to `entities.json` |
-| **Relation Inverse Consistency** | **100%** | 100% | Symmetric and reverse mappings verified |
+> **Applicability warning:** the reference labels in `evaluation/knowledge_graph/*_gold.json` are **LLM-assisted labels pending human verification**, and they were annotated for the **6.5-minute Transformer lecture only**. Gold-reference metrics are therefore computed **only** where the gold lecture matches the audited package (`gold_applies` flag in `outputs/*/metrics.json`); for all other lectures they are reported as `null` — never as 0.0 and never replaced by optimistic fallbacks.
+
+#### Gold-reference scores (Transformer lecture only — the sole annotated lecture)
+
+| Metric | Precision | Recall | F1 | Basis |
+|---|---|---|---|---|
+| Entity extraction | 55.6% (5/9) | 31.3% (5/16) | **40.0%** | one-to-one matching against 16 reference concepts |
+| Relation extraction | 0.0% (0/5) | 0.0% (0/21) | **0.0%** | exact + fuzzy matching against 21 reference relations |
+| Prerequisite DAG | 0.0% (0/3) | 0.0% (0/10) | **0.0%** strict (fuzzy diagnostic F1: 15.4%) | against 10 reference prerequisites |
+
+#### Structural metrics (measured, gold-independent — all audited packages, latest `0-output/` versions)
+
+| Metric | CS162 (93 chunks) | MIT (69 chunks) | Self-Attention (46 chunks) | Transformer (9 chunks) |
+|---|---|---|---|---|
+| Strict DAG guarantee | True | True | True | True |
+| Cycle count | 0 | 0 | 0 | 0 |
+| Self-loop count | 0 | 0 | 0 | 0 |
+| Relations (0 dangling) | 189 | 92 | 114 | 5 |
+| Prerequisite edges (DAG) | 27 | 11 | 3 | 3 |
+| Pedagogically supported prerequisites | 27/27 (100%) | n/a | n/a | n/a |
+| Composite diagnostic (only measurable components counted; gold-dependent prereq component excluded when no reference labels apply) | 28.0 / 45 | 24.6 / 45 | 26.9 / 45 | 32.1 / 100 |
+| — of which graph coherence (direct-evidence rate + entity participation, 10 pts) | 2.8 | 3.6 | 3.5 | 7.4 |
+
+All four audits were computed from the current packages in `0-output/`; the CS162 serving package (`lecture_092f861b`) is byte-identical to `0-output/CS162_...zip`, and all 50 benchmark anchor chunk IDs verify against that package.
+
+Provenance note (added 2026-09-14): every number in this file traces to either (a) a stored benchmark report generated by the code in this repo (`evaluation/outputs/`), (b) a regenerated audit artifact (`outputs/kg_quality*/`), or (c) a live execution recorded at the time of measurement. The MIT/Self-Attention audits were regenerated from the latest packages in `0-output/` and confirm the published extraction counts (92/114 relations, 11/3 prerequisites).
+
+**Honest read of the gold scores:** with one-to-one entity matching and no fallback substitution, the sole annotated lecture scores Entity F1 0.40 and Relation/Prerequisite F1 0.00 against its own LLM-assisted reference labels. These numbers are the current truth; they will only become meaningful after the reference labels are (a) extended to the other lectures and (b) verified by human domain experts.
 
 #### Multi-Lecture Extraction Yield (Full Cloud Execution)
 
@@ -185,7 +205,7 @@ Comparison between legacy run (truncated by token caps) and the current sliding-
 | Cross-lecture data isolation | Yes — hard guards, tested | Partial | n/a | n/a |
 | Domain-adaptive reranker training | Yes — dedicated training pipeline and automated triplet dataset generator | No | No | No |
 | Private / offline (no API dependence) | Yes — local Ollama + Neo4j + Qdrant | Yes | Yes | No — requires API |
-| Benchmark infra (RAGAS, QA harness, load test) | Yes — harness + live run: **50-QA curated (MRR@5 0.788, Hit@5 0.980, routing 0.980)** | No | No | No |
+| Benchmark infra (RAGAS, QA harness, load test) | Yes — harness + live run: **50-QA curated (strict MRR@5 0.785, Hit@5 0.980, routing 0.980)** | No | No | No |
 | Measured eval numbers to show | Yes — retrieval/rerank + live QA + latency + graph/visual types | Partial | No | No |
 | Source-video footprint | 83-min 720p lecture → **436 KB knowledge package** (~2,800× smaller); corpus ≈ 85 MB for 725 lectures | Stores raw video | Stores raw video | n/a |
 
@@ -197,9 +217,11 @@ Comparison between legacy run (truncated by token caps) and the current sliding-
 
 The evaluation suite executes the real pipeline with verified datasets:
 - **Comprehensive Benchmark (`evaluation/benchmark_runner.py`):** Real single-pass execution across Qdrant, Neo4j, CrossEncoder reranker, and LLM backends with full metric breakdowns.
-- **RAGAS Integration (`evaluation/ragas/eval_ragas.py`):** Structured evaluation harness for Faithfulness, Answer Relevancy, and Context Precision.
-- **Load Testing (`evaluation/load_testing/load_test.py`):** High-concurrency throughput and latency profiling (100 / 500 / 1000 concurrent virtual users).
+- **RAGAS Integration (`evaluation/ragas/eval_ragas.py`):** Structured evaluation harness for Faithfulness, Answer Relevancy, and Context Precision. Runnable via `python -m evaluation.ragas.eval_ragas --report <benchmark_report.json>`; requires the optional `ragas` package and an LLM judge — exits with a clear message if they are missing (no RAGAS results have been produced yet).
+- **Load Testing (`evaluation/load_testing/load_test.py`):** High-concurrency throughput and latency profiling (100 / 500 / 1000 concurrent virtual users). Runnable via `python -m evaluation.load_testing.load_test --url <server> --users 100`; no load-test results have been produced yet.
 - **Interactive Visual Dashboard (`evaluation/dashboard/`):** Standalone dashboard rendering performance analytics and score breakdowns.
 
+> **Provenance note:** every number in this file traces to either (a) a stored benchmark report generated by the code in this repo (`evaluation/outputs/`), (b) a regenerated audit artifact (`outputs/kg_quality*/`), or (c) a live execution recorded at the time of measurement. The MIT/Self-Attention audits were regenerated from the latest packages in `0-output/` and confirm the published extraction counts (92/114 relations, 11/3 prerequisites).
+
 ---
-*Maintained by the evaluation stack in `evaluation/` — regenerate reports with `evaluation/benchmark_runner.py`, `evaluation/ragas/eval_ragas.py`, `evaluation/load_testing/load_test.py`.*
+*Maintained by the evaluation stack in `evaluation/` — regenerate reports with `python -m evaluation.benchmark_runner`, `python -m evaluation.ragas.eval_ragas`, `python -m evaluation.load_testing.load_test`.*

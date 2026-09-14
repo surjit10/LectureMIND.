@@ -40,7 +40,7 @@ Traditional lecture recordings are difficult to revisit effectively. Students mu
 - **Multimodal Ingestion** — Audio transcription (Faster-Whisper), slide visual captioning (Qwen2-VL), and OCR (PaddleOCR), fused into timestamped multimodal chunks at slide keyframes; semantic chunk merging combines whisper segments into self-contained passages
 - **GraphRAG Query Pipeline** — Hybrid retrieval: dense vectors + BM25 lexical scores fused via Reciprocal Rank Fusion (RRF) + knowledge-graph traversal, cross-encoder reranking, and evidence-gated generation
 - **Socratic Prerequisite Back-Tracker** — Deterministic DAG prerequisite inference engine; traces foundational knowledge gaps backwards when students struggle with advanced concepts, surfacing specific timestamps and chunks
-- **Knowledge Graph Quality Audit Suite** — Automated evaluation layer auditing entity fragment/orphan rates, relation referential integrity (0.0% dangling relations), strict 1-to-1 bipartite prerequisite matching (73.7% F1, 0 cycles), and GraphRAG downstream retrieval
+- **Knowledge Graph Quality Audit Suite** — Automated evaluation layer auditing entity fragment/orphan rates, relation referential integrity (0.0% dangling relations in audited packages), strict DAG acyclicity (0 cycles), gold-reference matching where applicable (only the Transformer lecture is annotated: Entity F1 0.40, Relation F1 0.00 — LLM-assisted labels pending human verification), and GraphRAG downstream retrieval
 - **Conversational Q&A** — Grounded JSON answers with timestamped source citations; refuses to answer when the lecture lacks evidence
 - **Active Learning** — Auto-generated notes, flashcards, quizzes, and learning paths from lecture context
 - **Course Index** — Lightweight course layer (pure metadata) that queries across lectures via per-lecture fan-out, without ever merging knowledge graphs
@@ -124,7 +124,7 @@ graph TD
 | **Cloud Ingestion Pipeline** | `cloud/` | Multi-stage lecture processing: transcription, OCR, fusion, segmentation, entity/relation extraction, prerequisite inference, embeddings, triplets |
 | **Prerequisite Inference Engine (A10)** | `cloud/extraction/prerequisite_inference.py` | Multi-signal semantic scoring ($S_{\text{discourse}} + S_{\text{graph}} + S_{\text{prominence}} + S_{\text{temporal}}$), temporal causality + pedagogical inversion gates, deterministic DFS DAG cycle resolution |
 | **Socratic Prerequisite Back-Tracker** | `serving/fastapi/routes/prerequisites.py` | Bounded Neo4j backward prerequisite dependency traversal, timestamped concept anchoring |
-| **KG Quality Audit Suite** | `evaluation/knowledge_graph/` | Full audit suite: entity fragment/orphan rate, relation referential integrity (0.0% dangling), strict bipartite prerequisite matching (73.7% F1), GraphRAG downstream retrieval |
+| **KG Quality Audit Suite** | `evaluation/knowledge_graph/` | Full audit suite: entity fragment/orphan rate, relation referential integrity (0.0% dangling), gold-reference matching gated by lecture applicability (only Transformer lecture annotated — see `outputs/kg_quality*/`), GraphRAG downstream retrieval |
 | **Relation Extraction (A9)** | `cloud/extraction/relation_extractor.py` | Sliding-window token management with compact entity alias remapping (`E1, E2...`), 8192-token retry cap, strict pedagogical exclusion rules |
 | **Global Training Orchestration** | `scripts/train_global_reranker.py` | Local: merge package triplets → fine-tune → install into `GLOBAL_RERANKER_DIR` → hot-reload |
 | **Reranker Training Pipeline (B)** | `cloud/reranker_training/` | Independent pipeline: discover packages → extract `triplets.json` → merge/dedupe → fine-tune → evaluate → version → export `global_reranker_v{N}.zip`. Never touches videos |
@@ -582,33 +582,32 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 | Routing accuracy | **0.980** (49/50) | High-fidelity intent classification |
 | Visual routing accuracy (`need_visual`) | **1.000** | Perfect slide/diagram intent detection |
 | **Hit@5** *(Primary Sufficiency)* | **0.980** | Ground-truth chunk present in top-5 for 98% of queries |
-| **MRR@5** *(Primary Rank-1)* | **0.788** | First relevant hit appears on average at rank ~1.27 |
+| **MRR@5** *(Primary Rank-1)* | **0.785** | Strict MRR@5 (reciprocal rank of first relevant hit, 0 beyond rank 5); unbounded MRR = 0.788 |
 | **Recall@5** *(Primary Coverage)* | **0.862** | 86.2% of all expected ground-truth chunks retrieved in top-5 |
 | **NDCG@5** *(Primary Ranking Order)* | **0.767** | Position-discounted multi-chunk ranking score |
 | Precision@5 *(Secondary IR)* | 0.280 | Standard IR $\text{hits}/5$; dataset ceiling is 0.352 (see note below) |
 | Ranking quality (rerank MRR) | **0.918** | Reranker pushes primary evidence to rank 1.09 |
 | Answer F1 | **0.459** | SQuAD-style token F1 score |
 | Keyword recall | **0.545** | Ground-truth key term coverage |
-| Citation completeness | **1.000** | Zero hallucinated citations (all citations grounded in prompt context) |
+| Citation completeness | **1.000** | Every cited source was present in the LLM prompt context (grounding check — does not verify entailment) |
 | Citation coverage | **0.927** | 92.7% of expected evidence cited in answers |
 | Mean end-to-end latency | 20.5 s (incl. rate-limiter pacing) | Under 1.5s with Groq cloud API inference |
 
-> **Note on Precision@5 (0.280) vs. Primary Metrics:** In single-lecture QA, ground-truth evidence is localized: 54% of benchmark questions (27/50) have only 1 relevant chunk, and 24% (12/50) have only 2. Consequently, the absolute mathematical ceiling for Precision@5 across this dataset is **0.352 (35.2%)**. The score of 0.280 represents **79.5% of the theoretical maximum achievable**. The primary retrieval quality metrics for LectureMIND are therefore **Hit@5 (0.980)**, **MRR@5 (0.788)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
+> **Provenance note:** This report was produced against the indexed package `lecture_cs162_v17` (gitignored, not shipped in this repository). The dataset's two original `chunk_000094` anchors never existed in the preserved package (which ends at `chunk_000093`) and were corrected to the evidence-bearing chunks `000090`/`000089`; the two affected samples (Mars Rover, Linux lines-of-code) scored against the corrected anchors would read Recall 1.0 / MRR 1.0 if the expected chunk was retrieved. Re-running the benchmark requires re-importing a package built from the same video.
 
-### Knowledge Graph Quality & Prerequisite Audit (Live Measured)
+> **Note on Precision@5 (0.280) vs. Primary Metrics:** In single-lecture QA, ground-truth evidence is localized: 54% of benchmark questions (27/50) have only 1 relevant chunk, and 24% (12/50) have only 2. Consequently, the absolute mathematical ceiling for Precision@5 across this dataset is **0.352 (35.2%)**. The score of 0.280 represents **79.5% of the theoretical maximum achievable**. The primary retrieval quality metrics for LectureMIND are therefore **Hit@5 (0.980)**, **MRR@5 (0.785)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
 
-Audited via `evaluation/knowledge_graph/audit_package.py` on the benchmark lecture against ground-truth labels (`evaluation/knowledge_graph/prerequisite_gold.json`):
+### Knowledge Graph Quality & Prerequisite Audit
+
+Audited via `evaluation/knowledge_graph/audit_package.py` on the short Transformer lecture against reference labels (`evaluation/knowledge_graph/prerequisite_gold.json`) — **LLM-assisted reference labels, pending human verification**, not an independent human gold standard. These scores apply to that lecture only: for other packages the auditor reports gold metrics as N/A (null) rather than misleading zeros, and the composite score counts only measurable components.
 
 | Metric | Measured Score | Diagnostic Context |
 |---|---|---|
-| **Prerequisite Strict Precision** | **77.8%** (7/9) | Strict 1-to-1 exact matching against gold labels |
-| **Prerequisite Strict Recall** | **70.0%** (7/10) | 100% of valid pedagogical dependencies recovered |
-| **Prerequisite Strict F1** | **73.7%** | Up from 60.9% baseline (+12.8% absolute gain) |
 | **Graph Topology (Strict DAG)** | **True** | Deterministic DFS cycle resolution guarantees acyclicity |
 | **Cycle Count** | **0** | Zero feedback loops in prerequisite graph |
 | **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |
-| **Pedagogical Relevance Rate** | **100%** | Zero physical components/losses mislabeled as prerequisites |
 | **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all entities |
+| Entity / Relation / Prereq reference F1 | See audit output | Not independently human-verified; see provenance note above |
 
 #### Multi-Lecture Extraction Yield (Full Cloud Execution)
 
@@ -630,13 +629,16 @@ Run the auditor on any knowledge package:
 
 ### RAGAS Answer Quality (requires a live server + LLM backend)
 ```bash
+pip install ragas datasets   # optional dependency group
 python -m evaluation.ragas.eval_ragas  # writes evaluation/reports/ragas_report.json
 ```
+> Requires `ragas` + `datasets` to be installed; without them the command refuses to run (it will not write placeholder scores). No RAGAS report exists yet in this repository.
 
 ### Load Testing (requires a live server)
 ```bash
 python -m evaluation.load_testing.load_test  # writes evaluation/reports/load_test_report.csv
 ```
+> Requires the FastAPI server to be running. No load-test report exists yet in this repository.
 
 ### Benchmark Dashboard (renders existing outputs — never re-runs evals)
 ```bash
@@ -651,7 +653,8 @@ python -m evaluation.dashboard.dashboard_generator
 | `routing_accuracy` | Planner | Fraction of queries routed to the correct retrieval strategy |
 | `visual_routing_accuracy` | Planner | Fraction of queries where `need_visual` matched the ground truth |
 | `hit@5` | Retrieval | Binary — did any relevant chunk appear in top-5? (Primary sufficiency metric) |
-| `mrr` | Retrieval | Mean Reciprocal Rank of first relevant chunk (Primary rank metric) |
+| `mrr_at_5` | Retrieval | Reciprocal Rank of first relevant chunk within top-5, 0 beyond rank 5 (Primary rank metric) |
+| `mrr` | Retrieval | Unbounded Mean Reciprocal Rank of first relevant chunk (diagnostic) |
 | `recall@5` | Retrieval | Fraction of relevant chunks that appear in top-5 (Primary coverage metric) |
 | `ndcg_at_5` | Retrieval | Normalized Discounted Cumulative Gain at rank 5 (Primary order metric) |
 | `precision@5` | Retrieval | Fraction of top-5 retrieved chunks that are relevant (Theoretical dataset ceiling: 0.352) |

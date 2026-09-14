@@ -30,7 +30,9 @@ jobs:
         run: python -m compileall schemas/ config.py local/ agent/ retrieval/ serving/ -q
 
       - name: Run unit tests
-        run: pytest tests/ cloud/tests/ local/tests/ agent/tests/ retrieval/tests/ serving/tests/ -v --tb=short
+        # evaluation/ is included: its tests are pure-unit (no live services
+        # required) and cover the metric/auditor implementations.
+        run: pytest tests/ cloud/tests/ local/tests/ agent/tests/ retrieval/tests/ serving/tests/ evaluation/tests/ -v --tb=short
 
   frontend-build:
     name: Frontend Build
@@ -68,30 +70,7 @@ jobs:
       - name: Build frontend image
         run: docker build -f docker/Dockerfile.frontend -t lecturemind-frontend .
 
-  retrieval-eval:
-    name: Retrieval Evaluation
-    runs-on: ubuntu-latest
-    needs: backend-tests
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install ranx==0.3.20
-
-      - name: Run retrieval evaluation
-        run: |
-          echo "Retrieval evaluation would run here with test dataset."
-          echo "Skipped in CI — requires running Neo4j/Qdrant."
-
-      - name: Check for regression
-        run: |
-          echo "Regression check would compare against baseline metrics."
-          echo "Pipeline fails if MRR drops below baseline threshold."
+  # NOTE: live retrieval/benchmark evaluation requires Qdrant + Neo4j + an LLM
+  # backend and is therefore NOT faked here. To run it in CI, wire up service
+  # containers and an evaluation profile explicitly — a job that only echoes
+  # "would run" provides false assurance.

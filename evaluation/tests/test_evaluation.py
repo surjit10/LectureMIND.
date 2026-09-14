@@ -145,6 +145,53 @@ class TestCitationMetrics:
         assert calculate_citation_completeness("", [], []) == 1.0
 
 
+class TestMRRTruncation:
+
+    def test_mrr_unbounded_counts_beyond_k(self):
+        """k=None (default): a hit at rank 8 contributes 1/8."""
+        from evaluation.metrics.retrieval_metrics import calculate_mrr
+        assert calculate_mrr(["x"], ["a", "b", "c", "d", "e", "f", "g", "x"]) == pytest.approx(1 / 8)
+
+    def test_mrr_at_5_zeroes_hits_beyond_rank_5(self):
+        """Strict MRR@5: a relevant chunk ranked 7th contributes 0, matching Hit@5."""
+        from evaluation.metrics.retrieval_metrics import calculate_mrr
+        assert calculate_mrr(["x"], ["a", "b", "c", "d", "e", "f", "g", "x"], k=5) == 0.0
+
+    def test_mrr_at_5_counts_within_rank_5(self):
+        from evaluation.metrics.retrieval_metrics import calculate_mrr
+        assert calculate_mrr(["x"], ["a", "b", "c", "x"], k=5) == pytest.approx(0.25)
+
+    def test_mrr_ignores_duplicate_retrievals(self):
+        """Duplicates must not shift reciprocal-rank positions."""
+        from evaluation.metrics.retrieval_metrics import calculate_mrr
+        # 'x' is genuinely the 3rd unique document.
+        assert calculate_mrr(["x"], ["a", "x", "x", "x"], k=None) == pytest.approx(0.5)
+
+
+class TestDeduplicatedMetrics:
+
+    def test_precision_at_5_constant_k_denominator(self):
+        """Standard P@k divides by k, not by the number of retrieved docs."""
+        from evaluation.metrics.retrieval_metrics import calculate_precision_at_k
+        assert calculate_precision_at_k(["x"], ["x", "y"], 5) == pytest.approx(1 / 5)
+
+    def test_precision_at_5_duplicates_counted_once(self):
+        from evaluation.metrics.retrieval_metrics import calculate_precision_at_k
+        assert calculate_precision_at_k(["x"], ["x", "x", "x", "x", "x"], 5) == pytest.approx(1 / 5)
+
+    def test_ndcg_duplicates_never_exceed_one(self):
+        from evaluation.metrics.retrieval_metrics import calculate_ndcg
+        assert calculate_ndcg(["x"], ["x", "x", "x", "x", "x"], 5) == pytest.approx(1.0)
+
+    def test_recall_dedup(self):
+        from evaluation.metrics.retrieval_metrics import calculate_recall_at_k
+        assert calculate_recall_at_k(["x", "y"], ["x", "x", "y"], 5) == 1.0
+
+    def test_hit_dedup(self):
+        from evaluation.metrics.retrieval_metrics import calculate_hit_at_k
+        assert calculate_hit_at_k(["x"], ["y", "y", "x"], 5) == 1.0
+
+
 class TestRPrecision:
 
     def test_r_precision_single_chunk_hit(self):
@@ -229,13 +276,20 @@ class TestDatasetLoaderVisualFlag:
         assert RetrievalRoute.graph_only.name == "graph_only"
 
     def test_dataset_ground_truth_anchors_exist(self):
-        """Every expected chunk ID in the QA set exists in the package."""
+        """Every expected chunk ID in the QA set exists in the preserved CS162 package.
+
+        Uses the read-only package snapshot in 0-output/ (the benchmark's
+        indexed package data/packages/lecture_cs162_v17 is gitignored and not
+        shipped, so the preserved ZIP is the source of truth for chunk IDs).
+        """
         import json
+        import zipfile
         from evaluation.dataset_loader import DatasetLoader
-        pkg = Path("data/packages/lecture_cs162_v17")
-        if not pkg.exists():
-            pytest.skip("lecture package not present")
-        mm = json.loads((pkg / "multimodal_chunks.json").read_text(encoding="utf-8"))
+        pkg_zip = Path("0-output/CS162_Lecture_1_What_is_an_Operating_System_720P_knowledge_package.zip")
+        if not pkg_zip.exists():
+            pytest.skip("preserved CS162 package ZIP not present")
+        with zipfile.ZipFile(pkg_zip) as zf:
+            mm = json.loads(zf.read("multimodal_chunks.json").decode("utf-8"))
         ids = {c["chunk_id"] for c in mm}
         samples = DatasetLoader("evaluation/datasets/cs162_lecture1_qa_50.json").load()
         assert len(samples) >= 50

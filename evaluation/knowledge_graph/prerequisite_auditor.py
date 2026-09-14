@@ -105,9 +105,18 @@ def audit_prerequisites(
     entities: List[Dict[str, Any]],
     chunks: List[Dict[str, Any]],
     gold_prerequisites_path: Optional[str | Path] = None,
+    non_pedagogical_target_markers: Optional[List[str]] = None,
 ) -> PrerequisiteAuditResult:
     """
     Perform a comprehensive read-only audit of prerequisite dependencies.
+
+    Args:
+        non_pedagogical_target_markers: Target-name substrings that mark an
+            edge as explanatory/associative rather than a genuine pedagogical
+            prerequisite (e.g. "eddy current" — a core-loss effect explained
+            by transformers, not a foundational dependency). Domain-specific
+            and optional: with an empty/None list no edge is flagged
+            non-pedagogical by name alone.
     """
     total = len(prerequisites)
     entity_map = {e.get("entity_id", ""): e.get("name", "") for e in entities}
@@ -126,6 +135,9 @@ def audit_prerequisites(
 
     issues: List[PrerequisiteIssue] = []
     edge_details: List[Dict[str, Any]] = []
+
+    if non_pedagogical_target_markers is None:
+        non_pedagogical_target_markers = ["eddy current"]
 
     directed_edges: List[Tuple[str, str]] = []
     self_loop_count = 0
@@ -189,9 +201,11 @@ def audit_prerequisites(
             ))
 
         # 4. Pedagogical vs Explanatory Distinction
-        # E.g. Transformer -> Eddy Currents is explanatory (loss mechanism), not a strict conceptual necessity
+        # E.g. Transformer -> Eddy Currents is explanatory (loss mechanism), not a strict conceptual necessity.
+        # The marker list is caller-supplied so this check stays domain-neutral;
+        # lectures without known non-pedagogical markers are never auto-flagged.
         is_explanatory_only = False
-        if "eddy current" in tgt_name.lower():
+        if any(marker.lower() in tgt_name.lower() for marker in non_pedagogical_target_markers):
             is_explanatory_only = True
             issues.append(PrerequisiteIssue(
                 source_name=src_name,

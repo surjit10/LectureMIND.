@@ -181,10 +181,12 @@ class BenchmarkRunner:
             except Exception:
                 pass  # Hybrid is best-effort — fall back to the dense pool.
             retrieved_ids = []
+            seen_retrieved = set()
             for r in combined_retrieved:
                 payload = r.get("payload", r)
                 cid = payload.get("chunk_id", r.get("chunk_id", ""))
-                if cid:
+                if cid and cid not in seen_retrieved:
+                    seen_retrieved.add(cid)
                     retrieved_ids.append(cid)
 
             expected_ids = sample.expected_chunk_ids
@@ -196,7 +198,7 @@ class BenchmarkRunner:
                 sample.expected_route, actual_route_str
             )
             # Visual routing: did the planner flag need_visual when the ground
-            # truth requires visual context?
+            # truth requires visual context? Binary labels: need_visual / no_visual.
             metrics["visual_routing_accuracy"] = planner_metrics.calculate_routing_accuracy(
                 "need_visual" if sample.need_visual else "no_visual",
                 "need_visual" if actual_need_visual else "no_visual",
@@ -206,6 +208,10 @@ class BenchmarkRunner:
             metrics["recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, retrieved_ids, 5)
             metrics["r_precision"] = retrieval_metrics.calculate_r_precision(expected_ids, retrieved_ids)
             metrics["hit_at_5"] = retrieval_metrics.calculate_hit_at_k(expected_ids, retrieved_ids, 5)
+            # Primary rank metric: strict MRR@5 — a relevant chunk ranked below
+            # position 5 contributes 0, matching Hit@5 semantics.
+            metrics["mrr_at_5"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids, k=5)
+            # Diagnostic: unbounded MRR over the whole ranked list.
             metrics["mrr"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids)
             metrics["ndcg_at_5"] = retrieval_metrics.calculate_ndcg(expected_ids, retrieved_ids, 5)
 

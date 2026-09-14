@@ -3,6 +3,7 @@
 
 import json
 from pathlib import Path
+import tempfile
 import pytest
 
 from evaluation.knowledge_graph.entity_auditor import audit_entities
@@ -318,3 +319,125 @@ def test_strict_bipartite_prerequisite_matching():
         assert res.fuzzy_prerequisite_recall is not None
     finally:
         Path(tf_path).unlink(missing_ok=True)
+
+
+def test_entity_gold_matching_is_one_to_one():
+    """Duplicate predictions of one gold concept must yield 1 TP + 1 FP.
+
+    Regression: the original many-to-one match counted every prediction that
+    hit any gold concept as a TP, inflating precision when the extractor
+    emitted near-duplicate entities.
+    """
+    gold_data = {
+        "metadata": {"annotation_method": "test"},
+        "entities": [
+            {"canonical_name": "Transformer", "aliases": ["Transformers"]},
+            {"canonical_name": "Coil", "aliases": []},
+        ],
+    }
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tf:
+        json.dump(gold_data, tf)
+        tf_path = tf.name
+
+    entities = [
+        {"entity_id": "e1", "name": "Transformer"},
+        {"entity_id": "e2", "name": "Transformers"},  # duplicate surface form of the same gold concept
+        {"entity_id": "e3", "name": "Coil"},
+    ]
+    try:
+        res = audit_entities(entities, relations=None, gold_entities_path=tf_path)
+        # 2 TPs (Transformer, Coil); 'Transformers' is an FP; both gold concepts matched.
+        assert res.tp_entity_count == 2
+        assert res.gold_entity_precision == round(2 / 3, 4)
+        assert res.gold_entity_recall == 1.0
+        assert res.matched_gold_entity_count == 2
+    finally:
+        Path(tf_path).unlink(missing_ok=True)
+
+
+def test_relation_fuzzy_match_claims_gold_once():
+    """Two near-duplicate fuzzy predictions must yield 1 TP + 1 unmatched FP."""
+    gold_data = {
+        "metadata": {"annotation_method": "test"},
+        "relations": [
+            {"source_name": "Alternating Current", "relation": "USED_BY", "target_name": "Transformer"},
+        ],
+    }
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tf:
+        json.dump(gold_data, tf)
+        tf_path = tf.name
+
+    entities = [
+        {"entity_id": "e1", "name": "Alternating Current"},
+        {"entity_id": "e2", "name": "Transformer"},
+        {"entity_id": "e3", "name": "Basic Transformer"},
+    ]
+    relations = [
+        {"relation_id": "r1", "source_entity_id": "e1", "relation": "USED_BY", "target_entity_id": "e2"},
+        {"relation_id": "r2", "source_entity_id": "e1", "relation": "USED_BY", "target_entity_id": "e3"},
+    ]
+    chunks = [
+        {"chunk_id": "c1", "text": "AC used by transformers.", "start_time": 0.0, "end_time": 1.0},
+    ]
+    try:
+        res = audit_relations(relations, entities, chunks, gold_relations_path=tf_path)
+        # r1 fuzzy-matches the single gold triple; r2 must NOT claim it again.
+        assert res.tp_relation_count == 1
+        assert res.unmatched_relation_count == 1
+    finally:
+        Path(tf_path).unlink(missing_ok=True)
+
+
+def test_relation_audit_custom_direction_rules_and_markers():
+    """Direction rules and non-factual markers are caller-supplied, not baked in."""
+    entities = [
+        {"entity_id": "e1", "name": "Alpha Concept"},
+        {"entity_id": "e2", "name": "Beta Concept"},
+    ]
+    relations = [
+        {"relation_id": "r1", "source_entity_id": "e1", "relation": "DERIVED_FROM", "target_entity_id": "e2"},
+    ]
+    chunks = [{"chunk_id": "c1", "text": "Alpha concept relates to beta concept.", "start_time": 0.0, "end_time": 1.0}]
+
+    # No custom rules/markers -> the generic pair is not flagged.
+    res_default = audit_relations(relations, entities, chunks)
+    assert res_default.suspicious_direction_count == 0
+    assert res_default.factually_correct_count == 1
+
+    # Caller supplies a matching rule -> flagged as suspicious.
+    res_rules = audit_relations(
+        relations, entities, chunks,
+        direction_rules=[{
+            "source": "alpha concept",
+            "relation": "DERIVED_FROM",
+            "target": "beta concept",
+            "reason": "test rule",
+        }],
+    )
+    assert res_rules.suspicious_direction_count == 1
+    assert res_rules.factually_correct_count == 0
+
+    # Caller supplies a non-factual marker that matches the source name.
+    res_marker = audit_relations(
+        relations, entities, chunks,
+        non_factual_name_markers=["alpha"],
+    )
+    assert res_marker.factually_correct_count == 0
+
+
+def test_prereq_audit_pedagogical_markers_are_caller_supplied():
+    """Without domain markers no edge is flagged non-pedagogical; with them it is."""
+    entities = [{"entity_id": "e1", "name": "A"}, {"entity_id": "e2", "name": "B"}]
+    chunks = [{"chunk_id": "c1", "text": "A and B", "start_time": 0.0, "end_time": 1.0}]
+    prereqs = [
+        {"source_name": "A", "target_name": "Eddy Currents", "confidence": 0.9,
+         "signals": {"graph": 1.0, "discourse": 0.0}},
+    ]
+
+    # Default markers include "eddy current" -> flagged.
+    res_default = audit_prerequisites(prereqs, entities, chunks)
+    assert res_default.pedagogical_count == 0
+
+    # Caller opts out -> treated as pedagogical.
+    res_none = audit_prerequisites(prereqs, entities, chunks, non_pedagogical_target_markers=[])
+    assert res_none.pedagogical_count == 1
