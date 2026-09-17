@@ -23,7 +23,7 @@
       "display_name": "CS162 Lecture 1 What is an Operating System 720P",
       "duration": 4982.08,
       "status": "READY",
-      "chunk_count": 93,
+      "chunk_count": 98,
       "segment_count": 14,
       "package_path": "/home/surjit/Desktop/lecuremid/0-output/CS162_Lecture_1_What_is_an_Operating_System_720P_knowledge_package.zip",
       "created_at": "2026-09-14T13:07:15.220767+00:00",
@@ -33,7 +33,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "0-output-2026-09-13",
-      "package_sha256": "d4ca6c11fc885ca9a3f36c5e684bd415a3ad059fe1995ae637966a66d06ab288"
+      "package_sha256": "a8aadc312e6ad863dabf423cf679a348d072d021fbe4a9a70493eefb1ec75529"
     },
     "MIT_Introduction_to_Deep_Learning_6_S191_720P": {
       "lecture_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P",
@@ -41,7 +41,7 @@
       "display_name": "MIT Introduction to Deep Learning 6 S191 720P",
       "duration": 3375.7390333333333,
       "status": "READY",
-      "chunk_count": 69,
+      "chunk_count": 70,
       "segment_count": 7,
       "package_path": "/home/surjit/Desktop/lecuremid/0-output/MIT_Introduction_to_Deep_Learning_6_S191_720P_knowledge_package.zip",
       "created_at": "2026-09-14T13:07:15.222656+00:00",
@@ -51,7 +51,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "0-output-2026-09-13",
-      "package_sha256": "34eda4df27e5aff4029d6ff401e2da6240e693be64c1e4199b74b6f9647ee606"
+      "package_sha256": "f98e77fd5321f052522e1ef8788dae6b601f1120a584961464522f791ac0e1f6"
     },
     "Self_Attention_in_Transformers": {
       "lecture_id": "Self_Attention_in_Transformers",
@@ -59,7 +59,7 @@
       "display_name": "Self Attention in Transformers",
       "duration": 2627.52,
       "status": "READY",
-      "chunk_count": 46,
+      "chunk_count": 48,
       "segment_count": 4,
       "package_path": "/home/surjit/Desktop/lecuremid/0-output/Self_Attention_in_Transformers_knowledge_package.zip",
       "created_at": "2026-09-14T13:07:15.223867+00:00",
@@ -69,7 +69,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "0-output-2026-09-13",
-      "package_sha256": "2af03b7f0e9f2fde2bf8efe850f28403a8f37b42ac81eb7c0f96e40afec97c3d"
+      "package_sha256": "476f2af49b500aeec253052039e80ee806c0cbebf3adef0ff21e959f06993f85"
     }
   },
   "last_active_lecture_id": "lecture_092f861b",

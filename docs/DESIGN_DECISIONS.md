@@ -285,7 +285,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Lecture Isolation Guarantees** | Strict `(entity_id, lecture_id)` scoping in Neo4j and Qdrant queries | Guarantees zero cross-contamination between courses and lectures |
 | **Evidence Gating** | Strict verification against retrieved chunks before generating answers | Prevents hallucinations; ensures 100% citation completeness |
 | **Prerequisite DAG Guarantees** | Deterministic DFS cycle resolution (`cloud/extraction/prerequisite_extractor.py`) | Enforces strictly acyclic prerequisite graphs (0 cycles, 0 self-loops) for valid curriculum sequencing |
-| **Referential Integrity** | Pre-export validation against extracted entity indices (`cloud/packaging/validator.py`) | Enforces 0.0% dangling relations across all processed lectures (395/395 verified relations) |
+| **Referential Integrity** | Pre-export validation against extracted entity indices (`cloud/packaging/validator.py`) | Enforces 0.0% dangling relations across all processed lectures (262/262 verified relations in `0-output/`) |
 
 ---
 
@@ -316,7 +316,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Zero-restart provider switching** | LLM provider can switch from local to cloud mid-session via a single API call |
 | **Offline-first capability** | The entire local server runs without any cloud connectivity once packages are imported |
 | **Inspectable pipeline state** | `QueryState` makes every intermediate result available — critical for evaluation and debugging |
-| **Portable knowledge format** | Knowledge Packages use only open, standard formats (NumPy, JSON, ZIP) — **202–428 KB** replacing 1+ GB video |
+| **Portable knowledge format** | Knowledge Packages use only open, standard formats (NumPy, JSON, ZIP) — **208–437 KB** replacing 1+ GB video |
 | **Dual retrieval modes** | GraphRAG handles both semantic and relational queries — covering the full student query space |
 | **Strict Graph Topology** | Prerequisite graphs are strictly acyclic DAGs with verified 77.8% precision / 70.0% recall |
 | **Modular evaluation framework** | Independent benchmark and audit suites (`benchmark_runner.py` and `audit_package.py`) |
@@ -342,9 +342,9 @@ Extract prerequisite dependencies between entities using a composite scoring fun
 Remap extracted entities into short token aliases (`E1, E2, ... En`) within sliding chunk windows before passing to the relation extraction prompt, then resolve them back to canonical names.
 
 ### Rationale
-- Full 85-minute lectures (e.g., CS162 with 138 entities and 93 chunks) exceed standard prompt token limits if all entity names and descriptions are repeatedly serialized.
+- Full 85-minute lectures (e.g., CS162 with 158 entities and 98 chunks) exceed standard prompt token limits if all entity names and descriptions are repeatedly serialized.
 - Legacy extraction without alias remapping suffered token truncation, collapsing extracted relations from 189 down to only 20.
-- Compact alias remapping reduces prompt token usage by ~65%, enabling dense relation extraction (395 relations across 3 lectures) with zero dangling edges.
+- Compact alias remapping reduces prompt token usage by ~65%, enabling dense relation extraction (262 relations across 3 lectures in `0-output/`) with zero dangling edges.
 
 ---
 

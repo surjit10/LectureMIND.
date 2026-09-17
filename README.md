@@ -615,10 +615,20 @@ Results across three full-length lectures processed with sliding-window chunking
 
 | Lecture Package | Duration / Chunks | Extracted Entities | Extracted Relations | Inferred Prerequisites | DAG Status |
 |---|---|---|---|---|---|
-| **CS162 Operating Systems** | ~85 min (93 chunks) | **138** | **189** | **27** | **Strict DAG (0 cycles)** |
-| **MIT 6.S191 Deep Learning** | ~60 min (69 chunks) | **78** | **92** | **11** | **Strict DAG (0 cycles)** |
-| **Self-Attention in Transformers**| ~40 min (46 chunks) | **60** | **114** | **3** | **Strict DAG (0 cycles)** |
-| **Total Across Corpus** | **208 chunks** | **276 entities** | **395 relations** | **41 prerequisites** | **100% Acyclic** |
+| **CS162 Operating Systems** | ~83 min (98 chunks) | **158** | **103** | **29** | **Strict DAG (0 cycles)** |
+| **MIT 6.S191 Deep Learning** | ~56 min (70 chunks) | **87** | **94** | **15** | **Strict DAG (0 cycles)** |
+| **Self-Attention in Transformers**| ~44 min (48 chunks) | **82** | **65** | **14** | **Strict DAG (0 cycles)** |
+| **Total Across Corpus** | **216 chunks** | **327 entities** | **262 relations** | **58 prerequisites** | **100% Acyclic** |
+
+#### Downstream GraphRAG Benchmark (CS162 Operating Systems)
+
+Evaluated via `evaluation/knowledge_graph/graphrag_evaluator.py`:
+
+| Retrieval Route | Hit@1 | Hit@3 | Hit@5 | Recall@5 | Precision@5 | MRR |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BM25 / Lexical Retrieval** | 0.25 | 0.42 | 0.50 | 0.403 | 0.117 | 0.389 |
+| **Graph-Only RAG** | 0.08 | 0.42 | 0.42 | 0.236 | 0.100 | 0.280 |
+| **Hybrid RAG (RRF)** | **0.25** | **0.42** | **0.67** | **0.486** | **0.167** | **0.420** |
 
 Run the auditor on any knowledge package:
 ```bash

@@ -9,8 +9,11 @@
 #   "relation_id": "rel_001",
 #   "source_entity_id": "lec_001_entity_000012",
 #   "relation": "PREREQUISITE_OF",
-#   "target_entity_id": "lec_001_entity_000037"
+#   "target_entity_id": "lec_001_entity_000037",
+#   "evidence": "Virtual memory is a prerequisite for understanding address translation."  # optional
 # }
+
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 from .enums import RelationType
@@ -23,6 +26,9 @@ class Relation(BaseModel):
     source_entity_id: str
     relation: RelationType
     target_entity_id: str
+    # Verbatim transcript sentence verified against the lecture source in Stage A9.
+    # None for relations extracted before evidence-gating was introduced.
+    evidence: Optional[str] = None
 
     @field_validator("relation_id", "source_entity_id", "target_entity_id")
     @classmethod

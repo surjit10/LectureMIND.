@@ -255,18 +255,18 @@ Graph paths are rendered into the LLM context (`[Graph] EntityA -RELATION-> Enti
 
 Audited via `evaluation/knowledge_graph/audit_package.py`. Reference labels (`evaluation/knowledge_graph/*_gold.json`) are **LLM-assisted labels pending human verification**, annotated for the 6.5-minute **Transformer lecture only** — the auditor computes gold metrics **only when the audited package matches that lecture** (`gold_applies` flag); for every other package gold metrics are reported as `null`, and the composite score counts only measurable components.
 
-Regenerated audits (2026-09-14, honest one-to-one matching, no fallback substitution, computed from the **latest `0-output/` packages**):
+Regenerated audits (2026-09-15, honest one-to-one matching, no fallback substitution, computed from the **latest `0-output/` packages**):
 
 | Package | Entity F1 | Relation F1 | Prereq F1 | DAG / cycles | Prereq edges | Composite |
 |---|---|---|---|---|---|---|
 | Transformer (gold applies) | **40.0%** (P 55.6 / R 31.3) | **0.0%** (0/5) | **0.0%** (0/3) | True / 0 | 3 | 32.1 / 100 |
-| CS162 (93 chunks) | n/a | n/a | n/a | True / 0 | 27 | 28.0 / 45 |
-| MIT 6.S191 (69 chunks) | n/a | n/a | n/a | True / 0 | 11 | 24.6 / 45 |
-| Self-Attention (46 chunks) | n/a | n/a | n/a | True / 0 | 3 | 26.9 / 45 |
+| CS162 (98 chunks) | n/a | n/a | n/a | True / 0 | 29 | **37.4 / 55** |
+| MIT 6.S191 (70 chunks) | n/a | n/a | n/a | True / 0 | 15 | **25.0 / 45** |
+| Self-Attention (48 chunks) | n/a | n/a | n/a | True / 0 | 14 | **27.2 / 45** |
 
-All four audits were computed from the current packages in `0-output/` (the CS162 serving package `lecture_092f861b` is byte-identical to `0-output/CS162_...zip`), and all 50 benchmark anchor chunk IDs verify against that package.
+All four audits were computed from the current packages in `0-output/` (the CS162 package is verified with 98 chunks, and all routing and QA benchmark anchor chunk IDs verify against that package).
 
-Structural properties measured across all audited packages (gold-independent): strict DAG, 0 cycles, 0 self-loops, 0.0% dangling relations. CS162 additionally has 27/27 pedagogically supported prerequisites.
+Structural properties measured across all audited packages (gold-independent): strict DAG, 0 cycles, 0 self-loops, 0.0% dangling relations. CS162 additionally has 29/29 pedagogically supported prerequisites.
 
 Historical audit of the (no-longer-preserved) original benchmark package, retained for traceability:
 
@@ -280,11 +280,6 @@ Historical audit of the (no-longer-preserved) original benchmark package, retain
 | **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |
 | **Pedagogical Relevance Rate** | **100%** | Zero physical components/losses mislabeled as prerequisites |
 | **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all extracted entities |
-| **Graph Topology (Strict DAG)** | **True** | Deterministic DFS cycle resolution guarantees acyclicity |
-| **Cycle Count** | **0** | Zero feedback loops in prerequisite graph |
-| **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |
-| **Pedagogical Relevance Rate** | **100%** | Zero physical components/losses mislabeled as prerequisites |
-| **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all extracted entities |
 
 ### Multi-Lecture Extraction Yield (Full Cloud Execution)
 
@@ -292,10 +287,20 @@ Empirical extraction yield across three complete production lecture packages in 
 
 | Lecture Package | Duration / Chunks | Extracted Entities | Extracted Relations | Inferred Prerequisites | DAG Status | Package Size |
 |---|---|---|---|---|---|---|
-| **CS162 Operating Systems** | ~85 min (93 chunks) | **138** | **189** | **27** | **Strict DAG (0 cycles)** | **428 KB** |
-| **MIT 6.S191 Deep Learning** | ~60 min (69 chunks) | **78** | **92** | **11** | **Strict DAG (0 cycles)** | **308 KB** |
-| **Self-Attention in Transformers**| ~40 min (46 chunks) | **60** | **114** | **3** | **Strict DAG (0 cycles)** | **202 KB** |
-| **Total Across Corpus** | **208 chunks** | **276 entities** | **395 relations** | **41 prerequisites** | **100% Acyclic** | **938 KB total** |
+| **CS162 Operating Systems** | ~83 min (98 chunks) | **158** | **103** | **29** | **Strict DAG (0 cycles)** | **437 KB** |
+| **MIT 6.S191 Deep Learning** | ~56 min (70 chunks) | **87** | **94** | **15** | **Strict DAG (0 cycles)** | **312 KB** |
+| **Self-Attention in Transformers**| ~44 min (48 chunks) | **82** | **65** | **14** | **Strict DAG (0 cycles)** | **208 KB** |
+| **Total Across Corpus** | **216 chunks** | **327 entities** | **262 relations** | **58 prerequisites** | **100% Acyclic** | **957 KB total** |
+
+### Downstream GraphRAG Benchmark Evaluation (CS162)
+
+Evaluated via `evaluation/knowledge_graph/graphrag_evaluator.py`:
+
+| Retrieval Route | Hit@1 | Hit@3 | Hit@5 | Recall@5 | Precision@5 | MRR |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BM25 / Lexical Retrieval** | 0.25 | 0.42 | 0.50 | 0.403 | 0.117 | 0.389 |
+| **Graph-Only RAG** | 0.08 | 0.42 | 0.42 | 0.236 | 0.100 | 0.280 |
+| **Hybrid RAG (RRF)** | **0.25** | **0.42** | **0.67** | **0.486** | **0.167** | **0.420** |
 
 ---
 

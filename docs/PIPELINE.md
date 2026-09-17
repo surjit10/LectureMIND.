@@ -164,7 +164,7 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
 3. **Structured Prompting with Schema Constraints:** The LLM outputs relation triples using compact aliases (`E1 -> REL -> E2`), which are dynamically remapped to canonical entity names.
 4. **Pedagogical Exclusion Rules:** Strict filters reject low-signal or non-pedagogical relations (e.g., trivial mentions or physical slide layout).
 5. **8192-Token Retry Budget:** Dynamic retry mechanism recovers valid relations even under dense extraction conditions.
-6. **Referential Integrity Enforcement:** Every relation endpoint is verified against `entities.json`, ensuring a **0.0% dangling relation rate** (395 verified relations across benchmark lectures).
+6. **Referential Integrity Enforcement:** Every relation endpoint is verified against `entities.json`, ensuring a **0.0% dangling relation rate** (262 verified relations across benchmark lectures in `0-output/`).
 
 **Why it exists:** The knowledge graph enables relationship-aware traversal — answering "How does concept A relate to concept C?" by traversing graph edges rather than relying on textual similarity alone.
 
@@ -578,7 +578,7 @@ The route returns JSON:
 
 [Step 3] Relation Referential Integrity Audit
          • Validates that source and target of every relation exist in entities.json
-         • Measured: 0.0% dangling relation rate (395/395 valid across 3 benchmark lectures)
+         • Measured: 0.0% dangling relation rate (262/262 valid across 3 benchmark lectures in `0-output/`)
          • Audits inverse consistency and schema type compliance
 
 [Step 4] Bipartite Prerequisite Matching against Gold Labels
