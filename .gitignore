@@ -195,3 +195,4 @@ Thumbs.db
 # ------------------------------------------------------------
 0-not-required/
 outputs/kg_quality_*/
+outputs/kg_quality/*_test/

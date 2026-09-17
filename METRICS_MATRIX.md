@@ -28,9 +28,9 @@
 | Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
 | Reranker | Global cross-encoder `BAAI/bge-reranker-base` (XLM-R), CPU, process singleton; dynamic int8 quantization (`RERANKER_QUANTIZE`) with automatic FP32 fallback | `rerank_service.py`, `reranker_loader.py`, `app.py` |
 | Hybrid retrieval | Dense (`bge-large-en-v1.5`) + BM25 lexical candidates fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking; enabled by default (`ENABLE_HYBRID_RETRIEVAL`) | `retrieval/hybrid/bm25_retriever.py`, `config.py` |
-| Knowledge graph | Production run: CS162 (138 entities / 189 relations), MIT (78 entities / 92 relations), Self-Attention (60 entities / 114 relations); **395 total relations**, 0 dangling — all re-verified by audit against the current packages in `0-output/` | Kaggle package audit (`audit_package.py`) |
-| Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 27 prerequisites (CS162), 11 (MIT), 3 (Self-Attention), 0 cycles / 0 self-loops across all packages (re-verified). Reference-label F1 is only defined for the Transformer lecture (the sole annotated one) — see §2.6 | `evaluation/knowledge_graph/` |
-| Content scale | Ingested long-lecture packages (46–93 chunks / 40–85 min); package size: **202–428 KB** (replacing 1+ GB video) | `0-output/` |
+| Knowledge graph | Production run: CS162 (158 entities / 103 relations), MIT (87 entities / 94 relations), Self-Attention (82 entities / 65 relations); **262 total relations**, 0 dangling — all re-verified by audit against the current packages in `0-output/` | Kaggle package audit (`audit_package.py`) |
+| Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 29 prerequisites (CS162), 15 (MIT), 14 (Self-Attention), **58 total prerequisites**, 0 cycles / 0 self-loops across all packages (re-verified). Reference-label F1 is only defined for the Transformer lecture (the sole annotated one) — see §2.6 | `evaluation/knowledge_graph/` |
+| Content scale | Ingested long-lecture packages (48–98 chunks / 44–83 min); package size: **208–437 KB** (replacing 1+ GB video) | `0-output/` |
 | Automated tests | **580 passing, 10 skipped** (skips: optional heavy deps absent locally / live-server scripts moved to `scripts/manual/`) — planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction | `pytest` |
 
 ---
@@ -122,14 +122,14 @@ Citation completeness of 1.0 means every cited source was actually present in th
 
 ### 2.5 Storage & compression
 
-LectureMIND replaces raw video with structured knowledge. An **85-minute, 720p lecture (~1.2 GB at typical encoding)** compresses into a **~428 KB knowledge package** (~2,800× smaller):
+LectureMIND replaces raw video with structured knowledge. An **85-minute, 720p lecture (~1.2 GB at typical encoding)** compresses into a **~437 KB knowledge package** (~2,800× smaller):
 
 | Artifact | Size | Notes |
 |---|---|---|
 | Source video (85 min, 720p) | ≈ 1.2 GB | Not stored or shipped |
-| CS162 Knowledge package (`.zip`) | **428 KB** | 93 chunks, 138 entities, 189 relations, 27 prerequisites (~2,800× smaller than video) |
-| MIT 6.S191 Knowledge package (`.zip`) | **308 KB** | 69 chunks, 78 entities, 92 relations, 11 prerequisites |
-| Self-Attention Knowledge package (`.zip`)| **202 KB** | 46 chunks, 60 entities, 114 relations, 3 prerequisites |
+| CS162 Knowledge package (`.zip`) | **437 KB** | 98 chunks, 158 entities, 103 relations, 29 prerequisites (~2,800× smaller than video) |
+| MIT 6.S191 Knowledge package (`.zip`) | **312 KB** | 70 chunks, 87 entities, 94 relations, 15 prerequisites |
+| Self-Attention Knowledge package (`.zip`)| **208 KB** | 48 chunks, 82 entities, 65 relations, 14 prerequisites |
 | Per-query LLM context | ≈ 3.5 KB | the only text the model reads per question |
 | Code snapshot (`dist/lecturemind-code-kaggle.zip`) | **131.89 KB** | 64 files, 335 KB of source → 2.5× zip ratio |
 | Whole corpus (725 packages) | ≈ 85 MB | replaces an estimated 100+ GB of source video |
@@ -138,7 +138,7 @@ This is the storage story the architecture is built around: the expensive, bulky
 
 ### 2.6 Knowledge Graph Quality & Prerequisite DAG Metrics (Live Audited)
 
-Source: `evaluation/knowledge_graph/audit_package.py` — audits regenerated 2026-09-14 from the **latest packages in `0-output/`** (Transformer lecture + CS162/MIT/Self-Attention long-lecture packages).
+Source: `evaluation/knowledge_graph/audit_package.py` — audits regenerated 2026-09-15 from the **latest packages in `0-output/`** (Transformer lecture + CS162/MIT/Self-Attention long-lecture packages).
 
 > **Applicability warning:** the reference labels in `evaluation/knowledge_graph/*_gold.json` are **LLM-assisted labels pending human verification**, and they were annotated for the **6.5-minute Transformer lecture only**. Gold-reference metrics are therefore computed **only** where the gold lecture matches the audited package (`gold_applies` flag in `outputs/*/metrics.json`); for all other lectures they are reported as `null` — never as 0.0 and never replaced by optimistic fallbacks.
 
@@ -152,43 +152,52 @@ Source: `evaluation/knowledge_graph/audit_package.py` — audits regenerated 202
 
 #### Structural metrics (measured, gold-independent — all audited packages, latest `0-output/` versions)
 
-| Metric | CS162 (93 chunks) | MIT (69 chunks) | Self-Attention (46 chunks) | Transformer (9 chunks) |
+| Metric | CS162 (98 chunks) | MIT (70 chunks) | Self-Attention (48 chunks) | Transformer (9 chunks) |
 |---|---|---|---|---|
 | Strict DAG guarantee | True | True | True | True |
 | Cycle count | 0 | 0 | 0 | 0 |
 | Self-loop count | 0 | 0 | 0 | 0 |
-| Relations (0 dangling) | 189 | 92 | 114 | 5 |
-| Prerequisite edges (DAG) | 27 | 11 | 3 | 3 |
-| Pedagogically supported prerequisites | 27/27 (100%) | n/a | n/a | n/a |
-| Composite diagnostic (only measurable components counted; gold-dependent prereq component excluded when no reference labels apply) | 28.0 / 45 | 24.6 / 45 | 26.9 / 45 | 32.1 / 100 |
-| — of which graph coherence (direct-evidence rate + entity participation, 10 pts) | 2.8 | 3.6 | 3.5 | 7.4 |
+| Relations (0 dangling) | 103 | 94 | 65 | 5 |
+| Prerequisite edges (DAG) | 29 | 15 | 14 | 3 |
+| Pedagogically supported prerequisites | 29/29 (100%) | n/a | n/a | n/a |
+| Composite diagnostic (only measurable components counted) | **37.4 / 55** | **25.0 / 45** | **27.2 / 45** | 32.1 / 100 |
+| — of which graph coherence (direct-evidence rate + entity participation, 10 pts) | 2.15 | 3.31 | 2.15 | 7.4 |
+| — of which downstream GraphRAG usefulness (Recall@5 contribution, 10 pts) | 4.86 | n/a | n/a | n/a |
 
-All four audits were computed from the current packages in `0-output/`; the CS162 serving package (`lecture_092f861b`) is byte-identical to `0-output/CS162_...zip`, and all 50 benchmark anchor chunk IDs verify against that package.
+All four audits were computed from the current packages in `0-output/`; the CS162 package is verified with 98 chunks, and all routing and QA benchmark anchor chunk IDs verify against that package.
 
-Provenance note (added 2026-09-14): every number in this file traces to either (a) a stored benchmark report generated by the code in this repo (`evaluation/outputs/`), (b) a regenerated audit artifact (`outputs/kg_quality*/`), or (c) a live execution recorded at the time of measurement. The MIT/Self-Attention audits were regenerated from the latest packages in `0-output/` and confirm the published extraction counts (92/114 relations, 11/3 prerequisites).
+Provenance note (updated 2026-09-15): every number in this file traces to either (a) a stored benchmark report generated by the code in this repo (`evaluation/outputs/`), (b) a regenerated audit artifact (`outputs/kg_quality_latest_0output/`), or (c) a live execution recorded at the time of measurement.
 
-**Honest read of the gold scores:** with one-to-one entity matching and no fallback substitution, the sole annotated lecture scores Entity F1 0.40 and Relation/Prerequisite F1 0.00 against its own LLM-assisted reference labels. These numbers are the current truth; they will only become meaningful after the reference labels are (a) extended to the other lectures and (b) verified by human domain experts.
+#### Downstream GraphRAG Retrieval Benchmark (CS162 — 12 Gold Routing Queries)
+
+Evaluated via `evaluation/knowledge_graph/graphrag_evaluator.py` against `0-output/CS162_...zip`:
+
+| Retrieval Route | Hit@1 | Hit@3 | Hit@5 | Recall@5 | Precision@5 | MRR |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **BM25 / Lexical Retrieval** | 0.2500 | 0.4167 | 0.5000 | 0.4028 | 0.1167 | 0.3885 |
+| **Graph-Only RAG** | 0.0833 | 0.4167 | 0.4167 | 0.2361 | 0.1000 | 0.2795 |
+| **Hybrid RAG (RRF)** | **0.2500** | **0.4167** | **0.6667** | **0.4861** | **0.1667** | **0.4204** |
 
 #### Multi-Lecture Extraction Yield (Full Cloud Execution)
 
-Comparison between legacy run (truncated by token caps) and the current sliding-window + compact alias pipeline:
+Empirical extraction yield across three complete production lecture packages in `0-output/` using sliding-window chunking, compact entity alias remapping (`E1, E2...`), and 8192-token retry budgets:
 
-| Lecture Package | Duration | Entities (Old $\to$ New) | Relations (Old $\to$ New) | Inferred Prerequisites | Extraction Gain |
-|---|---|---|---|---|---|
-| **CS162 Operating Systems** | ~85 min (93 chunks) | $128 \to \mathbf{138}$ | $20 \to \mathbf{189}$ | **27** | **+845% (+169 relations)** |
-| **MIT 6.S191 Deep Learning** | ~60 min (69 chunks) | $75 \to \mathbf{78}$ | $20 \to \mathbf{92}$ | **11** | **+360% (+72 relations)** |
-| **Self-Attention in Transformers**| ~40 min (46 chunks) | $43 \to \mathbf{60}$ | $10 \to \mathbf{114}$ | **3** | **+1040% (+104 relations)** |
-| **Total Across Corpus** | **208 chunks** | **276 entities** | **395 relations** | **41 prerequisites** | **+690% (+345 relations)** |
+| Lecture Package | Duration / Chunks | Extracted Entities | Extracted Relations | Inferred Prerequisites | DAG Status | Package Size |
+|---|---|---|---|---|---|---|
+| **CS162 Operating Systems** | ~83 min (98 chunks) | **158** | **103** | **29** | **Strict DAG (0 cycles)** | **437 KB** |
+| **MIT 6.S191 Deep Learning** | ~56 min (70 chunks) | **87** | **94** | **15** | **Strict DAG (0 cycles)** | **312 KB** |
+| **Self-Attention in Transformers**| ~44 min (48 chunks) | **82** | **65** | **14** | **Strict DAG (0 cycles)** | **208 KB** |
+| **Total Across Corpus** | **216 chunks** | **327 entities** | **262 relations** | **58 prerequisites** | **100% Acyclic** | **957 KB total** |
 
 ### 2.7 Scale & content coverage
 
 | Metric | Value |
 |---|---|
 | Videos ingested | 725 knowledge packages on disk (Kaggle-produced) |
-| Avg chunks / lecture | Long lectures: **46–93 multimodal chunks / 4–14 segments** |
+| Avg chunks / lecture | Long lectures: **48–98 multimodal chunks / 6–13 segments** |
 | Transcript coverage | 100% of chunks carry transcript |
 | Visual + OCR coverage | Fused at slide keyframes; 5 of 50 benchmark questions target slide content |
-| Graph density | 276 entities / 395 relations across 3 recent full lectures; 0.0% dangling edges |
+| Graph density | 327 entities / 262 relations across 3 recent full lectures; 0.0% dangling edges |
 
 ---
 

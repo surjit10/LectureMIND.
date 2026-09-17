@@ -94,7 +94,7 @@ class SimpleGraphRetriever:
             eid = e["entity_id"]
             ename_low = e["name"].lower()
             for c in chunks:
-                txt = ((c.get("text") or "") + " " + (c.get("ocr_text") or "")).lower()
+                txt = ((c.get("text") or c.get("transcript") or "") + " " + (c.get("ocr_text") or "")).lower()
                 if ename_low in txt:
                     self.entity_chunks[eid].add(c["chunk_id"])
 

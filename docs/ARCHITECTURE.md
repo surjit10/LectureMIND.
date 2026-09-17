@@ -146,7 +146,7 @@ Runs on GPU-equipped infrastructure (Kaggle). Stages (A1–C2):
   ±2 s of keyframes → `multimodal_chunks.json`
 - **A7 Segmentation** — Qwen2.5-7B-Instruct → `segments.json`, `chunk_segment_map.json`
 - **A8 Entity Extraction** — Qwen2.5-7B-Instruct → `entities.json` (typed domain concepts)
-- **A9 Relation Extraction** — Qwen2.5-7B-Instruct with sliding-window chunk context, compact entity alias remapping (`E1, E2...`), 8192-token retry budgets, and strict pedagogical exclusion rules → `relations.json` (395 verified relations across benchmark lectures, 0.0% dangling edges)
+- **A9 Relation Extraction** — Qwen2.5-7B-Instruct with sliding-window chunk context, compact entity alias remapping (`E1, E2...`), 8192-token retry budgets, and strict pedagogical exclusion rules → `relations.json` (262 verified relations across benchmark lectures in `0-output/`, 0.0% dangling edges)
 - **A10 Prerequisite Inference & DAG Enforcement** — Multi-Signal Fuser (`cloud/extraction/prerequisite_extractor.py` and `local/loaders/prerequisite_enricher.py`) combining lexical mentions, segment containment, temporal precedence, negative lookbehinds, and pedagogical inversion, followed by deterministic DFS cycle resolution → `prerequisites.json` (guaranteed strict DAG, 0 cycles, 77.8% precision / 70.0% recall)
 - **B0 Embeddings** — `BAAI/bge-large-en-v1.5` (1024-dim) → `embeddings.npy`, `embedding_ids.json`
 - **B1 Triplet Generation** — `triplets.json` (reranker training data)
