@@ -208,7 +208,7 @@ Empirical extraction yield across three complete production lecture packages in 
 | Multimodal capture (audio + slide + OCR) | Yes — audio 100% + keyframe slides/OCR | No — text-only | Partial — transcript only | No — cannot ingest |
 | Timestamped, chunk-level grounding | Yes — every chunk carries timestamp | No | No | No |
 | Knowledge-graph reasoning (entities/relations/traversal) | Yes — 128 entities / 20 relations (demo), 930 / 127 collection, 6 relation types | No | No | No |
-| Hybrid retrieval (dense + BM25/RRF + graph + cross-encoder rerank) | Yes — 0.997 MRR on lecture triplets; 50-set MRR@5 0.788 | Partial — top-k only, no rerank | No | No |
+| Hybrid retrieval (dense + BM25/RRF + graph + cross-encoder rerank) | Yes — 50-set MRR@5 0.788 on QA; 0.997 pairwise reranker training convergence (see §2.1) | Partial — top-k only, no rerank | No | No |
 | Lecture-wide synthesis (summary/notes/quiz) | Yes — 8-bucket temporal sampling, 56-source summary | No — single-pass top-k | Partial — chapter list only | No |
 | Hallucination control (evidence-gated, source-only) | Yes — live-verified refusal | No — invents freely | No | No |
 | Cross-lecture data isolation | Yes — hard guards, tested | Partial | n/a | n/a |
@@ -218,7 +218,7 @@ Empirical extraction yield across three complete production lecture packages in 
 | Measured eval numbers to show | Yes — retrieval/rerank + live QA + latency + graph/visual types | Partial | No | No |
 | Source-video footprint | 83-min 720p lecture → **436 KB knowledge package** (~2,800× smaller); corpus ≈ 85 MB for 725 lectures | Stores raw video | Stores raw video | n/a |
 
-**The one-line pitch this matrix supports:** *LectureMIND is a full-stack, private, multimodal GraphRAG system — with timestamped grounding, graph reasoning, lecture-wide synthesis, and hallucination controls — that has an evaluation harness and measured ranking metrics (0.997 MRR) out of the box.*
+**The one-line pitch this matrix supports:** *LectureMIND is a full-stack, private, multimodal GraphRAG system — with timestamped grounding, graph reasoning, lecture-wide synthesis, and hallucination controls — that has an evaluation harness and measured ranking metrics (MRR@5 0.788 on 50-question QA; 0.997 pairwise training convergence) out of the box.*
 
 ---
 
