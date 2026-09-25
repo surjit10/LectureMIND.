@@ -9,6 +9,9 @@ from evaluation.evaluate_graph_rag import evaluate_graph_benchmark, generate_gra
 
 def test_evaluate_graph_benchmark():
     dataset_path = Path("evaluation/datasets/cs162_lecture1_graph_qa.json")
+    pkg_dir = Path("data/packages/lecture_092f861b")
+    if not (pkg_dir / "entities.json").exists():
+        pytest.skip("CS162 lecture package not present (gitignored in CI)")
     assert dataset_path.exists(), "Graph benchmark dataset must exist"
 
     results = evaluate_graph_benchmark(dataset_path)
@@ -27,11 +30,16 @@ def test_evaluate_graph_benchmark():
 
 
 def test_generate_graph_markdown_report():
-    dataset_path = Path("evaluation/datasets/cs162_lecture1_graph_qa.json")
-    results = evaluate_graph_benchmark(dataset_path)
+    import json
+    report_path = Path("evaluation/outputs/graph_evaluation_report.json")
+    assert report_path.exists(), "Graph evaluation report must exist"
+    with open(report_path, "r", encoding="utf-8") as f:
+        results = json.load(f)
     md = generate_graph_markdown_report(results)
 
     assert "# LectureMIND — GraphRAG & Multi-Hop Traversal Evaluation Report" in md
     assert "Structural Graph Traversal Accuracy" in md
     assert "Downstream Chunk Retrieval Comparison on Graph Queries" in md
     assert "Hop-by-Hop Chunk Retrieval Breakdown" in md
+
+
