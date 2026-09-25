@@ -27,7 +27,7 @@ lecturemind/
 │           ├── models/        # Cached model weights
 │           ├── neo4j_data/    # Neo4j graph database persistent storage
 │           └── qdrant_data/   # Qdrant vector database persistent storage
-├── agent/                     # LangGraph orchestration engine
+├── agent/                     # Query orchestration engine (LangGraph-compatible)
 │   └── langgraph/
 │       ├── nodes/             # Individual DAG node implementations
 │       └── workflow.py        # Graph definition and QueryWorkflow class
@@ -123,13 +123,13 @@ Docker bind-mount targets for persistent data:
 
 ### `agent/`
 
-**Purpose:** The reasoning engine. Defines and executes the LangGraph-based query processing pipeline.
+**Purpose:** The reasoning engine. Defines and executes the query processing pipeline using a single-pass orchestrator with LangGraph-compatible state structure.
 
 **Sub-structure:**
 
 #### `agent/langgraph/workflow.py`
 - Defines `QueryWorkflow` class.
-- Builds the LangGraph `StateGraph` connecting all nodes in sequence.
+- Executes the single-pass pipeline connecting all nodes in sequence.
 - Manages `QueryState` (TypedDict) that accumulates data across nodes.
 - Records telemetry (per-node latency timestamps) into `state["telemetry"]`.
 

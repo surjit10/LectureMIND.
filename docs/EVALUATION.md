@@ -226,18 +226,25 @@ limiter. Dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` (23 factual / 
 |---|---|---|
 | Routing accuracy | 0.980 (49/50) | 1.000 |
 | Visual routing accuracy | 1.000 | 1.000 |
-| MRR@5 | **0.785** | 1.000 |
-| Hit@5 | **0.980** | 1.000 |
+| Pre-Rerank Hit@1 | **0.660** (33/50) | 1.000 |
+| Pre-Rerank Hit@3 | **0.880** (44/50) | 1.000 |
+| Hit@5 *(Primary Sufficiency)* | **0.980** (49/50) | 1.000 |
+| Strict MRR@5 *(Strict Capped MRR)* | **0.7853** | 1.000 |
+| Unbounded MRR *(Diagnostic)* | **0.7882** | 1.000 |
 | NDCG@5 | **0.767** | 1.000 |
 | Recall@5 | **0.862** | 1.000 |
 | Precision@5 | 0.280 | 0.400 |
-| Ranking quality | **0.918** | 1.000 |
-| Answer F1 | **0.459** | 0.714 |
-| Keyword recall | **0.545** | 1.000 |
+| Post-Rerank Hit@1 | **0.860** (43/50) | 1.000 |
+| Post-Rerank Hit@3 | **0.960** (48/50) | 1.000 |
+| Ranking quality (post-rerank MRR) | **0.9183** | 1.000 |
+| Answer F1 | **0.4594** | 0.714 |
+| Keyword recall | **0.5453** | 1.000 |
 | Citation completeness | 1.000 | 1.000 |
 | Citation coverage | **0.927** | 1.000 |
 | Chunk coverage | 1.000 | 1.000 |
 | Mean end-to-end latency | 20.5 s | 22.8 s |
+
+> **Pipeline Tradeoff Note (Q17 vs Q40):** Cross-encoder reranking produces a clear pipeline shift: Pre-rerank, Q17 (*abstraction necessity*) was at Rank 7 (Hit@5 miss) while Q40 was at Rank 1. Post-rerank, the cross-encoder promoted Q17 to Rank 1 (success) but demoted Q40 (*grading breakdown*) to Rank 6, causing Q40 to trigger evidence-gated refusal. Exactly 1 miss occurs in both stages (98.0% Hit@5), illustrating the reranker/context-window tradeoff.
 
 **How the stack achieves these numbers:**
 - Semantic chunk merging gives answer chunks complete passages instead of fragments.

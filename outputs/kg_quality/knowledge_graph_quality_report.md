@@ -1,8 +1,8 @@
 # LectureMIND Knowledge Graph Quality Report
 
-**Lecture ID**: `vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P`
+**Lecture ID**: `CS162_Lecture_1_What_is_an_Operating_System_720P`
 **Evaluation Standard**: Read-Only Structural Audit & Reference-Label Evaluation
-**KG Quality Diagnostic Score**: **32.1 / 100.0** *(only measurable components counted)*
+**KG Quality Diagnostic Score**: **32.5 / 45.0** *(only measurable components counted)*
 
 > [!NOTE]
 > **Reference Label Provenance**: Reference concepts, relations, and prerequisite dependencies are **LLM-assisted reference labels, pending human verification**. They serve as an automated evaluation benchmark and have not undergone independent manual double-blind verification by human domain experts.
@@ -13,59 +13,143 @@
 
 | Metric | Measured Value |
 | :--- | :--- |
-| **Lecture Duration** | 390.0s (~6.5 min) |
-| **Multimodal Chunks** | 9 chunks |
-| **Segments** | 1 segments |
-| **Extracted Entities** | 9 (accepted: 8, flagged as fragments: 1) |
-| **Extracted Relations** | 5 (dangling entity references: 0) |
-| **Inferred Prerequisites** | 3 edges (DAG: True, cycles: 0) |
-| **QA Benchmark Applied** | Yes — evaluation/datasets/transformer_kg_qa_50.json |
-| **Gold Reference Applied** | Yes |
+| **Lecture Duration** | 4982.1s (~83.0 min) |
+| **Multimodal Chunks** | 98 chunks |
+| **Segments** | 13 segments |
+| **Extracted Entities** | 158 (accepted: 158, flagged as fragments: 0) |
+| **Extracted Relations** | 103 (dangling entity references: 0) |
+| **Inferred Prerequisites** | 29 edges (DAG: True, cycles: 0) |
+| **QA Benchmark Applied** | No — benchmark chunk IDs do not belong to this package (reported N/A) |
+| **Gold Reference Applied** | No — gold labels are annotated for a different lecture (reported N/A) |
 
 ---
 
 ## 2. Entity Extraction Quality
 
-* **Reference Label Standard**: `LLM-assisted reference labels, pending human verification`
-* **Reference Concepts Available**: 16
-
-| Metric | Value | Interpretation |
-| :--- | :---: | :--- |
-| **Reference Entity Precision** | **55.6%** | 5 / 9 extracted entities match a reference concept (1-to-1) |
-| **Reference Entity Recall** | **31.2%** | 5 / 16 reference concepts captured |
-| **Reference Entity F1** | **40.0%** | Balanced entity extraction performance |
+* Gold reference metrics: **N/A** — the packaged gold labels are annotated for a different lecture and were NOT applied.
 
 | Structural Metric | Value | Interpretation |
 | :--- | :---: | :--- |
-| **Fragment Rate** | **11.1%** | 1 sentence-fragment extraction artifacts detected |
-| **Generic Non-Concept Rate** | **0.0%** | 0 generic stopwords detected |
-| **Orphan Entity Rate** | **11.1%** | 1 entities with graph degree = 0 |
+| **Fragment Rate** | **0.0%** | 0 sentence-fragment extraction artifacts detected |
+| **Generic Non-Concept Rate** | **1.3%** | 2 generic stopwords detected |
+| **Orphan Entity Rate** | **58.9%** | 93 entities with graph degree = 0 |
 | **Duplicate Surface Forms** | **0** | groups of entities sharing a normalized surface form |
 
 ### Flagged Entity Issues:
-- **[ORPHAN]** `blueprint-style grid`: Entity has degree = 0 (no incident relationships in knowledge graph).
-- **[FRAGMENT]** `us a sinusoidal waveform. This is important because`: Matches sentence fragment / clausal connector pattern: ^(us\s+a|and\s+then|this\s+means|because\s+the|which\s+means|gives\s+us|so\s+that|therefore\s+we|to\s+fix|now\s+the|we\s+will|that\s+is|due\s+to)\b
+- **[ORPHAN]** `Internet`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `ARPANET`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `World Wide Web`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Bell's Law`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Moore's Law`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `L1 cache reference`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Mutex lock/unlock`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `DNS Server`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Multimedia`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Windowing System`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Browser`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Search Query`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Switchboard Operator`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Computer Operator`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[GENERIC_STOPWORD]** `System`: Matches generic non-concept dictionary: 'System'
+- **[GENERIC_STOPWORD]** `Process`: Matches generic non-concept dictionary: 'Process'
+- **[ORPHAN]** `System Library`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Hypervisor`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Docker`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Register`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Input/Output Controller`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `System Libraries`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Scheduler Queue`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Shared Data`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Idle Process`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `CPU`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Protection Boundary`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Segmentation Fault`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Virtual Machine`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Tiny OS`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `I/O`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Processor protection`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Power management`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Look and feel`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Compiled Program`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `System Libs`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Core OS`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Locking`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Device Driver`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Network File System`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Clustered High-Availability System`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Peer-to-Peer System`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Tessellation`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Ocean Store`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Quantum Computing`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Swarm`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Global Data Plane`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Data Capsule`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Sections TBA`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Neil Kulkarni`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Akshat Gokhale`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Alina Dan`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `William Hsu`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `John Markham`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Taj Shaik`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Early Drop Deadline`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Drop Deadline`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Camera Requirement`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Discussion Sessions`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Design Reviews`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Office Hours`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Exams`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Virtual Class`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Coffee Houses`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `cs162.eecs.berkeley.edu`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Principles and Practices of Operating Systems`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `O'Reilly animal books`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `cloud operating system`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `project zero`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `GitHub account`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Autograder`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Camera`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Design doc`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Slack`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Messenger`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Time-zone survey`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Resource Allocation`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Hyperthreading`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Linux 2.2.0`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Mars Curiosity Rover`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Firefox`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Android`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Linux 3.1`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Windows 7`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Windows Vista`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Facebook`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Mac OS`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Real-time operating system`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[ORPHAN]** `Programming`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `t there's a lot of material in this`: Entity name is 35 chars / 8 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `t there's a lot of material in this`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `template for internet history and evolution Title: Evolution`: Entity name is 60 chars / 8 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `template for internet history and evolution Title: Evolution`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `10/26/20 Kubiatowicz CS162 UCB Fall 2020 Lec1.7 what`: Entity name is 52 chars / 8 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `10/26/20 Kubiatowicz CS162 UCB Fall 2020 Lec1.7 what`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `Title Process Abstraction and Isolation in Operating Systems`: Entity name is 60 chars / 8 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `Title Process Abstraction and Isolation in Operating Systems`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `how to write code that runs in a`: Entity name is 32 chars / 8 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `how to write code that runs in a`: Entity has degree = 0 (no incident relationships in knowledge graph).
+- **[EXCESSIVE_LENGTH]** `Common Services and Specialized Operating Systems`: Entity name is 49 chars / 6 words, likely a descriptive clause rather than atomic concept.
+- **[ORPHAN]** `Common Services and Specialized Operating Systems`: Entity has degree = 0 (no incident relationships in knowledge graph).
 
 ---
 
 ## 3. Relation Extraction, Direction & Evidence Grounding Quality
 
-* **Reference Label Standard**: `LLM-assisted reference labels, pending human verification` (21 reference relations)
-
-| Metric | Value | Interpretation |
-| :--- | :---: | :--- |
-| **Reference Relation Precision** | **0.0%** | 0 / 5 extracted relations match a reference triple |
-| **Reference Relation Recall** | **0.0%** | 0 / 21 reference triples captured |
-| **Reference Relation F1** | **0.0%** | Harmonic mean of precision and recall |
-| **Gold-Matched Direction Accuracy** | **0.0%** | 0 / 0 gold-matched directional relations have correct orientation |
-| **Evidence Coverage Rate** | **60.0%** | 3 / 5 relations supported by direct or indirect transcript evidence |
+* Gold reference metrics: **N/A** — the packaged gold labels are annotated for a different lecture and were NOT applied.
 
 | Evidence Grounding Tier | Count | Proportion |
 | :--- | :---: | :---: |
-| **Direct Textual Evidence** | 3 | 60.0% |
-| **Indirect Textual Evidence** | 0 | 0.0% |
-| **Co-occurrence Only** *(not evidence)* | 1 | 20.0% |
-| **No Single-Chunk Evidence** | 1 | 20.0% |
+| **Direct Textual Evidence** | 2 | 1.9% |
+| **Indirect Textual Evidence** | 76 | 73.8% |
+| **Co-occurrence Only** *(not evidence)* | 17 | 16.5% |
+| **No Single-Chunk Evidence** | 8 | 7.8% |
 
 ### Flagged Directional Warnings:
 - None detected.
@@ -76,16 +160,14 @@
 
 | Prerequisite Metric | Value | Status |
 | :--- | :---: | :---: |
-| **Total Inferred Prerequisites** | 3 | Multi-signal inferred edges |
+| **Total Inferred Prerequisites** | 29 | Multi-signal inferred edges |
 | **Graph Topology (Is DAG)** | **True** | Strict DAG — zero cycles |
 | **Cycle Count** | **0** | PASS |
 | **Self-Loop Count** | **0** | PASS |
 | **Temporal Inversion Warnings** | **0** | Diagnostic (LOW severity) |
 | **Non-Pedagogical Flags** | **0** | Marker-based heuristic |
 
-| **Reference Prerequisite Precision** | **0.0%** | 0 / 3 inferred prerequisites match reference DAG (strict 1-to-1) |
-| **Reference Prerequisite Recall** | **0.0%** | 0 / 10 reference prerequisites captured |
-| **Reference Prerequisite F1** | **0.0%** | Prerequisite graph alignment score |
+* Gold reference metrics: **N/A** — the packaged gold prerequisite labels are annotated for a different lecture and were NOT applied.
 
 ---
 
@@ -99,35 +181,27 @@ composite score, which instead rewards grounding depth and entity participation 
 
 | Metric | Measured Value |
 | :--- | :--- |
-| **Same-Chunk Relations** | 4 (80.0%) |
-| **Cross-Chunk Relations** | **1 (20.0%)** |
-| **Cross-Chunk Ratio** | **0.200** |
+| **Same-Chunk Relations** | 95 (92.2%) |
+| **Cross-Chunk Relations** | **8 (7.8%)** |
+| **Cross-Chunk Ratio** | **0.078** |
 
 ---
 
 ## 6. Downstream GraphRAG Benchmark Evaluation
 
-Evaluated on the applied QA benchmark (50 queries; lexical BM25 baseline vs graph-only vs hybrid RRF — self-contained evaluators, not the production Qdrant/Neo4j stack):
-
-| Retrieval Route | Hit@1 | Hit@3 | Hit@5 | Recall@5 | Precision@5 | MRR |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **BM25 / Lexical Retrieval** | **0.68** | **0.88** | **0.98** | **0.885** | **0.264** | **0.796** |
-| **Graph-Only RAG** | 0.10 | 0.38 | 0.62 | 0.543 | 0.176 | 0.333 |
-| **Hybrid RAG (RRF)** | 0.34 | 0.82 | **0.90** | 0.768 | 0.228 | 0.582 |
-
-> [!IMPORTANT]
-> **Methodological note:** BM25 is lexical retrieval (term frequency + length saturation), not dense vector search. Dense multimodal-embedding retrieval is a planned future experiment.
+* **N/A** — the configured QA benchmark's `expected_chunk_ids` belong to a different lecture package. Scoring this package against them would only produce meaningless zeros, so downstream retrieval metrics are not reported. Run the audit with `--benchmark-qa` pointing at a benchmark written for this package.
 
 ---
 
 ## 7. Diagnostic Ontology Breakdown
 
-* `USED_BY`: 1 relations (20.0% of all relations)
-  - **COMPONENT_OF**: 0 instances — Physical/structural hardware components forming the machine.
+* `USED_BY`: 62 relations (60.2% of all relations)
+  - **COMPONENT_OF**: 1 instances — Physical/structural hardware components forming the machine.
+    Examples: `Multi-core -> USED_BY -> System`
   - **FUNCTIONAL_INPUT**: 0 instances — Physical quantities or power sources required for operation.
   - **SYSTEM_TOPOLOGY**: 0 instances — Electrical wiring topology or multi-phase organizational layouts.
-  - **OTHER**: 1 instances — Miscellaneous associations mapped to USED_BY.
-    Examples: `magnetic field -> USED_BY -> transformers`
+  - **OTHER**: 61 instances — Miscellaneous associations mapped to USED_BY.
+    Examples: `Operating System -> USED_BY -> Branch mispredict`, `Operating System -> USED_BY -> L2 cache reference`, `Operating System -> USED_BY -> Main memory reference`, `Operating System -> USED_BY -> Disk seek`
 
 ---
 
@@ -135,14 +209,10 @@ Evaluated on the applied QA benchmark (50 queries; lexical BM25 baseline vs grap
 
 | Component | Weight | Contribution |
 | :--- | :---: | :---: |
-| entity_quality | 20 | 8.0 |
-| relation_quality | 20 | 0.0 |
-| direction_accuracy | 10 | 0.0 |
-| evidence_grounding | 15 | 9.0 |
-| graph_coherence | 10 | 7.44 |
-| prerequisite_dag | 15 | 0.0 |
-| graphrag_usefulness | 10 | 7.68 |
-| **Total** | **100** | **32.1** |
+| entity_quality | 20 | 18.99 |
+| evidence_grounding | 15 | 11.36 |
+| graph_coherence | 10 | 2.15 |
+| **Total** | **45** | **32.5** |
 
 ---
 

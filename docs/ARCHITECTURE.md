@@ -106,7 +106,7 @@ graph TD
         Ollama["OllamaBackend\n(Local Private)"]
         Online["OnlineBackend\n(Cloud APIs / Groq / Gemini)"]
         Learning["LearningService\n(Notes/Quiz/Flashcards)"]
-        Eval["Evaluation & Quality Auditing\n(BenchmarkRunner + RAGAS + KG Audit Suite)"]
+        Eval["Evaluation & Quality Auditing\n(BenchmarkRunner + QA Harness + KG Audit Suite)"]
 
         Import --> QueryWorkflow
         Import --> Course
@@ -146,7 +146,7 @@ Runs on GPU-equipped infrastructure (Kaggle). Stages (A1–C2):
   ±2 s of keyframes → `multimodal_chunks.json`
 - **A7 Segmentation** — Qwen2.5-7B-Instruct → `segments.json`, `chunk_segment_map.json`
 - **A8 Entity Extraction** — Qwen2.5-7B-Instruct → `entities.json` (typed domain concepts)
-- **A9 Relation Extraction** — Qwen2.5-7B-Instruct with sliding-window chunk context, compact entity alias remapping (`E1, E2...`), 8192-token retry budgets, and strict pedagogical exclusion rules → `relations.json` (262 verified relations across benchmark lectures in `0-output/`, 0.0% dangling edges)
+- **A9 Relation Extraction** — Qwen2.5-7B-Instruct with sliding-window chunk context, compact entity alias remapping (`E1, E2...`), 8192-token retry budgets, and strict pedagogical exclusion rules → `relations.json` (262 verified relations across benchmark lectures in `0-output/`, 0.0% dangling edges; CS162 has 93 orphan entities = 58.9% isolated background concepts, a known KG sparsity limitation)
 - **A10 Prerequisite Inference & DAG Enforcement** — Multi-Signal Fuser (`cloud/extraction/prerequisite_extractor.py` and `local/loaders/prerequisite_enricher.py`) combining lexical mentions, segment containment, temporal precedence, negative lookbehinds, and pedagogical inversion, followed by deterministic DFS cycle resolution → `prerequisites.json` (guaranteed strict DAG, 0 cycles, 77.8% precision / 70.0% recall)
 - **B0 Embeddings** — `BAAI/bge-large-en-v1.5` (1024-dim) → `embeddings.npy`, `embedding_ids.json`
 - **B1 Triplet Generation** — `triplets.json` (reranker training data)
@@ -241,7 +241,7 @@ Next.js 14 + React 18 + TypeScript web UI. Communicates with the FastAPI server 
 | `retrieval/` | Vector / graph / course retrievers, reranker service, context builder |
 | `local/` | LLM backends + provider registry, loaders (`prerequisite_enricher.py`), storage registries, docker compose |
 | `serving/` | FastAPI app, routes (`query.py`, `prerequisites.py`, `lectures.py`), learning service |
-| `evaluation/` | Benchmark runner, metrics, reports, dashboard, datasets, load testing, RAGAS, and `knowledge_graph/` quality audit suite |
+| `evaluation/` | Benchmark runner, metrics, reports, dashboard, datasets, load testing scaffold, RAGAS scaffold, and `knowledge_graph/` quality audit suite |
 | `frontend/` | Next.js web UI |
 | `schemas/` | Shared Pydantic models + closed enums |
 | `scripts/` | `train_global_reranker.py`, `trace_query.py`, validators |

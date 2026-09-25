@@ -1,0 +1,36 @@
+{
+  "benchmark_creation_method": "Independent lecture-driven question construction decoupled from graph traversal queries",
+  "source_material": {
+    "lecture_id": "lecture_092f861b",
+    "course": "UC Berkeley CS162 Operating Systems and Systems Programming",
+    "lecture_title": "Lecture 1: What is an Operating System?",
+    "source_artifacts": [
+      "data/packages/lecture_092f861b/multimodal_chunks.json",
+      "data/packages/lecture_092f861b/entities.json",
+      "data/packages/lecture_092f861b/relations.json",
+      "data/packages/lecture_092f861b/prerequisites.json",
+      "data/packages/lecture_092f861b/metadata.json"
+    ]
+  },
+  "question_creation_method": "Human-curated question design based on lecture instructional concepts (process abstraction, concurrency, OS dual-mode execution, kernel privilege, storage layers, and hardware interfaces) without inspecting active Neo4j Cypher path outputs.",
+  "gold_label_method": "Grounded semantic mapping linking student-level inquiries to conceptual entities and verified lecture transcript/slide evidence chunks.",
+  "creation_timestamp": "2026-09-25T16:50:00+05:30",
+  "evaluation_timestamp": "2026-09-25T17:00:00+05:30",
+  "neo4j_used_during_question_creation": false,
+  "neo4j_used_during_gold_label_verification": true,
+  "verification_protocol_notes": "Questions were authored blind to Neo4j graph traversal endpoints. After questions were formulated, Neo4j connectivity and schema relations were verified to confirm whether the conceptual path is indexed in the lecture knowledge graph or represents an authentic gap/unanswerable negative inquiry.",
+  "sample_distribution": {
+    "total_questions": 30,
+    "1_hop": 8,
+    "2_hop": 10,
+    "3_hop": 7,
+    "unanswerable_negative": 5
+  },
+  "question_types": {
+    "direct_relation": 6,
+    "multi_hop": 17,
+    "prerequisite": 1,
+    "relation_specific": 1,
+    "unanswerable_negative": 5
+  }
+}

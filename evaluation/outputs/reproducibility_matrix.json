@@ -1,0 +1,263 @@
+[
+  {
+    "metric": "Retrieval Hit@5 (Pre-Rerank Hybrid)",
+    "reported": 0.98,
+    "recomputed": 0.98,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "49/50 queries retrieved gold evidence in top 5 candidate pool."
+  },
+  {
+    "metric": "Retrieval Recall@5 (Pre-Rerank Hybrid)",
+    "reported": 0.862,
+    "recomputed": 0.862,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Mean recall across all 50 questions is exactly 43.1 / 50 = 0.8620."
+  },
+  {
+    "metric": "Retrieval MRR@5 (Pre-Rerank Hybrid)",
+    "reported": 0.788,
+    "recomputed": 0.7882,
+    "difference": 0.0002,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Mean pre-rerank MRR over hybrid candidates is 0.7882 (strict capped MRR@5 is 0.7853)."
+  },
+  {
+    "metric": "Ranking Quality (Post-Rerank MRR)",
+    "reported": 0.918,
+    "recomputed": 0.9183,
+    "difference": 0.0003,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Reciprocal rank of first relevant chunk after cross-encoder reranking (sum = 45.9167 / 50 = 0.9183)."
+  },
+  {
+    "metric": "NDCG@5 (Pre-Rerank Hybrid)",
+    "reported": 0.767,
+    "recomputed": 0.7674,
+    "difference": 0.0004,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Mean pre-rerank NDCG@5 across 50 questions is 0.7674."
+  },
+  {
+    "metric": "Pre-Rerank Hit@1",
+    "reported": 0.62,
+    "recomputed": 0.66,
+    "difference": 0.04,
+    "reproducible": false,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Reported as 0.620 (31/50); actual recomputed value is 0.660 (33/50). Typo in narrative table."
+  },
+  {
+    "metric": "Pre-Rerank Hit@3",
+    "reported": 0.94,
+    "recomputed": 0.88,
+    "difference": -0.06,
+    "reproducible": false,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Reported as 0.940 (47/50); actual recomputed value is 0.880 (44/50). Typo in narrative table."
+  },
+  {
+    "metric": "Post-Rerank Hit@1",
+    "reported": 0.84,
+    "recomputed": 0.86,
+    "difference": 0.02,
+    "reproducible": false,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Reported as 0.840 (42/50); actual recomputed value is 0.860 (43/50). Under-reported in narrative table."
+  },
+  {
+    "metric": "Post-Rerank Hit@3",
+    "reported": 0.96,
+    "recomputed": 0.96,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "48/50 questions have gold evidence in top-3 post-rerank."
+  },
+  {
+    "metric": "Post-Rerank Hit@5",
+    "reported": 0.98,
+    "recomputed": 0.98,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "49/50 questions have gold evidence in top-5 post-rerank (Q40 is the sole post-rerank miss)."
+  },
+  {
+    "metric": "BM25-Only Hit@5",
+    "reported": 0.38,
+    "recomputed": 0.38,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/knowledge_graph/graphrag_evaluator.py",
+    "notes": "Exactly 19/50 questions retrieved gold evidence in top 5 under BM25 alone."
+  },
+  {
+    "metric": "BM25-Only Recall@5",
+    "reported": 0.281,
+    "recomputed": 0.2813,
+    "difference": 0.0003,
+    "reproducible": true,
+    "source_artifact": "evaluation/knowledge_graph/graphrag_evaluator.py",
+    "notes": "Mean BM25 Recall@5 is exactly 0.2813."
+  },
+  {
+    "metric": "BM25-Only MRR",
+    "reported": 0.322,
+    "recomputed": 0.3215,
+    "difference": -0.0005,
+    "reproducible": true,
+    "source_artifact": "evaluation/knowledge_graph/graphrag_evaluator.py",
+    "notes": "Mean unbounded BM25 MRR across 50 questions is 0.3215."
+  },
+  {
+    "metric": "BM25-Only NDCG@5",
+    "reported": 0.257,
+    "recomputed": 0.2571,
+    "difference": 0.0001,
+    "reproducible": true,
+    "source_artifact": "evaluation/knowledge_graph/graphrag_evaluator.py",
+    "notes": "Mean BM25 NDCG@5 across 50 questions is 0.2571."
+  },
+  {
+    "metric": "Dense-Only Hit@5",
+    "reported": 0.94,
+    "recomputed": null,
+    "difference": null,
+    "reproducible": false,
+    "source_artifact": "None (Estimated in final_evaluation_report.md)",
+    "notes": "Lacks a saved execution output file or log; cannot be reproduced without running dense-only Qdrant pass."
+  },
+  {
+    "metric": "Answer Generation Token F1",
+    "reported": 0.459,
+    "recomputed": 0.4594,
+    "difference": 0.0004,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Standard SQuAD unigram token overlap F1 across 50 LLM answers."
+  },
+  {
+    "metric": "Keyword Recall",
+    "reported": 0.545,
+    "recomputed": 0.5453,
+    "difference": 0.0003,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Mean keyword recall across all 50 questions is 0.5453 (54.5%)."
+  },
+  {
+    "metric": "Citation Completeness",
+    "reported": 1.0,
+    "recomputed": 1.0,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Measures architectural provenance attachment (sources built from retrieved chunks), not NLP citation faithfulness."
+  },
+  {
+    "metric": "Query Routing Accuracy (12 Queries)",
+    "reported": 1.0,
+    "recomputed": 1.0,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/routing_evaluation_report.json",
+    "notes": "12/12 on curated pattern test (5 vector, 5 graph, 2 hybrid). Targeted regex unit test."
+  },
+  {
+    "metric": "Graph Traversal Path Recovery (20 Queries)",
+    "reported": 1.0,
+    "recomputed": 1.0,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/graph_evaluation_report.json",
+    "notes": "20/20 paths recovered on targeted graph integration test (10 1-hop, 5 2-hop, 5 3-hop). Circular construction."
+  },
+  {
+    "metric": "2-Hop Hybrid Retrieval Hit@5",
+    "reported": 1.0,
+    "recomputed": 1.0,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/graph_evaluation_report.json",
+    "notes": "5/5 on the 2-hop subset of the graph benchmark using SimpleBM25 + SimpleGraphRetriever."
+  },
+  {
+    "metric": "Reranker Triplet Training MRR",
+    "reported": 0.996,
+    "recomputed": 0.996,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "METRICS_MATRIX.md / training_metrics.json",
+    "notes": "Pairwise binary ranking (1 positive, 1 negative) convergence metric, not end-to-end retrieval MRR."
+  },
+  {
+    "metric": "CS162 Orphan Entity Rate",
+    "reported": 0.0,
+    "recomputed": 0.5886,
+    "difference": 0.5886,
+    "reproducible": false,
+    "source_artifact": "outputs/kg_quality/metrics.json",
+    "notes": "Reported as 0.0% by conflating with dangling edges. Actual degree=0 orphan rate is 93/158 (58.9%)."
+  },
+  {
+    "metric": "CS162 Relation Evidence Coverage Rate",
+    "reported": 0.757,
+    "recomputed": 0.7573,
+    "difference": 0.0003,
+    "reproducible": true,
+    "source_artifact": "outputs/kg_quality/metrics.json",
+    "notes": "78/103 relations have direct or indirect text evidence in lecture chunks."
+  },
+  {
+    "metric": "Automated Test Suite Pass Count",
+    "reported": 594,
+    "recomputed": 594,
+    "difference": 0,
+    "reproducible": true,
+    "source_artifact": "pytest execution",
+    "notes": "594 passed, 6 skipped (optional sentence-transformers dependency), 0 failed out of 600 collected."
+  },
+  {
+    "metric": "Strict MRR@5 (Pre-Rerank Hybrid)",
+    "reported": 0.7853,
+    "recomputed": 0.7853,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/evaluation_report_20260811_105621.json",
+    "notes": "Strict reciprocal rank strictly capped at k=5 across 50 questions (sum = 39.2667 / 50 = 0.7853)."
+  },
+  {
+    "metric": "Held-Out Graph Structural Path Recovery",
+    "reported": 0.520,
+    "recomputed": 0.520,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/graph_heldout_evaluation.json",
+    "notes": "13/25 answerable questions had full multi-hop path recovered in live Neo4j without path-guided query leakage."
+  },
+  {
+    "metric": "Held-Out Graph Downstream Hit@5",
+    "reported": 0.840,
+    "recomputed": 0.840,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/graph_heldout_evaluation.json",
+    "notes": "21/25 answerable questions retrieved gold source chunks in top-5 under Hybrid Graph+BM25 RRF fusion."
+  },
+  {
+    "metric": "Held-Out Graph Negative Refusal Accuracy",
+    "reported": 1.000,
+    "recomputed": 1.000,
+    "difference": 0.0,
+    "reproducible": true,
+    "source_artifact": "evaluation/outputs/graph_heldout_evaluation.json",
+    "notes": "5/5 negative/unanswerable trap questions were correctly refused without hallucinating false connections."
+  }
+]

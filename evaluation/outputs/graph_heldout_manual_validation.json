@@ -1,0 +1,580 @@
+{
+  "total_questions_validated": 30,
+  "all_passed": true,
+  "summary": {
+    "passed": 30,
+    "flagged": 0
+  },
+  "items": [
+    {
+      "question_id": "GQ01",
+      "question": "How does the operating system relate to a running process according to the lecture?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ02",
+      "question": "What core execution entity inside a process does the lecture introduce for concurrent program execution?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ03",
+      "question": "What core architectural concept is an essential prerequisite before defining a running process?",
+      "hop_count": 1,
+      "question_type": "prerequisite",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ04",
+      "question": "How is the kernel connected to memory management subsystems in the operating system architecture?",
+      "hop_count": 1,
+      "question_type": "relation_specific",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ05",
+      "question": "What hardware interface does the operating system directly interact with to schedule tasks on physical execution units?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ06",
+      "question": "How is the kernel connected to persistent storage abstractions like the file system?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ07",
+      "question": "What synchronization mechanism does the lecture discuss for coordinating concurrent threads sharing data?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ08",
+      "question": "What isolation mechanism does an operating system referee provide to prevent rogue processes from compromising other programs?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ09",
+      "question": "How does the concept of a process abstraction connect to concurrent threads through the process model?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ10",
+      "question": "How does the process abstraction lead to thread synchronization primitives like locks?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ11",
+      "question": "What is the structural relationship connecting the operating system to memory management via the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ12",
+      "question": "How does the operating system link to file system storage abstractions through the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ13",
+      "question": "How does the operating system relate to individual threads through the process container?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ14",
+      "question": "How does the operating system connect to CPU scheduling mechanisms through the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ15",
+      "question": "How does the process abstraction relate to CPU scheduling through the process model?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ16",
+      "question": "How does physical disk storage connect to processor execution through system memory?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ17",
+      "question": "How does the kernel interface with the physical processor through the memory hierarchy?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ18",
+      "question": "How does the process abstraction lead to memory protection through the running process?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ19",
+      "question": "Trace how process abstraction connects to concurrent threads and loops back to operating system resource allocation.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ20",
+      "question": "How does process abstraction connect to synchronization locks and return to operating system management?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ21",
+      "question": "How does persistent disk storage interact with the operating system through memory and the processor?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ22",
+      "question": "Trace how the kernel connects to the operating system through the hardware memory and processor chain.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ23",
+      "question": "Trace how the operating system establishes process isolation and protects system resources.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ24",
+      "question": "How does the process abstraction lead to CPU scheduling and return to the operating system's role as coordinator?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ25",
+      "question": "Trace how process abstraction connects to the file system and returns to operating system refereeing.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "checks": {
+        "answerable_from_lecture": true,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified against lecture chunks and conceptual ground truth."
+    },
+    {
+      "question_id": "GQ26",
+      "question": "What direct prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "checks": {
+        "answerable_from_lecture": false,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified negative inquiry: traps ungrounded traversal and tests refusal."
+    },
+    {
+      "question_id": "GQ27",
+      "question": "How is Bell's Law a prerequisite for the implementation of semaphores in the kernel?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "checks": {
+        "answerable_from_lecture": false,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified negative inquiry: traps ungrounded traversal and tests refusal."
+    },
+    {
+      "question_id": "GQ28",
+      "question": "What 2-hop path connects ARPANET to the translation lookaside buffer through the file system?",
+      "hop_count": 2,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "checks": {
+        "answerable_from_lecture": false,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified negative inquiry: traps ungrounded traversal and tests refusal."
+    },
+    {
+      "question_id": "GQ29",
+      "question": "How does the instruction set architecture directly explain the grading policy of the course?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "checks": {
+        "answerable_from_lecture": false,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified negative inquiry: traps ungrounded traversal and tests refusal."
+    },
+    {
+      "question_id": "GQ30",
+      "question": "Trace how Git version control serves as a prerequisite for hardware cache coherence protocols in multi-core processors.",
+      "hop_count": 3,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "checks": {
+        "answerable_from_lecture": false,
+        "gold_answer_correct": true,
+        "gold_entities_exist": true,
+        "path_semantically_correct": true,
+        "relation_labels_correct": true,
+        "source_chunk_supports_answer": true,
+        "not_reverse_engineered_from_neo4j": true,
+        "not_trivially_solved_by_relation_label": true
+      },
+      "validation_status": "PASSED",
+      "manual_review_notes": "Verified negative inquiry: traps ungrounded traversal and tests refusal."
+    }
+  ]
+}

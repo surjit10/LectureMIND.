@@ -143,8 +143,8 @@ graph TD
 | **Provider Manager** | `local/llm/provider_manager.py` | Runtime health checker for configured providers |
 | **Learning Service** | `serving/fastapi/learning_service.py` | Notes, flashcards, quiz, and learning-path generation reusing the retrieval pipeline |
 | **Evaluation Framework** | `evaluation/benchmark_runner.py` | Offline RAG quality benchmark over a QA dataset, bypassing HTTP |
-| **RAGAS Eval** | `evaluation/ragas/eval_ragas.py` | Faithfulness, Answer Relevancy, Context Precision scores |
-| **Load Testing** | `evaluation/load_testing/load_test.py` | 100/500/1000 concurrent users; avg/p95 latency + RPS |
+| **RAGAS Scaffold** | `evaluation/ragas/eval_ragas.py` | Scaffolded evaluation interface for optional Faithfulness, Answer Relevancy, Context Precision |
+| **Load Test Scaffold** | `evaluation/load_testing/load_test.py` | Concurrency profiling scaffold for 100/500/1000 simulated users; avg/p95 latency + RPS |
 | **Frontend** | `frontend/` | Next.js 14 + React 18 + TypeScript + custom CSS design system; Student/Developer modes |
 
 ---
@@ -282,8 +282,8 @@ lecturemind/
 │
 ├── evaluation/                     # Offline evaluation framework
 │   ├── benchmark_runner.py          # QA benchmark over the real workflow
-│   ├── ragas/eval_ragas.py          # Faithfulness / Answer Relevancy / Context Precision
-│   ├── load_testing/load_test.py    # 100/500/1000 concurrent users
+│   ├── ragas/eval_ragas.py          # Scaffold for Faithfulness / Answer Relevancy / Context Precision
+│   ├── load_testing/load_test.py    # Scaffold for 100/500/1000 concurrent users
 │   ├── dashboard/dashboard_generator.py  # HTML dashboard from existing outputs
 │   ├── metrics/                     # 6 metric families (planner/retrieval/reranker/…)
 │   ├── reports/report_generator.py  # JSON/CSV/Markdown reports
@@ -581,21 +581,27 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 |---|---|---|
 | Routing accuracy | **0.980** (49/50) | High-fidelity intent classification |
 | Visual routing accuracy (`need_visual`) | **1.000** | Perfect slide/diagram intent detection |
-| **Hit@5** *(Primary Sufficiency)* | **0.980** | Ground-truth chunk present in top-5 for 98% of queries |
-| **MRR@5** *(Primary Rank-1)* | **0.785** | Strict MRR@5 (reciprocal rank of first relevant hit, 0 beyond rank 5); unbounded MRR = 0.788 |
+| Pre-Rerank Hit@1 | **0.660** (33/50) | Ground-truth chunk at rank 1 pre-rerank |
+| Pre-Rerank Hit@3 | **0.880** (44/50) | Ground-truth chunk in top-3 pre-rerank |
+| **Hit@5** *(Primary Sufficiency)* | **0.980** (49/50) | Ground-truth chunk present in top-5 for 98% of queries |
+| **Strict MRR@5** *(Primary Rank-1)* | **0.7853** | Strict MRR@5 (reciprocal rank of first relevant hit, 0 beyond rank 5); unbounded MRR = 0.7882 |
 | **Recall@5** *(Primary Coverage)* | **0.862** | 86.2% of all expected ground-truth chunks retrieved in top-5 |
 | **NDCG@5** *(Primary Ranking Order)* | **0.767** | Position-discounted multi-chunk ranking score |
 | Precision@5 *(Secondary IR)* | 0.280 | Standard IR $\text{hits}/5$; dataset ceiling is 0.352 (see note below) |
-| Ranking quality (rerank MRR) | **0.918** | Reranker pushes primary evidence to rank 1.09 |
-| Answer F1 | **0.459** | SQuAD-style token F1 score |
-| Keyword recall | **0.545** | Ground-truth key term coverage |
+| Post-Rerank Hit@1 | **0.860** (43/50) | Cross-encoder lifts rank 1 from 66.0% to 86.0% (+20 percentage points) |
+| Post-Rerank Hit@3 | **0.960** (48/50) | Cross-encoder top-3 candidate coverage |
+| Ranking quality (post-rerank reciprocal rank mean) | **0.9183** | Reranker pushes primary evidence to rank 1.09 |
+| Answer F1 | **0.4594** | SQuAD-style token F1 score (Mean Keyword Recall is 54.53%) |
+| Keyword recall | **0.5453** | Ground-truth key term coverage |
 | Citation completeness | **1.000** | Every cited source was present in the LLM prompt context (grounding check — does not verify entailment) |
 | Citation coverage | **0.927** | 92.7% of expected evidence cited in answers |
 | Mean end-to-end latency | 20.5 s (incl. rate-limiter pacing) | Under 1.5s with Groq cloud API inference |
 
+> **Pipeline Tradeoff Note (Q17 vs Q40):** Cross-encoder reranking produces a clear pipeline shift: Pre-rerank, Q17 (*abstraction necessity*) was at Rank 7 (Hit@5 miss) while Q40 was at Rank 1. Post-rerank, the cross-encoder promoted Q17 to Rank 1 (success) but demoted Q40 (*grading breakdown*) to Rank 6, causing Q40 to trigger evidence-gated refusal. Exactly 1 miss occurs in both stages (98.0% Hit@5), illustrating the reranker/context-window tradeoff.
+
 > **Provenance note:** This report was produced against the indexed package `lecture_cs162_v17` (gitignored, not shipped in this repository). The dataset's two original `chunk_000094` anchors never existed in the preserved package (which ends at `chunk_000093`) and were corrected to the evidence-bearing chunks `000090`/`000089`; the two affected samples (Mars Rover, Linux lines-of-code) scored against the corrected anchors would read Recall 1.0 / MRR 1.0 if the expected chunk was retrieved. Re-running the benchmark requires re-importing a package built from the same video.
 
-> **Note on Precision@5 (0.280) vs. Primary Metrics:** In single-lecture QA, ground-truth evidence is localized: 54% of benchmark questions (27/50) have only 1 relevant chunk, and 24% (12/50) have only 2. Consequently, the absolute mathematical ceiling for Precision@5 across this dataset is **0.352 (35.2%)**. The score of 0.280 represents **79.5% of the theoretical maximum achievable**. The primary retrieval quality metrics for LectureMIND are therefore **Hit@5 (0.980)**, **MRR@5 (0.785)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
+> **Note on Precision@5 (0.280) vs. Primary Metrics:** In single-lecture QA, ground-truth evidence is localized: 54% of benchmark questions (27/50) have only 1 relevant chunk, and 24% (12/50) have only 2. Consequently, the absolute mathematical ceiling for Precision@5 across this dataset is **0.352 (35.2%)**. The score of 0.280 represents **79.5% of the theoretical maximum achievable**. The primary retrieval quality metrics for LectureMIND are therefore **Hit@5 (0.980)**, **Strict MRR@5 (0.7853)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
 
 ### Knowledge Graph Quality & Prerequisite Audit
 
@@ -606,7 +612,8 @@ Audited via `evaluation/knowledge_graph/audit_package.py` on the short Transform
 | **Graph Topology (Strict DAG)** | **True** | Deterministic DFS cycle resolution guarantees acyclicity |
 | **Cycle Count** | **0** | Zero feedback loops in prerequisite graph |
 | **Self-Loop Count** | **0** | Zero self-dependencies ($A \to A$) |
-| **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all entities |
+| **Orphan Entity Rate** | **58.86%** | 93/158 background entities in CS162 have degree 0 (known KG limitation) |
+| **Dangling Relation Rate** | **0.0%** | 100% referential integrity across all entities (0 dangling edges) |
 | Entity / Relation / Prereq reference F1 | See audit output | Not independently human-verified; see provenance note above |
 
 #### Multi-Lecture Extraction Yield (Full Cloud Execution)

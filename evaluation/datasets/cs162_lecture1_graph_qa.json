@@ -1,0 +1,416 @@
+[
+  {
+    "id": "cs162_graph_01",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What is the prerequisite relationship between Operating System and Process?",
+    "ground_truth_answer": "In the lecture knowledge graph, Operating System is a direct prerequisite of Process (Operating System ==[PREREQUISITE_OF]==> Process); the OS must be understood as the resource referee before defining running processes.",
+    "expected_route": "graph_only",
+    "question_type": "direct_relation",
+    "hops": 1,
+    "gold_entities": ["Operating System", "Process"],
+    "gold_relations": [
+      ["Operating System", "PREREQUISITE_OF", "Process"]
+    ],
+    "gold_path": ["Operating System", "Process"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "difficulty": "medium",
+    "topic": "processes"
+  },
+  {
+    "id": "cs162_graph_02",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "How is Process Abstraction related to Process in the lecture graph?",
+    "ground_truth_answer": "Process Abstraction is a direct prerequisite of Process (Process Abstraction ==[PREREQUISITE_OF]==> Process) and Process is derived from Process Abstraction (Process ==[DERIVED_FROM]==> Process Abstraction).",
+    "expected_route": "graph_only",
+    "question_type": "direct_relation",
+    "hops": 1,
+    "gold_entities": ["Process Abstraction", "Process"],
+    "gold_relations": [
+      ["Process Abstraction", "PREREQUISITE_OF", "Process"]
+    ],
+    "gold_path": ["Process Abstraction", "Process"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "difficulty": "medium",
+    "topic": "processes"
+  },
+  {
+    "id": "cs162_graph_03",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Which subsystem does Kernel connect to via USED_BY for memory handling?",
+    "ground_truth_answer": "In the knowledge graph, Kernel is directly connected via USED_BY to Memory Management (Kernel ==[USED_BY]==> Memory Management).",
+    "expected_route": "graph_only",
+    "question_type": "direct_relation",
+    "hops": 1,
+    "gold_entities": ["Kernel", "Memory Management"],
+    "gold_relations": [
+      ["Kernel", "USED_BY", "Memory Management"]
+    ],
+    "gold_path": ["Kernel", "Memory Management"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "difficulty": "medium",
+    "topic": "memory-management"
+  },
+  {
+    "id": "cs162_graph_04",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What relation connects Kernel to CPU Scheduling in the knowledge graph?",
+    "ground_truth_answer": "Kernel is connected to CPU Scheduling via a USED_BY relationship (Kernel ==[USED_BY]==> CPU Scheduling).",
+    "expected_route": "graph_only",
+    "question_type": "direct_relation",
+    "hops": 1,
+    "gold_entities": ["Kernel", "CPU Scheduling"],
+    "gold_relations": [
+      ["Kernel", "USED_BY", "CPU Scheduling"]
+    ],
+    "gold_path": ["Kernel", "CPU Scheduling"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "difficulty": "medium",
+    "topic": "scheduling"
+  },
+  {
+    "id": "cs162_graph_05",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "How is Kernel related to File System according to the graph schema?",
+    "ground_truth_answer": "Kernel connects directly to File System via the USED_BY relationship (Kernel ==[USED_BY]==> File System), representing the kernel's core abstraction layer for persistent storage.",
+    "expected_route": "graph_only",
+    "question_type": "direct_relation",
+    "hops": 1,
+    "gold_entities": ["Kernel", "File System"],
+    "gold_relations": [
+      ["Kernel", "USED_BY", "File System"]
+    ],
+    "gold_path": ["Kernel", "File System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "difficulty": "medium",
+    "topic": "file-systems"
+  },
+  {
+    "id": "cs162_graph_06",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What concurrency concept does Process directly explain in the graph?",
+    "ground_truth_answer": "The Process entity directly explains Threads (Process ==[EXPLAINS]==> Threads) as execution contexts within an address space.",
+    "expected_route": "graph_only",
+    "question_type": "one_hop",
+    "hops": 1,
+    "gold_entities": ["Process", "Threads"],
+    "gold_relations": [
+      ["Process", "EXPLAINS", "Threads"]
+    ],
+    "gold_path": ["Process", "Threads"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "medium",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_07",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Which synchronization primitive does Process explain in the 1-hop neighborhood?",
+    "ground_truth_answer": "In the 1-hop graph neighborhood, Process explains Locks (Process ==[EXPLAINS]==> Locks) to synchronize concurrent thread execution.",
+    "expected_route": "graph_only",
+    "question_type": "one_hop",
+    "hops": 1,
+    "gold_entities": ["Process", "Locks"],
+    "gold_relations": [
+      ["Process", "EXPLAINS", "Locks"]
+    ],
+    "gold_path": ["Process", "Locks"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "medium",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_08",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What CPU management topic does Process explain in the lecture graph?",
+    "ground_truth_answer": "Process explains Scheduling (Process ==[EXPLAINS]==> Scheduling), covering how multiple running threads/processes share the processor.",
+    "expected_route": "graph_only",
+    "question_type": "one_hop",
+    "hops": 1,
+    "gold_entities": ["Process", "Scheduling"],
+    "gold_relations": [
+      ["Process", "EXPLAINS", "Scheduling"]
+    ],
+    "gold_path": ["Process", "Scheduling"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "medium",
+    "topic": "scheduling"
+  },
+  {
+    "id": "cs162_graph_09",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What security concept does Operating System directly explain in the graph?",
+    "ground_truth_answer": "Operating System explains Protection (Operating System ==[EXPLAINS]==> Protection) as part of its referee role isolating programs.",
+    "expected_route": "graph_only",
+    "question_type": "one_hop",
+    "hops": 1,
+    "gold_entities": ["Operating System", "Protection"],
+    "gold_relations": [
+      ["Operating System", "EXPLAINS", "Protection"]
+    ],
+    "gold_path": ["Operating System", "Protection"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "difficulty": "medium",
+    "topic": "protection"
+  },
+  {
+    "id": "cs162_graph_10",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What isolation property does Operating System directly explain in the graph?",
+    "ground_truth_answer": "Operating System explains Isolation (Operating System ==[EXPLAINS]==> Isolation) preventing buggy or malicious programs from corrupting each other.",
+    "expected_route": "graph_only",
+    "question_type": "one_hop",
+    "hops": 1,
+    "gold_entities": ["Operating System", "Isolation"],
+    "gold_relations": [
+      ["Operating System", "EXPLAINS", "Isolation"]
+    ],
+    "gold_path": ["Operating System", "Isolation"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "difficulty": "medium",
+    "topic": "protection"
+  },
+  {
+    "id": "cs162_graph_11",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What is the 2-hop connection from Process Abstraction to Threads via Process?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which in turn explains Threads: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads.",
+    "expected_route": "graph_only",
+    "question_type": "two_hop",
+    "hops": 2,
+    "gold_entities": ["Process Abstraction", "Process", "Threads"],
+    "gold_relations": [
+      ["Process Abstraction", "PREREQUISITE_OF", "Process"],
+      ["Process", "EXPLAINS", "Threads"]
+    ],
+    "gold_path": ["Process Abstraction", "Process", "Threads"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "hard",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_12",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "How does Process Abstraction connect to Locks through Process in the graph?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, and Process explains Locks: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Locks.",
+    "expected_route": "graph_only",
+    "question_type": "two_hop",
+    "hops": 2,
+    "gold_entities": ["Process Abstraction", "Process", "Locks"],
+    "gold_relations": [
+      ["Process Abstraction", "PREREQUISITE_OF", "Process"],
+      ["Process", "EXPLAINS", "Locks"]
+    ],
+    "gold_path": ["Process Abstraction", "Process", "Locks"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "hard",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_13",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Trace the 2-hop path from Operating System to Memory Management via Kernel",
+    "ground_truth_answer": "Operating System introduces Kernel, which is used by Memory Management: Operating System ==[INTRODUCED_BEFORE]==> Kernel ==[USED_BY]==> Memory Management.",
+    "expected_route": "graph_only",
+    "question_type": "two_hop",
+    "hops": 2,
+    "gold_entities": ["Operating System", "Kernel", "Memory Management"],
+    "gold_relations": [
+      ["Operating System", "INTRODUCED_BEFORE", "Kernel"],
+      ["Kernel", "USED_BY", "Memory Management"]
+    ],
+    "gold_path": ["Operating System", "Kernel", "Memory Management"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "difficulty": "hard",
+    "topic": "memory-management"
+  },
+  {
+    "id": "cs162_graph_14",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What 2-hop path links Operating System to File System through the Kernel?",
+    "ground_truth_answer": "Operating System introduces Kernel, which is used by File System: Operating System ==[INTRODUCED_BEFORE]==> Kernel ==[USED_BY]==> File System.",
+    "expected_route": "graph_only",
+    "question_type": "two_hop",
+    "hops": 2,
+    "gold_entities": ["Operating System", "Kernel", "File System"],
+    "gold_relations": [
+      ["Operating System", "INTRODUCED_BEFORE", "Kernel"],
+      ["Kernel", "USED_BY", "File System"]
+    ],
+    "gold_path": ["Operating System", "Kernel", "File System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "difficulty": "hard",
+    "topic": "file-systems"
+  },
+  {
+    "id": "cs162_graph_15",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Trace the 2-hop path from Operating System to Threads via Process",
+    "ground_truth_answer": "Operating System is a prerequisite of Process, which explains Threads: Operating System ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads.",
+    "expected_route": "graph_only",
+    "question_type": "two_hop",
+    "hops": 2,
+    "gold_entities": ["Operating System", "Process", "Threads"],
+    "gold_relations": [
+      ["Operating System", "PREREQUISITE_OF", "Process"],
+      ["Process", "EXPLAINS", "Threads"]
+    ],
+    "gold_path": ["Operating System", "Process", "Threads"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "hard",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_16",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What is the 3-hop prerequisite chain leading from Process Abstraction to Threads and back to Operating System?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which explains Threads, and Threads are used by Operating System: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads ==[USED_BY]==> Operating System.",
+    "expected_route": "graph_only",
+    "question_type": "three_hop",
+    "hops": 3,
+    "gold_entities": ["Process Abstraction", "Process", "Threads", "Operating System"],
+    "gold_relations": [
+      ["Process Abstraction", "PREREQUISITE_OF", "Process"],
+      ["Process", "EXPLAINS", "Threads"],
+      ["Threads", "USED_BY", "Operating System"]
+    ],
+    "gold_path": ["Process Abstraction", "Process", "Threads", "Operating System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "hard",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_17",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Trace the 3-hop relationship from Process Abstraction to Locks and back to Operating System",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which explains Locks, which are used by Operating System: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Locks ==[USED_BY]==> Operating System.",
+    "expected_route": "graph_only",
+    "question_type": "three_hop",
+    "hops": 3,
+    "gold_entities": ["Process Abstraction", "Process", "Locks", "Operating System"],
+    "gold_relations": [
+      ["Process Abstraction", "PREREQUISITE_OF", "Process"],
+      ["Process", "EXPLAINS", "Locks"],
+      ["Locks", "USED_BY", "Operating System"]
+    ],
+    "gold_path": ["Process Abstraction", "Process", "Locks", "Operating System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "difficulty": "hard",
+    "topic": "concurrency"
+  },
+  {
+    "id": "cs162_graph_18",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What 3-hop path connects Kernel to Operating System via memory and processor hardware?",
+    "ground_truth_answer": "Kernel is used by memory, memory is used by processor, and processor is used by Operating System: Kernel ==[USED_BY]==> memory ==[USED_BY]==> processor ==[USED_BY]==> Operating System.",
+    "expected_route": "graph_only",
+    "question_type": "three_hop",
+    "hops": 3,
+    "gold_entities": ["Kernel", "memory", "processor", "Operating System"],
+    "gold_relations": [
+      ["Kernel", "USED_BY", "memory"],
+      ["memory", "USED_BY", "processor"],
+      ["processor", "USED_BY", "Operating System"]
+    ],
+    "gold_path": ["Kernel", "memory", "processor", "Operating System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "difficulty": "hard",
+    "topic": "hardware"
+  },
+  {
+    "id": "cs162_graph_19",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "What 3-hop chain leads from Operating System through Process to Protection and back to Operating System?",
+    "ground_truth_answer": "Operating System is a prerequisite of Process, Process is used by Protection, and Protection is used by Operating System: Operating System ==[PREREQUISITE_OF]==> Process ==[USED_BY]==> Protection ==[USED_BY]==> Operating System.",
+    "expected_route": "graph_only",
+    "question_type": "three_hop",
+    "hops": 3,
+    "gold_entities": ["Operating System", "Process", "Protection"],
+    "gold_relations": [
+      ["Operating System", "PREREQUISITE_OF", "Process"],
+      ["Process", "USED_BY", "Protection"],
+      ["Protection", "USED_BY", "Operating System"]
+    ],
+    "gold_path": ["Operating System", "Process", "Protection", "Operating System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "difficulty": "hard",
+    "topic": "protection"
+  },
+  {
+    "id": "cs162_graph_20",
+    "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
+    "query": "Trace the 3-hop path connecting disk to Operating System via memory and processor",
+    "ground_truth_answer": "disk is used by memory, which is used by processor, which is used by Operating System: disk ==[USED_BY]==> memory ==[USED_BY]==> processor ==[USED_BY]==> Operating System.",
+    "expected_route": "graph_only",
+    "question_type": "three_hop",
+    "hops": 3,
+    "gold_entities": ["disk", "memory", "processor", "Operating System"],
+    "gold_relations": [
+      ["disk", "USED_BY", "memory"],
+      ["memory", "USED_BY", "processor"],
+      ["processor", "USED_BY", "Operating System"]
+    ],
+    "gold_path": ["disk", "memory", "processor", "Operating System"],
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "difficulty": "hard",
+    "topic": "hardware"
+  }
+]

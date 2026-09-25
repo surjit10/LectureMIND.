@@ -1,0 +1,99 @@
+{
+  "audit_timestamp": "2026-09-25T16:45:00Z",
+  "audited_documents": [
+    "METRICS_MATRIX.md",
+    "README.md",
+    "docs/ARCHITECTURE.md",
+    "docs/FOLDER_STRUCTURE.md",
+    "docs/EVALUATION.md",
+    "evaluation/outputs/final_evaluation_report.md",
+    "evaluation/outputs/presentation_metrics.md",
+    "evaluation/outputs/answer_error_analysis.md"
+  ],
+  "discrepancies": [
+    {
+      "id": "DISC-01",
+      "issue": "Pre-Rerank Hit@1 and Hit@3 Narrative Mismatch",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md"
+      ],
+      "reported_in_doc": "Hit@1 = 0.620 (31/50), Hit@3 = 0.940 (47/50)",
+      "actual_raw_value": "Hit@1 = 0.660 (33/50), Hit@3 = 0.880 (44/50)",
+      "root_cause": "Typographical transcription error when synthesizing narrative ablation table from raw run."
+    },
+    {
+      "id": "DISC-02",
+      "issue": "Post-Rerank Hit@1 Narrative Mismatch",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md"
+      ],
+      "reported_in_doc": "Hit@1 = 0.840 (42/50)",
+      "actual_raw_value": "Hit@1 = 0.860 (43/50)",
+      "root_cause": "Under-reported post-rerank rank-1 count by 1 sample in narrative report."
+    },
+    {
+      "id": "DISC-03",
+      "issue": "Dense-Only Ablation Row Lacks Output Artifact",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md"
+      ],
+      "reported_in_doc": "Dense Only: Hit@5=0.940, Recall@5=0.814, MRR@5=0.724, NDCG@5=0.710",
+      "actual_raw_value": "UNVERIFIABLE from saved evaluation outputs",
+      "root_cause": "Standalone dense ablation lacks an underlying serialized execution artifact in evaluation/outputs/."
+    },
+    {
+      "id": "DISC-04",
+      "issue": "Orphan Entity Rate Conflated with Dangling Edge Rate",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md"
+      ],
+      "reported_in_doc": "Orphan Entity Rate: 0.0%",
+      "actual_raw_value": "Orphan Entity Rate: 58.9% (93/158 entities); Dangling Relation Rate: 0.0%",
+      "root_cause": "Definition confusion: degree=0 orphan entities were mislabeled as dangling relation edges (relations referencing invalid node IDs)."
+    },
+    {
+      "id": "DISC-05",
+      "issue": "Post-Rerank Hit@5 Failure Identification",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md",
+        "evaluation/outputs/answer_error_analysis.md"
+      ],
+      "reported_in_doc": "Q17 described as the sole failure across all retrieval stages",
+      "actual_raw_value": "Q17 is the sole failure in Pre-Rerank candidate retrieval (rank 7). In Post-Rerank, Q17 is promoted to Rank 1, but Q40 (Grading breakdown) is demoted from Rank 1 to Rank 6, causing Q40 to become the post-rerank Hit@5 miss and triggering LLM refusal.",
+      "root_cause": "Failing to distinguish between pre-rerank candidate pool failures and post-rerank context window failures."
+    },
+    {
+      "id": "DISC-06",
+      "issue": "Internal Keyword Recall Inconsistency in Error Analysis",
+      "documents_affected": [
+        "evaluation/outputs/answer_error_analysis.md"
+      ],
+      "reported_in_doc": "Header states Mean Keyword Recall: 54.5%; Recommendation #1 states Keyword Recall: 82.4%",
+      "actual_raw_value": "Mean Keyword Recall across 50 questions is exactly 54.53% (27.2667 / 50)",
+      "root_cause": "Stale number (82.4%) left over from an earlier sub-group evaluation or draft."
+    },
+    {
+      "id": "DISC-07",
+      "issue": "Dual MRR Presentation Without Contextual Labeling",
+      "documents_affected": [
+        "METRICS_MATRIX.md"
+      ],
+      "reported_in_doc": "MRR@5 reported as 0.785 in Section 2.4 / Section 3, but as 0.788 in Section 2.4 and Section 3 summary pitch",
+      "actual_raw_value": "0.7853 is strict capped MRR@5 (ranks > 5 score 0); 0.7882 is unbounded MRR including Q17 at rank 7 (1/7 = 0.1429)",
+      "root_cause": "Interchanging strict MRR@5 and unbounded MRR without consistently qualifying the cutoff."
+    },
+    {
+      "id": "DISC-08",
+      "issue": "Test Suite Pass Count Drift Across Documentation",
+      "documents_affected": [
+        "evaluation/outputs/final_evaluation_report.md",
+        "evaluation/outputs/baseline_before_evaluation_hardening.json",
+        "README.md",
+        "METRICS_MATRIX.md"
+      ],
+      "reported_in_doc": "584 passed, 6 skipped (final_evaluation_report.md) vs 580 passed, 10 skipped (METRICS_MATRIX.md line 34) vs 594 passed, 6 skipped (current repo)",
+      "actual_raw_value": "600 collected: 594 passed, 6 skipped, 0 failed",
+      "root_cause": "Recent test additions (+10 tests: 2 answer error, 4 canonical relation, 2 graph rag, 2 routing) were not back-propagated to all documentation files."
+    }
+  ]
+}

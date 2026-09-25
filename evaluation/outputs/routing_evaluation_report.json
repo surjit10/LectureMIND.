@@ -1,0 +1,167 @@
+{
+  "dataset": "evaluation/datasets/cs162_lecture1_routing_12.json",
+  "total_samples": 12,
+  "correct_samples": 12,
+  "overall_accuracy": 1.0,
+  "per_class_metrics": {
+    "vector_only": {
+      "total": 5,
+      "correct": 5,
+      "accuracy": 1.0
+    },
+    "graph_only": {
+      "total": 5,
+      "correct": 5,
+      "accuracy": 1.0
+    },
+    "graph+vector": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1.0
+    }
+  },
+  "confusion_matrix": {
+    "vector_only": {
+      "vector_only": 5,
+      "graph_only": 0,
+      "graph+vector": 0
+    },
+    "graph_only": {
+      "vector_only": 0,
+      "graph_only": 5,
+      "graph+vector": 0
+    },
+    "graph+vector": {
+      "vector_only": 0,
+      "graph_only": 0,
+      "graph+vector": 2
+    }
+  },
+  "samples": [
+    {
+      "query": "Which concepts depend on virtual memory according to the lecture?",
+      "expected_route": "graph_only",
+      "predicted_route": "graph_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "memory-management"
+    },
+    {
+      "query": "What topics are related to concurrency in the roadmap for this course?",
+      "expected_route": "graph_only",
+      "predicted_route": "graph_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "concurrency"
+    },
+    {
+      "query": "What is the path from the process abstraction to the resources it uses?",
+      "expected_route": "graph_only",
+      "predicted_route": "graph_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "hard",
+      "topic": "processes"
+    },
+    {
+      "query": "What was taught before the discussion of deadlock in the course roadmap?",
+      "expected_route": "graph_only",
+      "predicted_route": "graph_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "concurrency"
+    },
+    {
+      "query": "How is the thread concept connected to the kernel and the address space?",
+      "expected_route": "graph_only",
+      "predicted_route": "graph_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "hard",
+      "topic": "processes"
+    },
+    {
+      "query": "Explain the relationship between processes and threads and describe what each one means",
+      "expected_route": "graph+vector",
+      "predicted_route": "graph+vector",
+      "match": true,
+      "intent": "conceptual",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "processes"
+    },
+    {
+      "query": "Explain how virtual memory and page tables work together and what each provides",
+      "expected_route": "vector_only",
+      "predicted_route": "vector_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "memory-management"
+    },
+    {
+      "query": "Explain what the kernel provides and how file systems are connected to it",
+      "expected_route": "graph+vector",
+      "predicted_route": "graph+vector",
+      "match": true,
+      "intent": "conceptual",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "kernel"
+    },
+    {
+      "query": "What was said about CPU scheduling later in the term?",
+      "expected_route": "vector_only",
+      "predicted_route": "vector_only",
+      "match": true,
+      "intent": "definition",
+      "is_lecture_wide": false,
+      "difficulty": "easy",
+      "topic": "scheduling"
+    },
+    {
+      "query": "How does the lecture describe protecting programs from each other?",
+      "expected_route": "vector_only",
+      "predicted_route": "vector_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "protection"
+    },
+    {
+      "query": "What was said about why many layers of abstraction are necessary?",
+      "expected_route": "vector_only",
+      "predicted_route": "vector_only",
+      "match": true,
+      "intent": "reasoning",
+      "is_lecture_wide": false,
+      "difficulty": "medium",
+      "topic": "abstraction"
+    },
+    {
+      "query": "Describe the devices the lecture says the OS must tie together",
+      "expected_route": "vector_only",
+      "predicted_route": "vector_only",
+      "match": true,
+      "intent": "factual_qa",
+      "is_lecture_wide": false,
+      "difficulty": "easy",
+      "topic": "devices"
+    }
+  ],
+  "statistical_context": {
+    "n": 12,
+    "weight_per_sample_pct": 8.33,
+    "notes": "Evaluated on cs162_lecture1_routing_12.json containing distinct vector_only (N=5), graph_only (N=5), and graph+vector (N=2) queries. Each sample represents 8.33 percentage points. Do not extrapolate generalization beyond the tested heuristic pattern coverage."
+  }
+}

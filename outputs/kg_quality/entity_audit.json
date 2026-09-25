@@ -1,36 +1,729 @@
 {
-  "total_entities": 9,
-  "valid_entities": 8,
-  "fragment_count": 1,
-  "excessive_length_count": 1,
-  "generic_count": 0,
-  "orphan_count": 1,
+  "total_entities": 158,
+  "valid_entities": 150,
+  "fragment_count": 0,
+  "excessive_length_count": 6,
+  "generic_count": 2,
+  "orphan_count": 93,
   "duplicate_groups_count": 0,
-  "fragment_rate": 0.1111,
-  "generic_rate": 0.0,
-  "orphan_rate": 0.1111,
-  "heuristic_accept_rate": 0.8889,
-  "gold_entity_precision": 0.5556,
-  "gold_entity_recall": 0.3125,
-  "gold_entity_f1": 0.4,
-  "gold_evaluation_method": "LLM-assisted reference labels, pending human verification",
-  "gold_entity_count": 16,
-  "matched_gold_entity_count": 5,
-  "tp_entity_count": 5,
+  "fragment_rate": 0.0,
+  "generic_rate": 0.0127,
+  "orphan_rate": 0.5886,
+  "heuristic_accept_rate": 0.9494,
+  "gold_entity_precision": null,
+  "gold_entity_recall": null,
+  "gold_entity_f1": null,
+  "gold_evaluation_method": null,
+  "gold_entity_count": 0,
+  "matched_gold_entity_count": 0,
+  "tp_entity_count": 0,
   "issues": [
     {
-      "entity_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000008",
-      "entity_name": "blueprint-style grid",
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000002",
+      "entity_name": "Internet",
       "issue_type": "ORPHAN",
       "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
       "severity": "LOW"
     },
     {
-      "entity_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000009",
-      "entity_name": "us a sinusoidal waveform. This is important because",
-      "issue_type": "FRAGMENT",
-      "reason": "Matches sentence fragment / clausal connector pattern: ^(us\\s+a|and\\s+then|this\\s+means|because\\s+the|which\\s+means|gives\\s+us|so\\s+that|therefore\\s+we|to\\s+fix|now\\s+the|we\\s+will|that\\s+is|due\\s+to)\\b",
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000003",
+      "entity_name": "ARPANET",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000004",
+      "entity_name": "World Wide Web",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000005",
+      "entity_name": "Bell's Law",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000006",
+      "entity_name": "Moore's Law",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000007",
+      "entity_name": "L1 cache reference",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000010",
+      "entity_name": "Mutex lock/unlock",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000017",
+      "entity_name": "DNS Server",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000019",
+      "entity_name": "Multimedia",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000020",
+      "entity_name": "Windowing System",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000021",
+      "entity_name": "Browser",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000022",
+      "entity_name": "Search Query",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000026",
+      "entity_name": "Switchboard Operator",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000027",
+      "entity_name": "Computer Operator",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000028",
+      "entity_name": "System",
+      "issue_type": "GENERIC_STOPWORD",
+      "reason": "Matches generic non-concept dictionary: 'System'",
+      "severity": "MEDIUM"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000044",
+      "entity_name": "Process",
+      "issue_type": "GENERIC_STOPWORD",
+      "reason": "Matches generic non-concept dictionary: 'Process'",
+      "severity": "MEDIUM"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000048",
+      "entity_name": "System Library",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000050",
+      "entity_name": "Hypervisor",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000051",
+      "entity_name": "Docker",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000053",
+      "entity_name": "Register",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000058",
+      "entity_name": "Input/Output Controller",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000060",
+      "entity_name": "System Libraries",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000062",
+      "entity_name": "Scheduler Queue",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000063",
+      "entity_name": "Shared Data",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000064",
+      "entity_name": "Idle Process",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000065",
+      "entity_name": "CPU",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000067",
+      "entity_name": "Protection Boundary",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000068",
+      "entity_name": "Segmentation Fault",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000069",
+      "entity_name": "Virtual Machine",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000075",
+      "entity_name": "Tiny OS",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000076",
+      "entity_name": "I/O",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000077",
+      "entity_name": "Processor protection",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000078",
+      "entity_name": "Power management",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000079",
+      "entity_name": "Look and feel",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000080",
+      "entity_name": "Compiled Program",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000081",
+      "entity_name": "System Libs",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000083",
+      "entity_name": "Core OS",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000085",
+      "entity_name": "Locking",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000087",
+      "entity_name": "Device Driver",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000088",
+      "entity_name": "Network File System",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000089",
+      "entity_name": "Clustered High-Availability System",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000090",
+      "entity_name": "Peer-to-Peer System",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000091",
+      "entity_name": "Tessellation",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000092",
+      "entity_name": "Ocean Store",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000093",
+      "entity_name": "Quantum Computing",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000095",
+      "entity_name": "Swarm",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000096",
+      "entity_name": "Global Data Plane",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000097",
+      "entity_name": "Data Capsule",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000099",
+      "entity_name": "Sections TBA",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000100",
+      "entity_name": "Neil Kulkarni",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000101",
+      "entity_name": "Akshat Gokhale",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000102",
+      "entity_name": "Alina Dan",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000103",
+      "entity_name": "William Hsu",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000104",
+      "entity_name": "John Markham",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000105",
+      "entity_name": "Taj Shaik",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000106",
+      "entity_name": "Early Drop Deadline",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000107",
+      "entity_name": "Drop Deadline",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000109",
+      "entity_name": "Camera Requirement",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000110",
+      "entity_name": "Discussion Sessions",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000111",
+      "entity_name": "Design Reviews",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000112",
+      "entity_name": "Office Hours",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000113",
+      "entity_name": "Exams",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000114",
+      "entity_name": "Virtual Class",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000116",
+      "entity_name": "Coffee Houses",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000118",
+      "entity_name": "cs162.eecs.berkeley.edu",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000119",
+      "entity_name": "Principles and Practices of Operating Systems",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000120",
+      "entity_name": "O'Reilly animal books",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000121",
+      "entity_name": "cloud operating system",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000123",
+      "entity_name": "project zero",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000124",
+      "entity_name": "GitHub account",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000125",
+      "entity_name": "Autograder",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000129",
+      "entity_name": "Camera",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000130",
+      "entity_name": "Design doc",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000131",
+      "entity_name": "Slack",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000132",
+      "entity_name": "Messenger",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000134",
+      "entity_name": "Time-zone survey",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000139",
+      "entity_name": "Resource Allocation",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000141",
+      "entity_name": "Hyperthreading",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000142",
+      "entity_name": "Linux 2.2.0",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000143",
+      "entity_name": "Mars Curiosity Rover",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000144",
+      "entity_name": "Firefox",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000145",
+      "entity_name": "Android",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000146",
+      "entity_name": "Linux 3.1",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000147",
+      "entity_name": "Windows 7",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000148",
+      "entity_name": "Windows Vista",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000149",
+      "entity_name": "Facebook",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000150",
+      "entity_name": "Mac OS",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000151",
+      "entity_name": "Real-time operating system",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000152",
+      "entity_name": "Programming",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000153",
+      "entity_name": "t there's a lot of material in this",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 35 chars / 8 words, likely a descriptive clause rather than atomic concept.",
       "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000153",
+      "entity_name": "t there's a lot of material in this",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000154",
+      "entity_name": "template for internet history and evolution Title: Evolution",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 60 chars / 8 words, likely a descriptive clause rather than atomic concept.",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000154",
+      "entity_name": "template for internet history and evolution Title: Evolution",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000155",
+      "entity_name": "10/26/20 Kubiatowicz CS162 UCB Fall 2020 Lec1.7 what",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 52 chars / 8 words, likely a descriptive clause rather than atomic concept.",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000155",
+      "entity_name": "10/26/20 Kubiatowicz CS162 UCB Fall 2020 Lec1.7 what",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000156",
+      "entity_name": "Title Process Abstraction and Isolation in Operating Systems",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 60 chars / 8 words, likely a descriptive clause rather than atomic concept.",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000156",
+      "entity_name": "Title Process Abstraction and Isolation in Operating Systems",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000157",
+      "entity_name": "how to write code that runs in a",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 32 chars / 8 words, likely a descriptive clause rather than atomic concept.",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000157",
+      "entity_name": "how to write code that runs in a",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000158",
+      "entity_name": "Common Services and Specialized Operating Systems",
+      "issue_type": "EXCESSIVE_LENGTH",
+      "reason": "Entity name is 49 chars / 6 words, likely a descriptive clause rather than atomic concept.",
+      "severity": "HIGH"
+    },
+    {
+      "entity_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000158",
+      "entity_name": "Common Services and Specialized Operating Systems",
+      "issue_type": "ORPHAN",
+      "reason": "Entity has degree = 0 (no incident relationships in knowledge graph).",
+      "severity": "LOW"
     }
   ],
   "duplicate_groups": []

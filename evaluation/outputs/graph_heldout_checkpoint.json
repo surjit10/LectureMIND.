@@ -1,0 +1,92 @@
+{
+  "GQ01": {
+    "generated_answer": "The operating system translates the low\u2011level hardware interface into the high\u2011level application interface that a program uses.  \nEach running process is a protected environment, containing its own address space, one or more threads of control, and associated files and sockets.  \nThe OS ensures that these processes are isolated from one another, protecting each process\u2019s memory and resources.  \nIt also manages the allocation of CPU time and other resources, giving the illusion that multiple processes can run concurrently on a single processor."
+  },
+  "GQ02": {
+    "generated_answer": "The lecture defines a process as an environment that contains **one or more threads**. Threads are the core execution entities that can run concurrently within a process, providing the mechanism for concurrent program execution."
+  },
+  "GQ03": {
+    "generated_answer": "An essential prerequisite is the **instruction set architecture (ISA)** of the system.  \nThe lecture notes state, \u201cthe system, ISA, by the way, stands for instruction set architecture,\u201d indicating that a process can only be defined once the underlying ISA is established."
+  },
+  "GQ04": {
+    "generated_answer": "The kernel is the core component that uses the memory\u2011management subsystem to provide the operating system\u2019s address\u2011space abstraction.  In the lecture it is described that the kernel \u201cprovides a nice, clean address\u2011space abstraction\u201d so that memory can be treated as if it were entirely owned by a program.  The graph relationships in the material explicitly state: **Kernel \u2013[USED_BY]\u2192 Memory Management**."
+  },
+  "GQ05": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ06": {
+    "generated_answer": "The kernel is the part of the OS that turns raw storage devices into a usable file\u2011system abstraction.  In the lecture, the kernel is shown as used by I/O Management (see the graph), and the text explains that the OS \u201cturns a bunch of storage devices\u2026into a single abstraction, say, a file system.\u201d  Thus the kernel\u2019s I/O\u2011management functions provide the file\u2011system interface to persistent storage."
+  },
+  "GQ07": {
+    "generated_answer": "The lecture mentions **locks** as a synchronization mechanism for coordinating concurrent threads that share data, in the context of scheduling, deadlock, scalability, and fairness."
+  },
+  "GQ08": {
+    "generated_answer": "An operating\u2011system referee isolates programs by giving each one a **protected environment** that includes its own threads, address space, files and sockets.  \nBecause each process has a separate address space, a rogue process cannot read or write the memory of another process, preventing it from compromising other programs."
+  },
+  "GQ09": {
+    "generated_answer": "In the lecture, a **process** is defined as an isolated environment that contains an address space, open files, sockets, and **one or more threads of control** executing in that address space\u3010000027\u3011. The threads share the process\u2019s memory and resources while remaining isolated from other processes, giving the illusion of parallel execution when the operating system schedules them\u3010000031\u3011. Thus, the process abstraction provides the shared context for concurrent threads, while the OS manages scheduling to make them appear to run simultaneously."
+  },
+  "GQ10": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ11": {
+    "generated_answer": "The operating system is built around a kernel, which is the core component that implements the system\u2019s services.  \nThe graph shows a direct link: **Kernel -[USED_BY]-> Memory Management**, indicating that memory\u2011management functions are a part of what the kernel provides.  \nThus, the OS\u2019s relationship to memory management is mediated by the kernel, whose responsibilities include the memory\u2011management subsystem."
+  },
+  "GQ12": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ13": {
+    "generated_answer": "The operating system provides the **process** abstraction, which is an isolated environment that contains one or more **threads** of control. Each process has its own address space and the OS protects that address space from other processes. The OS is responsible for translating hardware instructions into the application interface and for managing the execution of threads inside each process."
+  },
+  "GQ14": {
+    "generated_answer": "The operating system relies on the kernel to provide CPU scheduling.  \nAccording to the lecture notes, the kernel is the core component that is **USED_BY** CPU scheduling, meaning the scheduling mechanisms live in the kernel and the OS calls into the kernel to decide which process runs next."
+  },
+  "GQ15": {
+    "generated_answer": "The process abstraction lets the operating system assign CPU time to each process. In the lecture, the professor shows that one process (\u201cbrown\u201d) is running while the other (\u201cgreen\u201d) is idle but protected. By switching the CPU\u2019s attention between processes, the OS schedules CPU time for each, creating the illusion of multiple processors."
+  },
+  "GQ16": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ17": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ18": {
+    "generated_answer": "The process abstraction gives each program its own **address space**\u2014a chunk of protected memory (Chunk\u202f000027).  \nThe operating system enforces this isolation so that a running process cannot read or write another process\u2019s memory; for example, the green process in the lecture is \u201cprotected\u201d while the brown process is actively using the CPU (Chunk\u202f000031).  \nThus, by isolating address spaces, the OS provides memory protection for each running process."
+  },
+  "GQ19": {
+    "generated_answer": "The lecture defines the **process abstraction** as the set of threads, address spaces, files, and sockets that together give a program the illusion of owning its own memory and I/O resources. Concurrent execution is achieved on a single processor by running one thread (the \u201cbrown\u201d process) at a time while other threads (the \u201cgreen\u201d process) remain protected and waiting for CPU time. This protection and isolation are managed by the operating system, which must allocate CPU registers, memory, and I/O devices to each process, thereby linking the process abstraction back to the OS\u2019s core resource\u2011allocation responsibilities."
+  },
+  "GQ20": {
+    "generated_answer": "The process abstraction is the environment that bundles threads, an address space, open files, and sockets. Within that environment the OS provides the mechanisms for concurrency management\u2014scheduling, locking, and dead\u2011lock detection\u2014so that threads can safely share or protect resources. Thus the OS returns to control by enforcing these synchronization primitives on the threads that live inside each process\u2019s isolated address space."
+  },
+  "GQ21": {
+    "generated_answer": "The operating system turns physical disk devices (disks, USB keys, cloud storage) into a single file\u2011system abstraction that programs can use without knowing where the bits are actually stored.  \nThrough that abstraction the OS uses the processor to issue disk I/O commands and uses memory (for buffers, caches, and the virtual address space) to hold data temporarily while it is moved to or from the persistent storage.  \nThus, persistent storage is accessed indirectly through OS\u2011managed files, with the processor and memory handling the data movement and bookkeeping on behalf of applications."
+  },
+  "GQ22": {
+    "generated_answer": "The operating system sits on top of the hardware, with the kernel running directly on the processor and memory of the machine. The kernel uses its subsystems\u2014memory management, CPU scheduling, I/O management, communications, and multitasking\u2014to provide clean abstractions such as threads and address spaces. Through these abstractions the OS presents the illusion of independent processors and unlimited memory to programs, while hiding the underlying hardware details."
+  },
+  "GQ23": {
+    "generated_answer": "The OS gives each process its own process descriptor, thread descriptor, and address space, so a running process uses the CPU registers and memory while the others are not running but are still protected.  By allocating separate threads, files, sockets, and linked libraries, the OS isolates processes from one another.  The \u201creferee\u201d component of the OS enforces this isolation and protects system resources such as memory and I/O devices, preventing one process from accessing another\u2019s data or hardware."
+  },
+  "GQ24": {
+    "generated_answer": "The process abstraction gives the operating system a clean, isolated environment to manage: each process has its own address space, thread descriptors, and system state (files, sockets, etc.). The OS schedules CPU time by switching the processor\u2019s registers between these process descriptors, so that each process \u201cgets CPU time\u201d even though only one core is present. When a process yields or blocks, control returns to the OS, which then chooses the next process to run\u2014this coordination of CPU allocation and resource protection is the core role of the operating system."
+  },
+  "GQ25": {
+    "generated_answer": "A process abstraction includes an address space, one or more threads, and a system state that contains open files and sockets (Chunk\u202f000027).  \nThe operating system supplies the file\u2011system abstraction, letting the process treat files as if they were part of its own environment (Chunk\u202f000021).  \nWhen a process opens a file, the OS mediates access, providing protection and isolation and thereby acting as the referee for those resources."
+  },
+  "GQ26": {
+    "generated_answer": "No direct prerequisite relationship between the Global Data Plane and CPU Scheduling is indicated in the lecture materials. The graph entries show no connection between those concepts."
+  },
+  "GQ27": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ28": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ29": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  },
+  "GQ30": {
+    "generated_answer": "Insufficient evidence found in lecture."
+  }
+}
