@@ -205,9 +205,7 @@ def _build_debug_trace(state: Dict[str, Any]) -> Dict[str, Any]:
 @router.post("/query", response_model=QueryResponse)
 async def query_endpoint(request: QueryRequest):
     """
-    Execute the full query pipeline.
-
-    DSPy Planner → LangGraph → Neo4j/Qdrant → Reranker → Answer Generator
+    QueryPlanner → Single-pass Orchestrator → Neo4j/Qdrant → Reranker → Answer Generator
 
     Request: QueryRequest (query field only)
     Response: QueryResponse (answer, sources, graph_path, prerequisites)

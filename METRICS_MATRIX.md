@@ -28,10 +28,10 @@
 | Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
 | Reranker | Global cross-encoder `BAAI/bge-reranker-base` (XLM-R), CPU, process singleton; dynamic int8 quantization (`RERANKER_QUANTIZE`) with automatic FP32 fallback | `rerank_service.py`, `reranker_loader.py`, `app.py` |
 | Hybrid retrieval | Dense (`bge-large-en-v1.5`) + BM25 lexical candidates fused via Reciprocal Rank Fusion (RRF) before cross-encoder reranking; enabled by default (`ENABLE_HYBRID_RETRIEVAL`) | `retrieval/hybrid/bm25_retriever.py`, `config.py` |
-| Knowledge graph | Production run: CS162 (158 entities / 103 relations), MIT (87 entities / 94 relations), Self-Attention (82 entities / 65 relations); **262 total relations**, 0 dangling — all re-verified by audit against the current packages in `0-output/` | Kaggle package audit (`audit_package.py`) |
+| Knowledge graph | Production run: CS162 (158 entities / 103 relations; 93 orphan entities = 58.9% isolated background concepts, 0 dangling relations), MIT (87 entities / 94 relations), Self-Attention (82 entities / 65 relations); **262 total relations**, 0 dangling — all re-verified by audit against the current packages in `0-output/` | Kaggle package audit (`audit_package.py`) |
 | Prerequisite DAG | Strict DAG enforced via deterministic DFS cycle resolution; 29 prerequisites (CS162), 15 (MIT), 14 (Self-Attention), **58 total prerequisites**, 0 cycles / 0 self-loops across all packages (re-verified). Reference-label F1 is only defined for the Transformer lecture (the sole annotated one) — see §2.6 | `evaluation/knowledge_graph/` |
 | Content scale | Ingested long-lecture packages (48–98 chunks / 44–83 min); package size: **208–437 KB** (replacing 1+ GB video) | `0-output/` |
-| Automated tests | **580 passing, 10 skipped** (skips: optional heavy deps absent locally / live-server scripts moved to `scripts/manual/`) — planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction | `pytest` |
+| Automated tests | **594 passing, 6 skipped** (600 collected; skips: optional sentence-transformers absent in .venv) — planner, retrieval, hybrid retrieval, reranker, prerequisite inference, KG auditor, loader, isolation, pipeline, extraction | `pytest` |
 
 ---
 
@@ -84,21 +84,27 @@ Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 que
 |---|---|---|
 | Routing accuracy | **0.980** (49/50) | 1.000 |
 | Visual routing accuracy (`need_visual`) | **1.000** | 1.000 |
-| Hit@5 *(Primary Sufficiency)* | **0.980** | 1.000 |
-| MRR@5 *(Primary Rank-1, strict: reciprocal rank capped at k=5)* | **0.785** | 1.000 |
-| MRR *(untruncated diagnostic; some relevant chunks rank beyond position 5)* | **0.788** | 1.000 |
+| Pre-Rerank Hit@1 *(Coverage at Rank 1)* | **0.660** (33/50) | 1.000 |
+| Pre-Rerank Hit@3 *(Coverage at Rank 3)* | **0.880** (44/50) | 1.000 |
+| Hit@5 *(Primary Sufficiency)* | **0.980** (49/50) | 1.000 |
+| Strict MRR@5 *(Primary Rank-1, reciprocal rank strictly capped at k=5)* | **0.7853** | 1.000 |
+| Unbounded MRR *(untruncated diagnostic over 15-candidate list)* | **0.7882** | 1.000 |
 | Recall@5 *(Primary Coverage)* | **0.862** | 1.000 |
 | NDCG@5 *(Primary Ranking Order)* | **0.767** | 1.000 |
 | Precision@5 *(Secondary IR)* | 0.280 | 0.400 |
-| Ranking quality (rerank MRR) | **0.918** | 1.000 |
-| Answer F1 | **0.459** | 0.714 |
-| Keyword recall | **0.545** | 1.000 |
+| Post-Rerank Hit@1 *(Cross-Encoder Rank 1)* | **0.860** (43/50) | 1.000 |
+| Post-Rerank Hit@3 *(Cross-Encoder Rank 3)* | **0.960** (48/50) | 1.000 |
+| Ranking quality (post-rerank reciprocal rank mean) | **0.9183** | 1.000 |
+| Answer F1 | **0.4594** | 0.714 |
+| Keyword recall | **0.5453** | 1.000 |
 | Citation completeness | **1.000** | 1.000 |
 | Citation coverage | **0.927** | 1.000 |
 | Chunk coverage | **1.000** | 1.000 |
 | Mean end-to-end latency | 20.51 s | 22.82 s |
 
-> **Note on Precision@5 (0.280) vs. Primary Metrics**: In single-lecture QA, ground-truth evidence is localized. In `cs162_lecture1_qa_50.json`, 27 questions (54%) have only 1 relevant chunk and 12 questions (24%) have only 2. The absolute mathematical upper bound for Precision@5 across this dataset is **0.3520 (35.20%)**. A score of 0.280 represents **79.5% of the theoretical maximum achievable by any system**. For this reason, the primary retrieval evaluation metrics for LectureMIND are **Hit@5 (0.980)**, **MRR@5 (0.785 strict)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
+> **Note on Precision@5 (0.280) vs. Primary Metrics**: In single-lecture QA, ground-truth evidence is localized. In `cs162_lecture1_qa_50.json`, 27 questions (54%) have only 1 relevant chunk and 12 questions (24%) have only 2. The absolute mathematical upper bound for Precision@5 across this dataset is **0.3520 (35.20%)**. A score of 0.280 represents **79.5% of the theoretical maximum achievable by any system**. For this reason, the primary retrieval evaluation metrics for LectureMIND are **Hit@5 (0.980)**, **Strict MRR@5 (0.7853)**, **Recall@5 (0.862)**, and **NDCG@5 (0.767)**.
+
+> **Pipeline Tradeoff (Q17 vs Q40):** Cross-encoder reranking produces a clear pipeline shift: Pre-rerank, Q17 (*abstraction necessity*) was at Rank 7 (Hit@5 miss) while Q40 was at Rank 1. Post-rerank, the cross-encoder promoted Q17 to Rank 1 (success) but demoted Q40 (*grading breakdown*) to Rank 6, causing Q40 to trigger evidence-gated refusal. Exactly 1 miss occurs in both stages (98.0% Hit@5), illustrating the reranker/context-window tradeoff.
 
 **By question type (measured; rerank MRR = 1/rank of the first expected chunk in the final reranked order):**
 
@@ -168,6 +174,23 @@ All four audits were computed from the current packages in `0-output/`; the CS16
 
 Provenance note (updated 2026-09-15): every number in this file traces to either (a) a stored benchmark report generated by the code in this repo (`evaluation/outputs/`), (b) a regenerated audit artifact (`outputs/kg_quality_latest_0output/`), or (c) a live execution recorded at the time of measurement.
 
+#### Knowledge Graph Evaluations (Decoupled Benchmark Suite)
+
+LectureMIND maintains two distinct evaluations for graph functionality:
+
+##### A. Targeted Graph Traversal Integration Test (`cs162_lecture1_graph_qa.json`)
+*Regression verification of Neo4j Cypher traversal and schema mechanics:*
+- **Sample size:** N = 20 (10 1-hop, 5 2-hop, 5 3-hop)
+- **Path Recovery Success:** **20/20 (100.0%)** on targeted paths
+- **Status:** Reclassified as an internal integration test verifying Cypher query formation rather than an independent GraphRAG accuracy metric.
+
+##### B. Independent Held-Out GraphRAG Benchmark (`cs162_lecture1_graph_qa_heldout.json`)
+*Blind evaluation authored independently from lecture instructional content (`neo4j_used_during_question_creation: false`):*
+- **Sample size:** N = 30 (8 1-hop, 10 2-hop, 7 3-hop, 5 unanswerable negative traps)
+- **Structural Path Recovery (Live Neo4j):** **52.0%** (13/25) — 1-hop: 50.0% (4/8), 2-hop: 70.0% (7/10), 3-hop: 28.6% (2/7)
+- **Downstream Hybrid Chunk Hit@5:** **84.0%** (21/25) under Graph + BM25 RRF (+20.0% over BM25-only 64.0%)
+- **Negative Question Resistance:** **100.0% correct refusal** (0 false affirmative claims)
+
 #### Downstream GraphRAG Retrieval Benchmark (CS162 — 12 Gold Routing Queries)
 
 Evaluated via `evaluation/knowledge_graph/graphrag_evaluator.py` against `0-output/CS162_...zip`:
@@ -214,7 +237,7 @@ Empirical extraction yield across three complete production lecture packages in 
 | Cross-lecture data isolation | Yes — hard guards, tested | Partial | n/a | n/a |
 | Domain-adaptive reranker training | Yes — dedicated training pipeline and automated triplet dataset generator | No | No | No |
 | Private / offline (no API dependence) | Yes — local Ollama + Neo4j + Qdrant | Yes | Yes | No — requires API |
-| Benchmark infra (RAGAS, QA harness, load test) | Yes — harness + live run: **50-QA curated (strict MRR@5 0.785, Hit@5 0.980, routing 0.980)** | No | No | No |
+| Benchmark infra (QA harness, KG audit suite; scaffolded RAGAS/load-test) | Yes — harness + live run: **50-QA curated (strict MRR@5 0.785, Hit@5 0.980, routing 0.980)** | No | No | No |
 | Measured eval numbers to show | Yes — retrieval/rerank + live QA + latency + graph/visual types | Partial | No | No |
 | Source-video footprint | 83-min 720p lecture → **436 KB knowledge package** (~2,800× smaller); corpus ≈ 85 MB for 725 lectures | Stores raw video | Stores raw video | n/a |
 

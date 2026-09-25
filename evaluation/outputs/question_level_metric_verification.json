@@ -1,0 +1,1408 @@
+{
+  "benchmark": "cs162_lecture1_qa_50.json",
+  "evaluation_run_source": "evaluation_report_20260811_105621.json",
+  "sample_size": 50,
+  "aggregated_pre_rerank": {
+    "hit@1": 0.66,
+    "hit@3": 0.88,
+    "hit@5": 0.98,
+    "mean_mrr": 0.7881900000000001,
+    "mean_ndcg": 0.7674,
+    "mean_answer_f1": 0.45938
+  },
+  "aggregated_post_rerank": {
+    "hit@1": 0.86,
+    "hit@3": 0.96,
+    "hit@5": 0.98,
+    "mean_mrr": 0.918334
+  },
+  "questions": [
+    {
+      "question_id": "Q01",
+      "question_text": "What is the Global Data Plane project?",
+      "difficulty": "medium",
+      "question_type": "definition",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.716,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The Global Data Plane is a project that develops cryptographically hardened \u201cdata containers,\u201d likened to shipping containers at a port. These secure containers can be moved between edge devices and t"
+    },
+    {
+      "question_id": "Q02",
+      "question_text": "How many devices could the original ARPANET handle?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.3673,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The original ARPANET could handle no more than\u202f256\u202fdevices. It was limited to supporting up to that number of connected machines."
+    },
+    {
+      "question_id": "Q03",
+      "question_text": "What is the main challenge of operating systems that the lecture closes with?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6309,
+      "answer_f1": 0.3846,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture closes by identifying **complexity** as the primary challenge for operating systems. It notes that modern applications consist of many modules running on diverse hardware and in many envir"
+    },
+    {
+      "question_id": "Q04",
+      "question_text": "What does the lecture say about how many processes typically run on a laptop?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4658,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture notes that a typical laptop has \u201cmany, many, many\u201d processes running all the time.  It estimates roughly\u202f50\u202fto\u202f100\u202fprocesses are present simultaneously, most of which are sleeping and will"
+    },
+    {
+      "question_id": "Q05",
+      "question_text": "What did the lecture say about SSL and security models?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6309,
+      "answer_f1": 0.3467,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture said that, as we move from device\u2011level protection to network\u2011level protection, we will cover security mechanisms such as SSL.\u202fIt also noted that the course will later explore \u201cmore intere"
+    },
+    {
+      "question_id": "Q06",
+      "question_text": "How many processors does a modern car have according to the lecture?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000084"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.3869,
+      "answer_f1": 0.3333,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture states that modern cars contain **hundreds of processors**."
+    },
+    {
+      "question_id": "Q07",
+      "question_text": "Which topics will the class cover according to the lecture?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008 (gold evidence at rank 5)"
+      ],
+      "gold_rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "reciprocal_rank": 0.2,
+      "ndcg": 0.1815,
+      "answer_f1": 0.2632,
+      "post_rerank": {
+        "gold_rank": 4,
+        "hit@1": 0,
+        "hit@3": 0,
+        "hit@5": 1,
+        "reciprocal_rank": 0.25
+      },
+      "answer_preview": "The lecture says the class will cover system\u2011programming fundamentals such as processes, I/O, networking, and virtual machines. It will focus heavily on concurrency\u2014including threads, scheduling, lock"
+    },
+    {
+      "question_id": "Q08",
+      "question_text": "What did the lecture say about the honor code?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4694,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture noted that UC\u202fBerkeley has an Academic Honor Code that requires members to act with honesty, integrity, and respect for others, and the instructor urged students to review it.\u202fHe also clar"
+    },
+    {
+      "question_id": "Q09",
+      "question_text": "What is the enrollment limit for CS162?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000054"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000054 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4783,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The enrollment limit for CS162 is\u202f428 students. The instructor noted that this limit has just been raised to that number and will not be increased further."
+    },
+    {
+      "question_id": "Q10",
+      "question_text": "What is the challenge of testing software for all environments?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.3478,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "Testing software for every possible environment is infeasible because applications consist of many modules that run on numerous devices and hardware platforms, creating an enormous number of component"
+    },
+    {
+      "question_id": "Q11",
+      "question_text": "What is the syllabus of CS162 according to the lecture?",
+      "difficulty": "medium",
+      "question_type": "summary",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6934,
+      "answer_f1": 0.6822,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture\u2019s syllabus lists the core OS concepts that will be covered, including processes, I/O, networks and virtual machines; concurrency topics such as threads, scheduling, locks, deadlock, scalab"
+    },
+    {
+      "question_id": "Q12",
+      "question_text": "What does the lecture say about the word 'system'?",
+      "difficulty": "medium",
+      "question_type": "definition",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6309,
+      "answer_f1": 0.7629,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture defines a **system** as \u201csomething with many interrelated parts where typically the sum is much greater than the sum of its parts.\u201d\u202fEach part can interact with every other part, leading to"
+    },
+    {
+      "question_id": "Q13",
+      "question_text": "What did the lecture say about the Intel Skylake example?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000092"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000092 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.406,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture highlighted Intel\u2019s 2017 Skylake processor as an example of massive parallelism, noting that a single chip can contain up to 28 cores, each with two hyper\u2011threads, giving roughly\u202f58\u202fthread"
+    },
+    {
+      "question_id": "Q14",
+      "question_text": "What is Alewife?",
+      "difficulty": "medium",
+      "question_type": "definition",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6309,
+      "answer_f1": 0.5588,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "Alewife was a chip (and associated project) that John Kubiatowicz designed for his Ph.D. work at MIT.\u202fIt was one of the first shared\u2011memory multiprocessors that also supported message\u2011passing communic"
+    },
+    {
+      "question_id": "Q15",
+      "question_text": "What does the lecture say about the number of computers per person?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4423,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture notes that the number of computers (or devices) per person is rising dramatically\u2014from a single computer serving millions in the early days to each individual now owning hundreds of device"
+    },
+    {
+      "question_id": "Q16",
+      "question_text": "How does a DNS lookup work when you use your phone to browse the web?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.5303,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "When you browse with your phone, the first step is a DNS request that asks the network\u2019s DNS servers for the IP address of the web site you want to reach. Those DNS servers respond with the address, a"
+    },
+    {
+      "question_id": "Q17",
+      "question_text": "Why must the OS provide a consistent programming abstraction to applications?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007 (gold evidence at rank 7)"
+      ],
+      "gold_rank": 7,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "reciprocal_rank": 0.1429,
+      "ndcg": 0.0,
+      "answer_f1": 0.1554,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The operating system sits between rapidly changing hardware and the programs that run on it, and it must give every program a stable view of the machine.  As the transcript notes, \u201cyou make incredible"
+    },
+    {
+      "question_id": "Q18",
+      "question_text": "What are the requirements for group projects in CS162?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000075"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.9197,
+      "answer_f1": 0.4815,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "Group projects in CS162 must consist of exactly four members; groups of three, five, or any other size are not allowed. All members of a group must be enrolled in the same course section and share the"
+    },
+    {
+      "question_id": "Q19",
+      "question_text": "What happens when a program becomes a process?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.2305,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "When the operating system loads a binary into memory, the static program is turned into a **process**.\u202fThe first step is that the executable file is read and its code and data are placed in a newly\u2011cr"
+    },
+    {
+      "question_id": "Q20",
+      "question_text": "What does the lecture say about the Mars Rover and its operating system?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.5273,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture explains that the Mars rover ran a **real\u2011time operating system** on very limited hardware\u2014a 20\u202fMHz processor with only 128\u202fMB of DRAM. It was deployed on Mars for more than a decade, and "
+    },
+    {
+      "question_id": "Q21",
+      "question_text": "What does the lecture say about files being an abstraction?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022 (gold evidence at rank 3)"
+      ],
+      "gold_rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.3333,
+      "ndcg": 0.2346,
+      "answer_f1": 0.4176,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture explains that a file is an abstraction that hides a collection of individual disk blocks, which are combined with inodes to present a single, convenient object. By treating those blocks as"
+    },
+    {
+      "question_id": "Q22",
+      "question_text": "How does the lecture describe networking as part of the internet system?",
+      "difficulty": "easy",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4545,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture characterizes networking as \u201cone of the amazing aspects\u201d of the huge Internet system, providing massive numbers of connections, inter\u2011connectivity and multiple redundancies. It notes that "
+    },
+    {
+      "question_id": "Q23",
+      "question_text": "Why does the lecture describe the internet as looking like a brain?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.212,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecturer compares the Internet to a brain because the two share the same dominant structural traits that the professor wants the students to notice.  \n\nFirst, the Internet is described as a **mass"
+    },
+    {
+      "question_id": "Q24",
+      "question_text": "What homework should students start right away?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000072"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6934,
+      "answer_f1": 0.5946,
+      "post_rerank": {
+        "gold_rank": 2,
+        "hit@1": 0,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 0.5
+      },
+      "answer_preview": "Students should begin **Homework\u202fZero** right away. It is released in the first week and gets you started with setting up your GitHub account, virtual machine, and submitting to the autograder."
+    },
+    {
+      "question_id": "Q25",
+      "question_text": "What is the power density problem described in the lecture?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000088"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000088 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.5042,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture explains that if processor performance had kept increasing at the same rate after 2000, the resulting chips would have reached an extremely high power density\u2014comparable to a rocket nozzle"
+    },
+    {
+      "question_id": "Q26",
+      "question_text": "What collaboration is allowed and not allowed between groups?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4035,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "Allowed collaboration between groups includes explaining concepts, discussing algorithms, testing strategies, and general debugging approaches, as well as searching online for generic algorithms that "
+    },
+    {
+      "question_id": "Q27",
+      "question_text": "What does the lecture say about time scales like nanoseconds and femtoseconds?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.2807,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture notes that computer systems must operate across a very wide range of time scales\u2014from femtoseconds or nanoseconds for low\u2011level hardware events up to seconds for higher\u2011level operations. I"
+    },
+    {
+      "question_id": "Q28",
+      "question_text": "What did the lecture say about the cloud and cloud operating systems?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4516,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture noted that, although the cloud is now a routine part of everyday computing, it has not become a single, monolithic \u201ccloud operating system.\u201d  The term \u201ccloud OS\u201d may be used, but what exis"
+    },
+    {
+      "question_id": "Q29",
+      "question_text": "What does the lecture say about caches?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000018"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000018 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4835,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture explains that caches are used to make slow memory appear fast.\u202fIt describes a cache hierarchy as trying to achieve the speed of the smallest component (the registers) while providing the c"
+    },
+    {
+      "question_id": "Q30",
+      "question_text": "What is the course website and where should students get information?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.7039,
+      "answer_f1": 0.4865,
+      "post_rerank": {
+        "gold_rank": 2,
+        "hit@1": 0,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 0.5
+      },
+      "answer_preview": "The course website is\u202f**cs162.exe.berkeley.edu**, which hosts the course schedule, slides, appendices, sample problems, old exams, and other resources.\u202fFor most up\u2011to\u2011date information, students should"
+    },
+    {
+      "question_id": "Q31",
+      "question_text": "What role does virtual memory play in protecting processes from each other?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000042",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000042 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.7654,
+      "answer_f1": 0.422,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "Virtual memory creates a protection boundary by mapping only the memory regions that the operating system has assigned to each process. Because a process can access only the addresses the OS has mappe"
+    },
+    {
+      "question_id": "Q32",
+      "question_text": "What does the lecture say about the OS providing common services like file systems?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6509,
+      "answer_f1": 0.4242,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture describes the operating system\u2019s \u201cglue\u201d as a set of common services that include a file system, which gives programs a clean storage abstraction.\u202fIt also groups other services such as wind"
+    },
+    {
+      "question_id": "Q33",
+      "question_text": "What is the kernel and why do people disagree about what it includes?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.7039,
+      "answer_f1": 0.1706,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The kernel is \u201cthe one program running at all times on the computer\u201d and is considered \u201cthe core of the operating system\u201d\u202f\u2014\u202fthat is, the always\u2011present component that directly controls the hardware an"
+    },
+    {
+      "question_id": "Q34",
+      "question_text": "What does the lecture say about how to think like an engineer?",
+      "difficulty": "easy",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000016",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000010"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000016 (gold evidence at rank 5)"
+      ],
+      "gold_rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "reciprocal_rank": 0.2,
+      "ndcg": 0.1815,
+      "answer_f1": 0.3099,
+      "post_rerank": {
+        "gold_rank": 2,
+        "hit@1": 0,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 0.5
+      },
+      "answer_preview": "The lecture says that thinking like an engineer means adopting a robustness\u2011oriented mindset.\u202fYou must handle errors meticulously, defend against malicious or careless users, and treat the computer as"
+    },
+    {
+      "question_id": "Q35",
+      "question_text": "Who is the instructor of CS162 and what is his background?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000052",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000052 (gold evidence at rank 2)"
+      ],
+      "gold_rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.5,
+      "ndcg": 0.6241,
+      "answer_f1": 0.6667,
+      "post_rerank": {
+        "gold_rank": 2,
+        "hit@1": 0,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 0.5
+      },
+      "answer_preview": "The instructor of CS162 is Professor\u202fJohn\u202fKubiatowicz. His background includes work on hardware design (the Alewife project at MIT, where he helped design the CMMU and modify a SPARC processor) and ex"
+    },
+    {
+      "question_id": "Q36",
+      "question_text": "What does the lecture say about Linux and other systems' lines of code?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000089"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000089 (gold evidence at rank 5)"
+      ],
+      "gold_rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "reciprocal_rank": 0.2,
+      "ndcg": 0.2372,
+      "answer_f1": 0.4516,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture includes a slide titled \u201cIncreasing Software Complexity\u201d that lists the size of several systems in **millions of lines of code**\u2014for example, Linux\u202f2.2.0, Linux\u202f3.1 (recent), Windows\u202f7, Mi"
+    },
+    {
+      "question_id": "Q37",
+      "question_text": "What does the lecture say about whether the windowing system belongs in the kernel?",
+      "difficulty": "hard",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000048",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000047"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000048 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.5505,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture explains that the windowing system can be placed either outside or inside the kernel, depending on the operating system.\u202fFor example, Windows\u202fNT originally kept the windowing system outsid"
+    },
+    {
+      "question_id": "Q38",
+      "question_text": "What did the lecture say about cameras being required for the class?",
+      "difficulty": "easy",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000062",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000062 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.4693,
+      "answer_f1": 0.4381,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture said that cameras must be on for discussion sessions, design reviews, office hours, and for the Zoom\u2011proctored midterm exams, and attendance will be taken with the camera on for those acti"
+    },
+    {
+      "question_id": "Q39",
+      "question_text": "What is the definition of an operating system according to the lecture?",
+      "difficulty": "easy",
+      "question_type": "definition",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4882,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture says that an operating system is a special layer of software that gives applications access to hardware resources by providing convenient abstractions of devices, protected shared\u2011resource"
+    },
+    {
+      "question_id": "Q40",
+      "question_text": "What is the grading breakdown for CS162?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000078"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.6131,
+      "answer_f1": 0.0,
+      "post_rerank": {
+        "gold_rank": 6,
+        "hit@1": 0,
+        "hit@3": 0,
+        "hit@5": 0,
+        "reciprocal_rank": 0.1667
+      },
+      "answer_preview": "Insufficient evidence found in lecture."
+    },
+    {
+      "question_id": "Q41",
+      "question_text": "Where does the word 'operating' come from according to the lecture?",
+      "difficulty": "medium",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4598,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "According to the lecture, the word \u201coperating\u201d comes from the historical role of human operators.\u202fIt originally referred to switchboard operators who manually connected telephone calls, and later to c"
+    },
+    {
+      "question_id": "Q42",
+      "question_text": "How does the operating system switch between two processes to give the illusion of parallelism?",
+      "difficulty": "hard",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000035",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.7654,
+      "answer_f1": 0.5672,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The OS saves the current process\u2019s registers into its own process\u2011descriptor block, then loads the registers saved for the other process from its descriptor and resumes execution from where that proce"
+    },
+    {
+      "question_id": "Q43",
+      "question_text": "What did the lecture say about the course website and Piazza?",
+      "difficulty": "easy",
+      "question_type": "factual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000067"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4444,
+      "post_rerank": {
+        "gold_rank": 2,
+        "hit@1": 0,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 0.5
+      },
+      "answer_preview": "The lecture said that the course website (\u202fcs162.exe.berkeley.edu\u202f) is the central location for schedule\u2011related material\u2014including the syllabus, slides, videos, sample problems, appendices, and old e"
+    },
+    {
+      "question_id": "Q44",
+      "question_text": "What abstractions and higher-level objects does the operating system provide to applications?",
+      "difficulty": "medium",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.8304,
+      "answer_f1": 0.5361,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The operating system supplies clean, easy\u2011to\u2011use abstractions of the underlying hardware, making physical resources appear as if you have \u201cinfinite\u201d memory and a processor dedicated solely to you.\u202fIt "
+    },
+    {
+      "question_id": "Q45",
+      "question_text": "What does the lecture say about the OS being an illusionist?",
+      "difficulty": "easy",
+      "question_type": "conceptual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 0.8304,
+      "answer_f1": 0.6471,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The lecture calls the operating system an \u201cillusionist\u201d because it supplies clean, easy\u2011to\u2011use abstractions of the underlying physical resources.\u202fIt masks hardware limits so that programmers can tempo"
+    },
+    {
+      "question_id": "Q46",
+      "question_text": "What does the slide about network capacity show?",
+      "difficulty": "medium",
+      "question_type": "visual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.4746,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The slide titled **\u201cNetwork Capacity Still Increasing\u201d** shows a graph that plots\u202f*date*\u202f(1995\u202f\u2013\u202f2020) on the horizontal axis against\u202f*network rate*\u202f(1\u202f000\u202f\u2013\u202f1\u202f000\u202f000\u202fMbps) on the vertical axis. It i"
+    },
+    {
+      "question_id": "Q47",
+      "question_text": "What does the slide say about societal-scale information systems?",
+      "difficulty": "medium",
+      "question_type": "visual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000085"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000085 (gold evidence at rank 1)"
+      ],
+      "gold_rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 1.0,
+      "ndcg": 1.0,
+      "answer_f1": 0.7143,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The slide titled \u201cSocietal Scale Information Systems (Or the\u202f\u2018Internet of Things\u2019?)\u201d describes the world as a large distributed system in which microprocessors are embedded in virtually everything, ba"
+    },
+    {
+      "question_id": "Q48",
+      "question_text": "According to the slide, what does a process consist of?",
+      "difficulty": "easy",
+      "question_type": "visual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029 (gold evidence at rank 4)"
+      ],
+      "gold_rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "reciprocal_rank": 0.25,
+      "ndcg": 0.4307,
+      "answer_f1": 0.88,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "According to the slide, a process consists of an **address space**, **one or more threads of control executing in that address space**, and **additional system state** such as open files and open sock"
+    },
+    {
+      "question_id": "Q49",
+      "question_text": "What does the diagram of a compiled program's view of the world show?",
+      "difficulty": "medium",
+      "question_type": "visual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027 (gold evidence at rank 4)"
+      ],
+      "gold_rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "reciprocal_rank": 0.25,
+      "ndcg": 0.4307,
+      "answer_f1": 0.5484,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The diagram depicts a compiled program at the top, with the system libraries it uses shown inside it. Below the program is a **process**, which the operating system provides as an execution environmen"
+    },
+    {
+      "question_id": "Q50",
+      "question_text": "What does the protection slide show about processes?",
+      "difficulty": "medium",
+      "question_type": "visual",
+      "gold_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000040"
+      ],
+      "retrieved_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000040 (gold evidence at rank 3)"
+      ],
+      "gold_rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "reciprocal_rank": 0.3333,
+      "ndcg": 0.5,
+      "answer_f1": 0.537,
+      "post_rerank": {
+        "gold_rank": 1,
+        "hit@1": 1,
+        "hit@3": 1,
+        "hit@5": 1,
+        "reciprocal_rank": 1.0
+      },
+      "answer_preview": "The slide depicts several distinct processes\u2014Process\u202f1, Process\u202f2, and Process\u202f3\u2014each shown with its own address space, files, sockets, and threads. A red \u201cprotection boundary\u201d separates these process"
+    }
+  ]
+}

@@ -1,35 +1,35 @@
 {
-  "total_prerequisites": 3,
+  "total_prerequisites": 29,
   "is_dag": true,
   "cycle_count": 0,
   "self_loop_count": 0,
   "temporal_inversion_count": 0,
   "unsupported_count": 0,
-  "pedagogical_count": 3,
-  "gold_prerequisite_precision": 0.0,
-  "gold_prerequisite_recall": 0.0,
-  "gold_prerequisite_f1": 0.0,
-  "gold_evaluation_method": "Strict 1-to-1 exact matching against reference labels",
-  "gold_prerequisite_count": 10,
+  "pedagogical_count": 29,
+  "gold_prerequisite_precision": null,
+  "gold_prerequisite_recall": null,
+  "gold_prerequisite_f1": null,
+  "gold_evaluation_method": null,
+  "gold_prerequisite_count": 0,
   "matched_gold_prerequisite_count": 0,
   "tp_prerequisite_count": 0,
-  "fuzzy_prerequisite_precision": 0.3333,
-  "fuzzy_prerequisite_recall": 0.1,
-  "fuzzy_prerequisite_f1": 0.1538,
+  "fuzzy_prerequisite_precision": null,
+  "fuzzy_prerequisite_recall": null,
+  "fuzzy_prerequisite_f1": null,
   "cycles_detected": [],
   "issues": [],
   "edge_details": [
     {
-      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
-      "source_name": "alternating current",
-      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000001",
-      "target_name": "transformers",
-      "confidence": 0.925,
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000016",
+      "target_name": "Kernel",
+      "confidence": 0.7793,
       "signals": {
-        "discourse": 0.95,
-        "graph": 1.0,
+        "discourse": 0.0,
+        "graph": 0.8,
         "prominence": 1.0,
-        "temporal": 0.5
+        "temporal": 0.4623
       },
       "t_source": 0.0,
       "t_target": 0.0,
@@ -38,28 +38,28 @@
       "is_supported": true
     },
     {
-      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000002",
-      "source_name": "alternating current",
-      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000003",
-      "target_name": "direct current",
-      "confidence": 0.89,
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000018",
+      "target_name": "File System",
+      "confidence": 0.7121,
       "signals": {
-        "discourse": 0.95,
-        "graph": 0.0,
+        "discourse": 0.0,
+        "graph": 0.7,
         "prominence": 1.0,
-        "temporal": 0.5
+        "temporal": 0.4805
       },
       "t_source": 0.0,
-      "t_target": 0.0,
+      "t_target": 2703.82,
       "has_temporal_warning": false,
       "is_pedagogical": true,
       "is_supported": true
     },
     {
-      "source_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000003",
-      "source_name": "direct current",
-      "target_id": "vidssave_com_How_does_a_Transformer_work_Working_Principle_electrical_engineering_1080P_entity_000001",
-      "target_name": "transformers",
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000028",
+      "target_name": "System",
       "confidence": 0.715,
       "signals": {
         "discourse": 0.0,
@@ -74,58 +74,472 @@
       "is_supported": true
     },
     {
-      "tp_prerequisites": [],
-      "fp_prerequisites": [
-        "alternating current -> transformers",
-        "alternating current -> direct current",
-        "direct current -> transformers"
-      ],
-      "fn_prerequisites": [
-        "Alternating Current -> Magnetic Field",
-        "Alternating Current -> Transformer",
-        "Magnetic Field -> Electromotive Force",
-        "Coil -> Transformer",
-        "Electromotive Force -> Transformer",
-        "Transformer -> Step Up Transformer",
-        "Transformer -> Step Down Transformer",
-        "Coil -> Step Up Transformer",
-        "Transformer -> Three Phase Configuration",
-        "Three Phase Configuration -> Delta Y Connection"
-      ],
-      "strict_metrics": {
-        "tp": 0,
-        "fp": 3,
-        "fn": 10,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000030",
+      "target_name": "Memory",
+      "confidence": 0.7362,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.6416
       },
-      "fuzzy_metrics": {
-        "tp": 1,
-        "fp": 2,
-        "fn": 9,
-        "precision": 0.3333,
-        "recall": 0.1,
-        "f1": 0.1538,
-        "tp_prerequisites": [
-          "alternating current -> transformers"
-        ],
-        "fp_prerequisites": [
-          "alternating current -> direct current",
-          "direct current -> transformers"
-        ],
-        "fn_prerequisites": [
-          "Alternating Current -> Magnetic Field",
-          "Magnetic Field -> Electromotive Force",
-          "Coil -> Transformer",
-          "Electromotive Force -> Transformer",
-          "Transformer -> Step Up Transformer",
-          "Transformer -> Step Down Transformer",
-          "Coil -> Step Up Transformer",
-          "Transformer -> Three Phase Configuration",
-          "Three Phase Configuration -> Delta Y Connection"
-        ]
-      }
+      "t_source": 0.0,
+      "t_target": 335.12,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000031",
+      "target_name": "Cache",
+      "confidence": 0.9462,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 1.0,
+        "temporal": 0.6416
+      },
+      "t_source": 0.0,
+      "t_target": 335.12,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000033",
+      "target_name": "TLB",
+      "confidence": 0.6964,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.376
+      },
+      "t_source": 0.0,
+      "t_target": 1091.88,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000036",
+      "target_name": "Instruction Set Architecture",
+      "confidence": 0.6946,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.3643
+      },
+      "t_source": 0.0,
+      "t_target": 1091.88,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000038",
+      "target_name": "C",
+      "confidence": 0.6932,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.3546
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000041",
+      "target_name": "Virtualization",
+      "confidence": 0.715,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.5
+      },
+      "t_source": 0.0,
+      "t_target": 2228.36,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000042",
+      "target_name": "Thread",
+      "confidence": 0.7265,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.5764
+      },
+      "t_source": 0.0,
+      "t_target": 1360.9,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000044",
+      "target_name": "Process",
+      "confidence": 0.9365,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 1.0,
+        "temporal": 0.5764
+      },
+      "t_source": 0.0,
+      "t_target": 1091.88,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000045",
+      "target_name": "Address Space",
+      "confidence": 0.7265,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.5764
+      },
+      "t_source": 0.0,
+      "t_target": 1360.9,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000046",
+      "target_name": "File",
+      "confidence": 0.7121,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.4805
+      },
+      "t_source": 0.0,
+      "t_target": 1360.9,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000047",
+      "target_name": "Socket",
+      "confidence": 0.6877,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.3182
+      },
+      "t_source": 0.0,
+      "t_target": 1360.9,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000049",
+      "target_name": "Compiler",
+      "confidence": 0.6946,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.3643
+      },
+      "t_source": 0.0,
+      "t_target": 1702.56,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000052",
+      "target_name": "Core",
+      "confidence": 0.7093,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.4623
+      },
+      "t_source": 0.0,
+      "t_target": 2614.82,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000057",
+      "target_name": "Storage",
+      "confidence": 0.742,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.6801
+      },
+      "t_source": 0.0,
+      "t_target": 282.18,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000061",
+      "target_name": "Program",
+      "confidence": 0.7093,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.4623
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000070",
+      "target_name": "Storage Abstraction",
+      "confidence": 0.6714,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.209
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000071",
+      "target_name": "Networking System",
+      "confidence": 0.6714,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.209
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000072",
+      "target_name": "Mouse Clicks",
+      "confidence": 0.6714,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.209
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000073",
+      "target_name": "Common services",
+      "confidence": 0.6714,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.209
+      },
+      "t_source": 0.0,
+      "t_target": 2408.54,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000074",
+      "target_name": "Martian Rover",
+      "confidence": 0.6714,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.209
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000082",
+      "target_name": "Scheduling",
+      "confidence": 0.9365,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 1.0,
+        "temporal": 0.5764
+      },
+      "t_source": 0.0,
+      "t_target": 3523.74,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000001",
+      "source_name": "Operating System",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000094",
+      "target_name": "Internet of Things",
+      "confidence": 0.742,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 1.0,
+        "temporal": 0.6801
+      },
+      "t_source": 0.0,
+      "t_target": 282.18,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000044",
+      "source_name": "Process",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000052",
+      "target_name": "Core",
+      "confidence": 0.7,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.7,
+        "prominence": 0.7,
+        "temporal": 0.7002
+      },
+      "t_source": 1091.88,
+      "t_target": 2614.82,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000122",
+      "source_name": "homework zero",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000044",
+      "target_name": "Process",
+      "confidence": 0.7095,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 0.0,
+        "temporal": 0.0634
+      },
+      "t_source": 0.0,
+      "t_target": 1091.88,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000137",
+      "source_name": "Chip",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000135",
+      "target_name": "Multi-core",
+      "confidence": 0.778,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 1.0,
+        "prominence": 0.0,
+        "temporal": 0.5197
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
+    },
+    {
+      "source_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000137",
+      "source_name": "Chip",
+      "target_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_entity_000136",
+      "target_name": "Transistor",
+      "confidence": 0.6682,
+      "signals": {
+        "discourse": 0.0,
+        "graph": 0.8,
+        "prominence": 0.0,
+        "temporal": 0.7215
+      },
+      "t_source": 0.0,
+      "t_target": 0.0,
+      "has_temporal_warning": false,
+      "is_pedagogical": true,
+      "is_supported": true
     }
   ]
 }

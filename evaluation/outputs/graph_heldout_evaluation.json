@@ -1,0 +1,1289 @@
+{
+  "evaluation_timestamp": "2026-09-25T17:05:00+05:30",
+  "benchmark_file": "evaluation/datasets/cs162_lecture1_graph_qa_heldout.json",
+  "summary": {
+    "total_questions": 30,
+    "answerable_questions": 25,
+    "negative_questions": 5,
+    "structural_path_recovery": {
+      "overall_rate": 0.52,
+      "hits": 13,
+      "total": 25,
+      "1_hop": {
+        "total": 8,
+        "hits": 4,
+        "rate": 0.5
+      },
+      "2_hop": {
+        "total": 10,
+        "hits": 7,
+        "rate": 0.7
+      },
+      "3_hop": {
+        "total": 7,
+        "hits": 2,
+        "rate": 0.2857
+      }
+    },
+    "negative_resistance": {
+      "total_negative": 5,
+      "correct_refusals": 5,
+      "refusal_accuracy": 1.0,
+      "false_positive_rate": 0.2,
+      "false_positive_paths": 1,
+      "hallucinated_answers": 0
+    },
+    "downstream_chunk_retrieval": {
+      "bm25": {
+        "Hit@1": 0.28,
+        "Hit@3": 0.44,
+        "Hit@5": 0.64,
+        "Recall@1": 0.12,
+        "Recall@3": 0.2,
+        "Recall@5": 0.3533,
+        "Precision@1": 0.28,
+        "Precision@3": 0.1467,
+        "Precision@5": 0.144,
+        "MRR": 0.4381
+      },
+      "graph": {
+        "Hit@1": 0.0,
+        "Hit@3": 0.0,
+        "Hit@5": 0.08,
+        "Recall@1": 0.0,
+        "Recall@3": 0.0,
+        "Recall@5": 0.0333,
+        "Precision@1": 0.0,
+        "Precision@3": 0.0,
+        "Precision@5": 0.016,
+        "MRR": 0.1421
+      },
+      "hybrid": {
+        "Hit@1": 0.04,
+        "Hit@3": 0.56,
+        "Hit@5": 0.84,
+        "Recall@1": 0.0133,
+        "Recall@3": 0.3067,
+        "Recall@5": 0.5,
+        "Precision@1": 0.04,
+        "Precision@3": 0.1867,
+        "Precision@5": 0.184,
+        "MRR": 0.3401
+      }
+    },
+    "answer_correctness": {
+      "answerable_correct": 20,
+      "answerable_total": 25,
+      "answerable_accuracy": 0.8,
+      "negative_refusal_accuracy": 1.0,
+      "overall_accuracy": 0.8333,
+      "by_hop": {
+        "1_hop": {
+          "total": 8,
+          "correct": 7,
+          "accuracy": 0.875,
+          "mean_f1": 0.2342
+        },
+        "2_hop": {
+          "total": 10,
+          "correct": 6,
+          "accuracy": 0.6,
+          "mean_f1": 0.1654
+        },
+        "3_hop": {
+          "total": 7,
+          "correct": 7,
+          "accuracy": 1.0,
+          "mean_f1": 0.2321
+        }
+      }
+    }
+  },
+  "detailed_results": [
+    {
+      "question_id": "GQ01",
+      "question": "How does the operating system relate to a running process according to the lecture?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 831,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 1,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system translates the low\u2011level hardware interface into the high\u2011level application interface that a program uses.  \nEach running process is a protected environment, containing its own address space, one or more threads of control, and associated files and sockets.  \nThe OS ensures that these processes are isolated from one another, protecting each process\u2019s memory and resources.  \nIt also manages the allocation of CPU time and other resources, giving the illusion that multiple processes can run concurrently on a single processor.",
+        "gold_answer": "The operating system provides the fundamental execution environment and process abstraction for running programs, acting as the referee and resource manager that precedes process definition.",
+        "is_refusal": false,
+        "answer_f1": 0.2202,
+        "keyword_recall": 1.0,
+        "similarity": 0.1296,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ02",
+      "question": "What core execution entity inside a process does the lecture introduce for concurrent program execution?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 881,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000024",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000035",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The lecture defines a process as an environment that contains **one or more threads**. Threads are the core execution entities that can run concurrently within a process, providing the mechanism for concurrent program execution.",
+        "gold_answer": "Threads are the fundamental units of execution within a process that share its address space and enable concurrency.",
+        "is_refusal": false,
+        "answer_f1": 0.3077,
+        "keyword_recall": 1.0,
+        "similarity": 0.16,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ03",
+      "question": "What core architectural concept is an essential prerequisite before defining a running process?",
+      "hop_count": 1,
+      "question_type": "prerequisite",
+      "answerable": true,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 404,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 1,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "An essential prerequisite is the **instruction set architecture (ISA)** of the system.  \nThe lecture notes state, \u201cthe system, ISA, by the way, stands for instruction set architecture,\u201d indicating that a process can only be defined once the underlying ISA is established.",
+        "gold_answer": "Process Abstraction must be understood as the foundational model of a virtual computer with an address space before defining individual running processes.",
+        "is_refusal": false,
+        "answer_f1": 0.1905,
+        "keyword_recall": 0.5,
+        "similarity": 0.0645,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ04",
+      "question": "How is the kernel connected to memory management subsystems in the operating system architecture?",
+      "hop_count": 1,
+      "question_type": "relation_specific",
+      "answerable": true,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2060,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 1,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The kernel is the core component that uses the memory\u2011management subsystem to provide the operating system\u2019s address\u2011space abstraction.  In the lecture it is described that the kernel \u201cprovides a nice, clean address\u2011space abstraction\u201d so that memory can be treated as if it were entirely owned by a program.  The graph relationships in the material explicitly state: **Kernel \u2013[USED_BY]\u2192 Memory Management**.",
+        "gold_answer": "The kernel provides the core privilege layer and low-level resource mechanisms utilized by the memory management subsystem to allocate and protect address spaces.",
+        "is_refusal": false,
+        "answer_f1": 0.2727,
+        "keyword_recall": 1.0,
+        "similarity": 0.2368,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ05",
+      "question": "What hardware interface does the operating system directly interact with to schedule tasks on physical execution units?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 427,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "The kernel provides the timer interrupt and context switching infrastructure used by CPU scheduling algorithms to allocate execution time across running tasks.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": false
+      }
+    },
+    {
+      "question_id": "GQ06",
+      "question": "How is the kernel connected to persistent storage abstractions like the file system?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2177,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 1,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "The kernel is the part of the OS that turns raw storage devices into a usable file\u2011system abstraction.  In the lecture, the kernel is shown as used by I/O Management (see the graph), and the text explains that the OS \u201cturns a bunch of storage devices\u2026into a single abstraction, say, a file system.\u201d  Thus the kernel\u2019s I/O\u2011management functions provide the file\u2011system interface to persistent storage.",
+        "gold_answer": "The kernel provides device drivers and block I/O primitives utilized by the file system to translate logical files and directories into persistent storage operations.",
+        "is_refusal": false,
+        "answer_f1": 0.268,
+        "keyword_recall": 1.0,
+        "similarity": 0.2432,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ07",
+      "question": "What synchronization mechanism does the lecture discuss for coordinating concurrent threads sharing data?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 12,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "The lecture mentions **locks** as a synchronization mechanism for coordinating concurrent threads that share data, in the context of scheduling, deadlock, scalability, and fairness.",
+        "gold_answer": "Locks (mutual exclusion primitives) are explained as the mechanism for coordinating threads within a process to prevent race conditions when updating shared state.",
+        "is_refusal": false,
+        "answer_f1": 0.3404,
+        "keyword_recall": 0.5,
+        "similarity": 0.1481,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ08",
+      "question": "What isolation mechanism does an operating system referee provide to prevent rogue processes from compromising other programs?",
+      "hop_count": 1,
+      "question_type": "direct_relation",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 430,
+        "gold_relations_count": 1,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000087",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "An operating\u2011system referee isolates programs by giving each one a **protected environment** that includes its own threads, address space, files and sockets.  \nBecause each process has a separate address space, a rogue process cannot read or write the memory of another process, preventing it from compromising other programs.",
+        "gold_answer": "Protection and memory isolation are core OS referee responsibilities that prevent buggy or malicious applications from corrupting each other or crashing the host system.",
+        "is_refusal": false,
+        "answer_f1": 0.274,
+        "keyword_recall": 1.0,
+        "similarity": 0.1026,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ09",
+      "question": "How does the concept of a process abstraction connect to concurrent threads through the process model?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 405,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 1,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "In the lecture, a **process** is defined as an isolated environment that contains an address space, open files, sockets, and **one or more threads of control** executing in that address space\u3010000027\u3011. The threads share the process\u2019s memory and resources while remaining isolated from other processes, giving the illusion of parallel execution when the operating system schedules them\u3010000031\u3011. Thus, the process abstraction provides the shared context for concurrent threads, while the OS manages scheduling to make them appear to run simultaneously.",
+        "gold_answer": "Process abstraction defines the virtual address space and isolated program state (prerequisite), which is instantiated into concrete processes that contain concurrent threads as their execution units.",
+        "is_refusal": false,
+        "answer_f1": 0.2569,
+        "keyword_recall": 1.0,
+        "similarity": 0.1731,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ10",
+      "question": "How does the process abstraction lead to thread synchronization primitives like locks?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 544,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000024"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "Process abstraction establishes the multi-threaded execution environment within a single address space, necessitating locks to coordinate thread access to shared memory.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": false
+      }
+    },
+    {
+      "question_id": "GQ11",
+      "question": "What is the structural relationship connecting the operating system to memory management via the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2060,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system is built around a kernel, which is the core component that implements the system\u2019s services.  \nThe graph shows a direct link: **Kernel -[USED_BY]-> Memory Management**, indicating that memory\u2011management functions are a part of what the kernel provides.  \nThus, the OS\u2019s relationship to memory management is mediated by the kernel, whose responsibilities include the memory\u2011management subsystem.",
+        "gold_answer": "The operating system architecture introduces the kernel as its core privileged component, which provides page allocation and address translation services utilized by memory management.",
+        "is_refusal": false,
+        "answer_f1": 0.3023,
+        "keyword_recall": 1.0,
+        "similarity": 0.2632,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ12",
+      "question": "How does the operating system link to file system storage abstractions through the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2177,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "The operating system defines the system boundary and introduces the kernel, which implements disk device drivers and buffer caches used by the file system to manage files.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": false
+      }
+    },
+    {
+      "question_id": "GQ13",
+      "question": "How does the operating system relate to individual threads through the process container?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 832,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 1,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system provides the **process** abstraction, which is an isolated environment that contains one or more **threads** of control. Each process has its own address space and the OS protects that address space from other processes. The OS is responsible for translating hardware instructions into the application interface and for managing the execution of threads inside each process.",
+        "gold_answer": "The operating system serves as the foundational referee managing processes, each of which contains and multiplexes one or more execution threads across the CPU.",
+        "is_refusal": false,
+        "answer_f1": 0.4096,
+        "keyword_recall": 1.0,
+        "similarity": 0.25,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ14",
+      "question": "How does the operating system connect to CPU scheduling mechanisms through the kernel?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 1733,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+        ],
+        "hit_at_1": 1,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system relies on the kernel to provide CPU scheduling.  \nAccording to the lecture notes, the kernel is the core component that is **USED_BY** CPU scheduling, meaning the scheduling mechanisms live in the kernel and the OS calls into the kernel to decide which process runs next.",
+        "gold_answer": "The operating system defines the coordinator role implemented by the kernel, which executes CPU scheduling to alternate processor execution among ready tasks.",
+        "is_refusal": false,
+        "answer_f1": 0.2857,
+        "keyword_recall": 1.0,
+        "similarity": 0.1429,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ15",
+      "question": "How does the process abstraction relate to CPU scheduling through the process model?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 406,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 1,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The process abstraction lets the operating system assign CPU time to each process. In the lecture, the professor shows that one process (\u201cbrown\u201d) is running while the other (\u201cgreen\u201d) is idle but protected. By switching the CPU\u2019s attention between processes, the OS schedules CPU time for each, creating the illusion of multiple processors.",
+        "gold_answer": "Process abstraction establishes the illusion of dedicated processor ownership, which concrete processes fulfill through CPU scheduling multiplexing time on the physical cores.",
+        "is_refusal": false,
+        "answer_f1": 0.2368,
+        "keyword_recall": 1.0,
+        "similarity": 0.1667,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ16",
+      "question": "How does physical disk storage connect to processor execution through system memory?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 1667,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "Data stored on persistent disk must be transferred into primary memory before it can be fetched, cached, and operated on by the processor.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": false
+      }
+    },
+    {
+      "question_id": "GQ17",
+      "question": "How does the kernel interface with the physical processor through the memory hierarchy?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2016,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "The kernel allocates and organizes physical memory pages that supply instructions and data operands to the hardware processor.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": false
+      }
+    },
+    {
+      "question_id": "GQ18",
+      "question": "How does the process abstraction lead to memory protection through the running process?",
+      "hop_count": 2,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 734,
+        "gold_relations_count": 2,
+        "recovered_relations_count": 2,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The process abstraction gives each program its own **address space**\u2014a chunk of protected memory (Chunk\u202f000027).  \nThe operating system enforces this isolation so that a running process cannot read or write another process\u2019s memory; for example, the green process in the lecture is \u201cprotected\u201d while the brown process is actively using the CPU (Chunk\u202f000031).  \nThus, by isolating address spaces, the OS provides memory protection for each running process.",
+        "gold_answer": "Process abstraction guarantees isolated address spaces, which running processes enforce via hardware memory protection mechanisms.",
+        "is_refusal": false,
+        "answer_f1": 0.1628,
+        "keyword_recall": 1.0,
+        "similarity": 0.2368,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ19",
+      "question": "Trace how process abstraction connects to concurrent threads and loops back to operating system resource allocation.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 833,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 1,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The lecture defines the **process abstraction** as the set of threads, address spaces, files, and sockets that together give a program the illusion of owning its own memory and I/O resources. Concurrent execution is achieved on a single processor by running one thread (the \u201cbrown\u201d process) at a time while other threads (the \u201cgreen\u201d process) remain protected and waiting for CPU time. This protection and isolation are managed by the operating system, which must allocate CPU registers, memory, and I/O devices to each process, thereby linking the process abstraction back to the OS\u2019s core resource\u2011allocation responsibilities.",
+        "gold_answer": "Process abstraction defines isolated execution, processes contain concurrent threads, and threads are scheduled and multiplexed by the operating system referee across system hardware.",
+        "is_refusal": false,
+        "answer_f1": 0.2276,
+        "keyword_recall": 1.0,
+        "similarity": 0.1579,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ20",
+      "question": "How does process abstraction connect to synchronization locks and return to operating system management?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 832,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 2,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The process abstraction is the environment that bundles threads, an address space, open files, and sockets. Within that environment the OS provides the mechanisms for concurrency management\u2014scheduling, locking, and dead\u2011lock detection\u2014so that threads can safely share or protect resources. Thus the OS returns to control by enforcing these synchronization primitives on the threads that live inside each process\u2019s isolated address space.",
+        "gold_answer": "Process abstraction enables multi-threading, processes define locks for mutual exclusion, and the operating system mediates lock waiting queues and thread sleep/wake transitions.",
+        "is_refusal": false,
+        "answer_f1": 0.1573,
+        "keyword_recall": 0.75,
+        "similarity": 0.0851,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ21",
+      "question": "How does persistent disk storage interact with the operating system through memory and the processor?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 1667,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 3,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system turns physical disk devices (disks, USB keys, cloud storage) into a single file\u2011system abstraction that programs can use without knowing where the bits are actually stored.  \nThrough that abstraction the OS uses the processor to issue disk I/O commands and uses memory (for buffers, caches, and the virtual address space) to hold data temporarily while it is moved to or from the persistent storage.  \nThus, persistent storage is accessed indirectly through OS\u2011managed files, with the processor and memory handling the data movement and bookkeeping on behalf of applications.",
+        "gold_answer": "Disk data is loaded into memory, which feeds processor registers and cache, while the operating system multiplexes and controls the processor executing those operations.",
+        "is_refusal": false,
+        "answer_f1": 0.2373,
+        "keyword_recall": 1.0,
+        "similarity": 0.125,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ22",
+      "question": "Trace how the kernel connects to the operating system through the hardware memory and processor chain.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 2443,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 3,
+        "path_recovered": true,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The operating system sits on top of the hardware, with the kernel running directly on the processor and memory of the machine. The kernel uses its subsystems\u2014memory management, CPU scheduling, I/O management, communications, and multitasking\u2014to provide clean abstractions such as threads and address spaces. Through these abstractions the OS presents the illusion of independent processors and unlimited memory to programs, while hiding the underlying hardware details.",
+        "gold_answer": "The kernel configures physical memory mappings, memory supplies the hardware processor with instructions, and the operating system coordinates execution across the processor.",
+        "is_refusal": false,
+        "answer_f1": 0.2857,
+        "keyword_recall": 1.0,
+        "similarity": 0.1628,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ23",
+      "question": "Trace how the operating system establishes process isolation and protects system resources.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 832,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 2,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000087",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "The OS gives each process its own process descriptor, thread descriptor, and address space, so a running process uses the CPU registers and memory while the others are not running but are still protected.  By allocating separate threads, files, sockets, and linked libraries, the OS isolates processes from one another.  The \u201creferee\u201d component of the OS enforces this isolation and protects system resources such as memory and I/O devices, preventing one process from accessing another\u2019s data or hardware.",
+        "gold_answer": "The operating system instantiates processes, processes are subjected to memory protection boundaries, and protection mechanisms preserve the overall stability of the operating system.",
+        "is_refusal": false,
+        "answer_f1": 0.1748,
+        "keyword_recall": 0.5,
+        "similarity": 0.0652,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ24",
+      "question": "How does the process abstraction lead to CPU scheduling and return to the operating system's role as coordinator?",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "graph+vector",
+      "structural_path": {
+        "neo4j_edges_retrieved": 833,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 1,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "The process abstraction gives the operating system a clean, isolated environment to manage: each process has its own address space, thread descriptors, and system state (files, sockets, etc.). The OS schedules CPU time by switching the processor\u2019s registers between these process descriptors, so that each process \u201cgets CPU time\u201d even though only one core is present. When a process yields or blocks, control returns to the OS, which then chooses the next process to run\u2014this coordination of CPU allocation and resource protection is the core role of the operating system.",
+        "gold_answer": "Process abstraction defines runnable units, processes require CPU scheduling to share time slices, and CPU scheduling functions as the operating system's core coordinator role.",
+        "is_refusal": false,
+        "answer_f1": 0.2222,
+        "keyword_recall": 1.0,
+        "similarity": 0.1481,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ25",
+      "question": "Trace how process abstraction connects to the file system and returns to operating system refereeing.",
+      "hop_count": 3,
+      "question_type": "multi_hop",
+      "answerable": true,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 1083,
+        "gold_relations_count": 3,
+        "recovered_relations_count": 2,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+        ],
+        "gold_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+        ],
+        "hit_at_1": 0,
+        "hit_at_3": 1,
+        "hit_at_5": 1
+      },
+      "generation": {
+        "generated_answer": "A process abstraction includes an address space, one or more threads, and a system state that contains open files and sockets (Chunk\u202f000027).  \nThe operating system supplies the file\u2011system abstraction, letting the process treat files as if they were part of its own environment (Chunk\u202f000021).  \nWhen a process opens a file, the OS mediates access, providing protection and isolation and thereby acting as the referee for those resources.",
+        "gold_answer": "Process abstraction establishes the execution context with file descriptors, processes interact with the file system for persistent I/O, and the operating system mediates access control across the file system.",
+        "is_refusal": false,
+        "answer_f1": 0.32,
+        "keyword_recall": 1.0,
+        "similarity": 0.1628,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ26",
+      "question": "What direct prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 4,
+        "gold_relations_count": 0,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000023"
+        ],
+        "gold_chunk_ids": [],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "No direct prerequisite relationship between the Global Data Plane and CPU Scheduling is indicated in the lecture materials. The graph entries show no connection between those concepts.",
+        "gold_answer": "No direct or indirect prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture. The Global Data Plane is an edge-storage research project, while CPU scheduling is a core single-node kernel mechanism.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ27",
+      "question": "How is Bell's Law a prerequisite for the implementation of semaphores in the kernel?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 1304,
+        "gold_relations_count": 0,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022"
+        ],
+        "gold_chunk_ids": [],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "There is no relationship connecting Bell's Law to semaphores or locks in the lecture knowledge graph. Bell's Law describes trends in computer classes per decade, whereas synchronization primitives are concurrency mechanisms.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ28",
+      "question": "What 2-hop path connects ARPANET to the translation lookaside buffer through the file system?",
+      "hop_count": 2,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 680,
+        "gold_relations_count": 0,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000019",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+        ],
+        "gold_chunk_ids": [],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "No valid path connects the historical ARPANET to the hardware TLB through the file system. These concepts belong to completely disjoint domains (wide-area networking vs virtual memory hardware).",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ29",
+      "question": "How does the instruction set architecture directly explain the grading policy of the course?",
+      "hop_count": 1,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "planned_route": "vector_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 195,
+        "gold_relations_count": 0,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": false
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000019",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+        ],
+        "gold_chunk_ids": [],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "No relationship exists between the hardware instruction set architecture and course grading policies in the knowledge graph.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": true
+      }
+    },
+    {
+      "question_id": "GQ30",
+      "question": "Trace how Git version control serves as a prerequisite for hardware cache coherence protocols in multi-core processors.",
+      "hop_count": 3,
+      "question_type": "unanswerable_negative",
+      "answerable": false,
+      "planned_route": "graph_only",
+      "structural_path": {
+        "neo4j_edges_retrieved": 196,
+        "gold_relations_count": 0,
+        "recovered_relations_count": 0,
+        "path_recovered": false,
+        "false_positive_path": true
+      },
+      "chunk_retrieval": {
+        "top_chunk_ids": [
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000031",
+          "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000047"
+        ],
+        "gold_chunk_ids": [],
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "hit_at_5": 0
+      },
+      "generation": {
+        "generated_answer": "Insufficient evidence found in lecture.",
+        "gold_answer": "No relationship exists linking Git version control to hardware cache coherence protocols in the knowledge graph. Git is a developer tool used for course projects, entirely unrelated to hardware cache architectures.",
+        "is_refusal": true,
+        "answer_f1": 0.0,
+        "keyword_recall": 0.0,
+        "similarity": 0.0,
+        "answer_correct": true
+      }
+    }
+  ]
+}
