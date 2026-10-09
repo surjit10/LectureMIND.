@@ -16,6 +16,7 @@ import numpy as np
 
 from config import LocalSettings, SharedSettings
 from schemas.manifest import Manifest
+from schemas.prerequisite import validate_prerequisite_artifact
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,20 @@ def validate_manifest(
     segments = json.loads((package_dir / "segments.json").read_text(encoding="utf-8"))
     entities = json.loads((package_dir / "entities.json").read_text(encoding="utf-8"))
     relations = json.loads((package_dir / "relations.json").read_text(encoding="utf-8"))
+    prerequisites_path = package_dir / "prerequisites.json"
+    prerequisite_count = 0
+    if prerequisites_path.exists():
+        prerequisites_data = json.loads(prerequisites_path.read_text(encoding="utf-8"))
+        try:
+            prerequisites = validate_prerequisite_artifact(
+                prerequisites_data,
+                (entity["entity_id"] for entity in entities),
+            )
+        except Exception as exc:
+            raise ManifestValidationError(
+                f"prerequisites.json validation failed: {exc}"
+            ) from exc
+        prerequisite_count = len(prerequisites)
 
     if manifest.chunk_count != len(chunks):
         raise ManifestValidationError(
@@ -105,6 +120,11 @@ def validate_manifest(
     if manifest.relation_count != len(relations):
         raise ManifestValidationError(
             f"relation_count mismatch: manifest={manifest.relation_count}, actual={len(relations)}"
+        )
+    if manifest.prerequisite_count != prerequisite_count:
+        raise ManifestValidationError(
+            "prerequisite_count mismatch: "
+            f"manifest={manifest.prerequisite_count}, actual={prerequisite_count}"
         )
 
     # 5. Verify embedding file dimension.
@@ -123,6 +143,7 @@ def validate_manifest(
         "segment_count": manifest.segment_count,
         "entity_count": manifest.entity_count,
         "relation_count": manifest.relation_count,
+        "prerequisite_count": manifest.prerequisite_count,
     }
     logger.info("Manifest validation PASSED for '%s'.", manifest.lecture_id)
     return summary

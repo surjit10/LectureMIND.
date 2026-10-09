@@ -79,6 +79,14 @@ def enrich_package(
         json.dumps(result, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
+    manifest_path = package_dir / "manifest.json"
+    if manifest_path.exists():
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest_data["prerequisite_count"] = len(result["prerequisites"])
+        manifest_path.write_text(
+            json.dumps(manifest_data, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
     logger.info("Saved %d prerequisites to %s", len(result["prerequisites"]), prereqs_path)
 
     return result
@@ -156,8 +164,8 @@ def enrich_and_load(
 
     close_driver = False
     if driver is None:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(settings)
         close_driver = True
 
     try:

@@ -245,6 +245,34 @@ class TestConsistencyAudit:
         report = reg.audit(packages_dir=tmp_path)
         assert "lecture_good" not in report["missing_dirs"]
 
+    def test_zip_path_is_not_a_runtime_package(self, reg, tmp_path):
+        zip_path = tmp_path / "lecture_zip.zip"
+        zip_path.write_bytes(b"not needed for this path-contract test")
+        reg.add_lecture(
+            lecture_id="lecture_zip", title="ZIP only", chunk_count=0,
+            segment_count=0, package_path=str(zip_path), status="READY",
+        )
+        report = reg.audit(packages_dir=tmp_path)
+        assert "lecture_zip" in report["non_runtime_paths"]
+        assert reg.get_lecture("lecture_zip")["status"] == "FAILED"
+
+    def test_hash_mismatch_marks_package_failed(self, reg, tmp_path):
+        from local.storage.lecture_registry import compute_package_hash
+
+        pkg = tmp_path / "lecture_changed"
+        pkg.mkdir()
+        (pkg / "manifest.json").write_text("before")
+        digest = compute_package_hash(pkg)
+        reg.add_lecture(
+            lecture_id="lecture_changed", title="Changed", chunk_count=0,
+            segment_count=0, package_path=str(pkg), status="READY",
+            package_sha256=digest,
+        )
+        (pkg / "manifest.json").write_text("after")
+        report = reg.audit(packages_dir=tmp_path)
+        assert "lecture_changed" in report["hash_mismatches"]
+        assert reg.get_lecture("lecture_changed")["status"] == "FAILED"
+
     def test_orphaned_dir_detected(self, reg, tmp_path):
         # Create a directory that is not in the registry.
         orphan = tmp_path / "lecture_orphan"

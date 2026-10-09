@@ -2,7 +2,7 @@
 # Pipeline orchestrator for Stages A1–C2.
 #
 # Runs the complete cloud ingestion pipeline for a single lecture.
-# Full pipeline: A1→A2→A3→A4→A5→A6→A7→A8→A9→Manifest→B0→B1→C1→C2
+# Full pipeline: A1→A2→A3→A4→A5→A6→A7→A8→A9→A10→Manifest→B0→B1→C1→C2
 #
 # Optimizations:
 #   - A2 (Whisper, GPU) and A3 (Frames, CPU/IO) run concurrently.
@@ -55,7 +55,7 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
     Pipeline order:
         A1 Metadata → [A2 Whisper ‖ A3 Frames] → A4 Qwen2-VL → A5 OCR →
         A6 Fusion → A7 Segmentation → A8 Entity Extraction →
-        A9 Relation Extraction → Manifest → B0 Embeddings →
+        A9 Relation Extraction → A10 Prerequisite Inference → Manifest → B0 Embeddings →
         B1 Triplets → C1 Validator → C2 Exporter
 
     Args:
@@ -164,13 +164,30 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
         relations = extract_relations(lecture_id, cloud_settings=settings)
     logger.info("A9 complete: %d relations", len(relations))
 
+    # --- A10: Prerequisite Inference ---
+    logger.info("Stage A10: Inferring prerequisite DAG...")
+    from cloud.extraction.prerequisite_inference import infer_prerequisites
+    prerequisite_result = infer_prerequisites(
+        entities=entities,
+        chunks=chunks,
+        segments=segments,
+        relations=relations,
+    )
+    prerequisites_path = Path(settings.lecture_dir(lecture_id)) / "prerequisites.json"
+    prerequisites_path.write_text(
+        json.dumps(prerequisite_result, indent=2), encoding="utf-8"
+    )
+    prerequisite_count = len(prerequisite_result["prerequisites"])
+    logger.info("A10 complete: %d prerequisite edges", prerequisite_count)
+
     # --- Manifest Generation ---
     logger.info("Manifest: Building manifest.json...")
     from cloud.packaging.manifest_builder import build_manifest
     manifest = build_manifest(lecture_id, cloud_settings=settings)
-    logger.info("Manifest complete: %d chunks, %d segments, %d entities, %d relations",
+    logger.info("Manifest complete: %d chunks, %d segments, %d entities, %d relations, %d prerequisites",
                 manifest.chunk_count, manifest.segment_count,
-                manifest.entity_count, manifest.relation_count)
+                manifest.entity_count, manifest.relation_count,
+                manifest.prerequisite_count)
 
     # --- B0: Embedding Generation ---
     # Reuse cached embeddings from A7 if available; otherwise compute fresh.
@@ -254,6 +271,7 @@ def run_pipeline(lecture_id: str, video_path: str) -> dict:
         "segments": len(segments),
         "entities": len(entities),
         "relations": len(relations),
+        "prerequisites": prerequisite_count,
         "embeddings": embedding_count,
         "triplets": len(triplets),
         "validation_status": validation_result["status"],

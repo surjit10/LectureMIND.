@@ -60,6 +60,9 @@ def valid_package(cloud_settings):
         [{"query": "What is BFS?", "positive": "BFS explores level by level",
           "negative": "DFS explores depth first"}]
     ))
+    (lecture_dir / "prerequisites.json").write_text(json.dumps({
+        "prerequisites": [], "metrics": {}, "threshold": 0.65,
+    }))
 
     # Also create excluded files that must NOT end up in the zip.
     (lecture_dir / "vlm_output.jsonl").write_text('{"test": true}\n')
@@ -105,6 +108,7 @@ class TestExporter:
             "manifest.json", "multimodal_chunks.json", "segments.json",
             "entities.json", "embeddings.npy", "embedding_ids.json",
             "chunk_segment_map.json", "triplets.json", "metadata.json",
+            "prerequisites.json",
         }
         assert required.issubset(set(names)), f"Missing files: {required - set(names)}"
         # No subfolder prefix anywhere.

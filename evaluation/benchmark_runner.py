@@ -220,7 +220,9 @@ class BenchmarkRunner:
             metrics["top1_cross_encoder_score"] = reranker_metrics.top1_cross_encoder_score(reranked_results)
             metrics["top3_cross_encoder_score"] = reranker_metrics.top_k_cross_encoder_score(reranked_results, k=3)
 
-            metrics["answer_similarity"] = answer_metrics.calculate_answer_similarity(sample.ground_truth_answer, answer)
+            metrics["lexical_content_jaccard"] = answer_metrics.calculate_lexical_content_jaccard(
+                sample.ground_truth_answer, answer
+            )
             metrics["answer_f1"] = answer_metrics.calculate_answer_f1(sample.ground_truth_answer, answer)
             keywords = getattr(sample, "keywords", []) or []
             metrics["keyword_recall"] = answer_metrics.calculate_keyword_recall(keywords, answer)
@@ -228,7 +230,7 @@ class BenchmarkRunner:
             metrics["answer_length"] = answer_metrics.get_answer_length(answer)
 
             metrics["citation_coverage"] = citation_metrics.calculate_citation_coverage(expected_ids, sources)
-            metrics["citation_completeness"] = citation_metrics.calculate_citation_completeness(
+            metrics["citation_provenance_precision"] = citation_metrics.calculate_citation_provenance_precision(
                 final_context, sources, reranked_results
             )
             metrics["citation_count"] = citation_metrics.get_citation_count(sources)
@@ -264,8 +266,16 @@ class BenchmarkRunner:
         self.report_generator.generate(self.results, provenance=provenance)
 
     def _collect_provenance(self) -> Dict[str, Any]:
-        provenance: Dict[str, Any] = {"dataset": {"path": str(self.dataset_loader.dataset_path)},
-                                      "packages": {}}
+        from mlops.run_manifest import create_run_manifest
+
+        provenance: Dict[str, Any] = {
+            "run": create_run_manifest(
+                "benchmark",
+                parameters={"sample_count": len(self.results)},
+            ),
+            "dataset": {"path": str(self.dataset_loader.dataset_path)},
+            "packages": {},
+        }
 
         def _sha256_file(p: Path) -> Optional[str]:
             import hashlib

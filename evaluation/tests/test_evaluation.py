@@ -50,12 +50,10 @@ class TestRetrievalEval:
 
 class TestRagasEval:
 
-    def test_placeholder_scores(self):
-        """Placeholder returns all three metrics."""
-        scores = _placeholder_scores([{"query": "test"}])
-        assert "Faithfulness" in scores
-        assert "Answer Relevancy" in scores
-        assert "Context Precision" in scores
+    def test_placeholder_scores_are_rejected(self):
+        """Missing RAGAS must fail loudly, never publish fake zeros."""
+        with pytest.raises(RuntimeError, match="not valid measurements"):
+            _placeholder_scores([{"query": "test"}])
 
 
 class TestRerankerMetrics:
@@ -81,6 +79,14 @@ class TestRerankerMetrics:
 
 
 class TestAnswerMetrics:
+
+    def test_similarity_is_explicitly_lexical(self):
+        from evaluation.metrics.answer_metrics import (
+            calculate_answer_similarity,
+            calculate_lexical_content_jaccard,
+        )
+        expected = calculate_lexical_content_jaccard("page faults", "page fault")
+        assert calculate_answer_similarity("page faults", "page fault") == expected
 
     def test_answer_f1_perfect(self):
         from evaluation.metrics.answer_metrics import calculate_answer_f1

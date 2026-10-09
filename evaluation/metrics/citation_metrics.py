@@ -15,14 +15,14 @@ def calculate_citation_coverage(expected_ids: List[str], sources: List[Dict[str,
     hits = sum(1 for cid in expected_ids if cid in cited_ids)
     return hits / len(expected_ids)
 
-def calculate_citation_completeness(
+def calculate_citation_provenance_precision(
     final_context: str,
     sources: List[Dict[str, Any]],
     reranked_results: List[Dict[str, Any]],
     context_chunk_ids: Optional[List[str]] = None,
 ) -> float:
     """
-    Fraction of cited sources that are actually backed by a chunk included in the LLM context.
+    Fraction of cited source IDs backed by a chunk included in the LLM context.
 
     A citation is complete and grounded only if its chunk_id corresponds to a chunk
     that was actually included in the context prompt provided to the LLM.
@@ -62,6 +62,18 @@ def calculate_citation_completeness(
 
     hits = sum(1 for cid in cited_ids if cid in valid_context_ids)
     return hits / len(cited_ids)
+
+
+def calculate_citation_completeness(
+    final_context: str,
+    sources: List[Dict[str, Any]],
+    reranked_results: List[Dict[str, Any]],
+    context_chunk_ids: Optional[List[str]] = None,
+) -> float:
+    """Backward-compatible alias; this checks provenance, not claim support."""
+    return calculate_citation_provenance_precision(
+        final_context, sources, reranked_results, context_chunk_ids
+    )
 
 def get_citation_count(sources: List[Dict[str, Any]]) -> int:
     """Returns the total number of unique citations used."""

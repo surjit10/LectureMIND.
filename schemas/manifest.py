@@ -23,6 +23,7 @@ class Manifest(BaseModel):
     segment_count: int
     entity_count: int
     relation_count: int
+    prerequisite_count: int = 0
     reranker_version: str
 
     # --- V7 optional metadata fields ---
@@ -52,7 +53,10 @@ class Manifest(BaseModel):
             raise ValueError("Field must not be empty.")
         return v
 
-    @field_validator("chunk_count", "segment_count", "entity_count", "relation_count")
+    @field_validator(
+        "chunk_count", "segment_count", "entity_count", "relation_count",
+        "prerequisite_count",
+    )
     @classmethod
     def must_be_non_negative(cls, v: int) -> int:
         if v < 0:

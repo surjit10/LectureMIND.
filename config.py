@@ -140,6 +140,8 @@ class LocalSettings(BaseSettings):
     """
 
     NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_USER: str = ""
+    NEO4J_PASSWORD: str = ""
     QDRANT_URL: str = "http://localhost:6333"
     OLLAMA_MODEL: str = "qwen2.5:3b"
     LOCAL_MODEL_DIR: str = "local_runtime/models/"
@@ -152,6 +154,11 @@ class LocalSettings(BaseSettings):
     MAX_MODEL_UPLOAD_MB: int = 2000
     # Knowledge package (lecture ZIP) upload cap — typical packages are 50–500 MB.
     MAX_PACKAGE_UPLOAD_MB: int = 2000
+    # Defend against highly compressed ZIP bombs independently of upload size.
+    MAX_PACKAGE_EXTRACTED_MB: int = 4000
+    MAX_PACKAGE_FILE_COUNT: int = 20000
+    # Comma-separated browser origins. Wildcard + credentials is invalid CORS.
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     ALLOWED_MODEL_FILES: list[str] = ["config.json", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json", "model.safetensors", "pytorch_model.bin", "vocab.txt"]
     AUTO_RELOAD_RERANKER: bool = True
 

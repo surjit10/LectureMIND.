@@ -10,6 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from config import local_settings
 
 from serving.fastapi.routes import query as query_routes
 from serving.fastapi.routes import lectures as lecture_routes
@@ -266,7 +267,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # temporary development setting
+    allow_origins=[
+        origin.strip()
+        for origin in local_settings.CORS_ORIGINS.split(",")
+        if origin.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

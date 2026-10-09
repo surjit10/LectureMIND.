@@ -3,7 +3,7 @@
 #
 # Loads embeddings.npy + metadata into a Qdrant collection.
 # Collection: vector_size=1024, distance=Cosine.
-# Point ID derived from chunk_id (deterministic UUID5).
+# Point ID derived from runtime lecture_id + chunk_id (deterministic UUID5).
 #
 # Payload contains exactly: lecture_id, chunk_id, segment_id,
 # timestamp, transcript, visual_context, ocr_text.
@@ -23,7 +23,7 @@ from config import LocalSettings, SharedSettings
 
 logger = logging.getLogger(__name__)
 
-# UUID namespace for deterministic point IDs from chunk_id.
+# UUID namespace for deterministic point IDs from lecture_id + chunk_id.
 QDRANT_NAMESPACE = uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
 COLLECTION_NAME = "lecturemind_chunks"
 
@@ -33,9 +33,16 @@ class QdrantLoadError(Exception):
     pass
 
 
-def _chunk_id_to_uuid(chunk_id: str) -> str:
-    """Generate a deterministic UUID from chunk_id for Qdrant point ID."""
-    return str(uuid.uuid5(QDRANT_NAMESPACE, chunk_id))
+def _chunk_id_to_uuid(chunk_id: str, lecture_id: str) -> str:
+    """Generate a deterministic, lecture-scoped UUID for a Qdrant point.
+
+    Cloud packages can be imported more than once under different runtime
+    lecture IDs.  Chunk IDs inside those packages are unchanged, so using a
+    chunk ID alone would make the second import overwrite the first one.
+    """
+    if not lecture_id:
+        raise QdrantLoadError("lecture_id is required when generating a Qdrant point ID.")
+    return str(uuid.uuid5(QDRANT_NAMESPACE, f"{lecture_id}:{chunk_id}"))
 
 
 def _build_chunk_segment_map(
@@ -242,7 +249,7 @@ def load_qdrant(
         points = []
         for i, entry in enumerate(embedding_ids):
             chunk_id = entry["chunk_id"]
-            point_id = _chunk_id_to_uuid(chunk_id)
+            point_id = _chunk_id_to_uuid(chunk_id, resolved_lecture_id)
             vector = embeddings[entry["row_index"]].tolist()
             payload = payloads[i]
 

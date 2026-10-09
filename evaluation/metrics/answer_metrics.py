@@ -41,10 +41,17 @@ def _stem_simple(token: str) -> str:
     return t
 
 
-def calculate_answer_similarity(ground_truth: str, generated_answer: str, use_content_words: bool = True) -> float:
+def calculate_lexical_content_jaccard(
+    ground_truth: str,
+    generated_answer: str,
+    use_content_words: bool = True,
+) -> float:
     """
-    Computes semantic-aware content word similarity between ground truth and answer.
-    Filters common stopwords and normalizes suffixes to fairly evaluate paraphrased answers.
+    Compute lexical Jaccard overlap after stopword and suffix normalization.
+
+    This is deliberately named as a lexical metric: it does not measure
+    semantic similarity and should be complemented by model- or judge-based
+    faithfulness/relevance evaluation for release decisions.
     """
     if not ground_truth and not generated_answer:
         return 1.0
@@ -70,6 +77,17 @@ def calculate_answer_similarity(ground_truth: str, generated_answer: str, use_co
     union = set1.union(set2)
 
     return len(intersection) / len(union)
+
+
+def calculate_answer_similarity(
+    ground_truth: str,
+    generated_answer: str,
+    use_content_words: bool = True,
+) -> float:
+    """Backward-compatible alias for the lexical content Jaccard metric."""
+    return calculate_lexical_content_jaccard(
+        ground_truth, generated_answer, use_content_words=use_content_words
+    )
 
 
 def calculate_keyword_recall(expected_keywords: List[str], generated_answer: str) -> float:

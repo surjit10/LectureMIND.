@@ -45,12 +45,15 @@ _RAGAS_METRICS = [
 ]
 
 _LOAD_COLS = [
-    ("users", "Users"),
+    ("concurrency", "Concurrency"),
     ("total_requests", "Requests"),
     ("errors", "Errors"),
+    ("error_rate", "Error rate"),
     ("avg_ttft", "Avg TTFB (s)"),
     ("avg_latency", "Avg latency (s)"),
+    ("p50_latency", "p50 latency (s)"),
     ("p95_latency", "p95 latency (s)"),
+    ("p99_latency", "p99 latency (s)"),
     ("throughput_rps", "Throughput (rps)"),
 ]
 
@@ -241,7 +244,7 @@ def _build_html(
     # 3. Load test.
     if load_test_rows:
         body = svg_bars(
-            [(f"{int(r.get('users', 0))} users · p95", float(r.get("p95_latency", 0) or 0)) for r in load_test_rows]
+            [(f"{int(r.get('concurrency', r.get('users', 0)))} concurrent · p95", float(r.get("p95_latency", 0) or 0)) for r in load_test_rows]
         )
         body += _table(
             [h for _, h in _LOAD_COLS],
@@ -249,7 +252,7 @@ def _build_html(
         )
         sections.append(_section("Load test (100/500/1000 users)", body))
     else:
-        sections.append(_section("Load test (100/500/1000 users)", '<p class="no-data">No load_test_report.csv found in evaluation/reports/.</p>'))
+        sections.append(_section("Load test", '<p class="no-data">No load_test_report.csv found in evaluation/reports/.</p>'))
 
     # 4. History.
     if len(benchmark_reports) > 1:

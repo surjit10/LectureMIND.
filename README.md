@@ -464,9 +464,10 @@ curl -X POST http://localhost:8000/settings/providers \
   -H 'Content-Type: application/json' \
   -d '{"provider":"groq","model":"llama-3.3-70b-versatile","api_key":"gsk_...","display_name":"Groq"}'
 
-# Switch to online inference
-curl -X POST http://localhost:8000/settings/inference-mode \
-  -H 'Content-Type: application/json' -d '{"mode":"online"}'
+# Switch to online inference and activate the provider ID returned above
+curl -X PATCH http://localhost:8000/settings \
+  -H 'Content-Type: application/json' \
+  -d '{"inference_mode":"online","active_provider_id":"<provider-id>"}'
 
 # Validate a key without saving it
 curl -X POST http://localhost:8000/settings/providers/test \
@@ -718,13 +719,20 @@ The following table summarizes the key architectural decisions. See [DESIGN_DECI
 
 ## Production Architecture & Operational Characteristics
 
+For the production Compose stack, provide a non-default Neo4j password:
+
+```bash
+export NEO4J_PASSWORD='replace-with-a-strong-secret'
+docker compose -f docker/docker-compose.prod.yml up -d
+```
+
 | Dimension | Implementation | Production Characteristic |
 |---|---|---|
 | **Inference Scalability** | Per-provider token & rate limiter (`local/llm/rate_limiter.py`) | Smoothly manages API quotas with exponential backoff; ensures zero mid-stream interruptions across large-scale workloads |
-| **Data Isolation** | Strict `(entity_id, lecture_id)` scoping & registry namespace separation | 100% leak-proof multi-tenant isolation between different courses and lectures |
+| **Data Isolation** | Strict `(entity_id, lecture_id)` scoping plus lecture-scoped Qdrant point IDs | Prevents cross-lecture collisions in the tested retrieval and import paths; this is not a substitute for user authentication/authorization |
 | **Memory Efficiency** | Dynamic quantization (`int8`) with automated FP32 fallback for CrossEncoder | Optimized for lightweight laptop deployment and minimal memory footprint |
-| **Knowledge Portability** | Compressed Knowledge Package archives (.zip) | ~2,800× compression ratio over raw video; 725 lectures fit within ~85 MB |
-| **Zero-Hallucination Guardrails** | Strict evidence gating & source-only citation binding | Guarantees 100% citation completeness; zero hallucinated sources |
+| **Knowledge Portability** | Compressed Knowledge Package archives (.zip) | Portable JSON/NumPy artifacts with upload, expanded-size, file-count, schema, and content-hash validation |
+| **Grounding Guardrails** | Evidence gating and source-ID provenance binding | Detects whether citations came from supplied context; claim-level faithfulness still requires a real RAGAS/judge evaluation and is not guaranteed |
 
 ---
 

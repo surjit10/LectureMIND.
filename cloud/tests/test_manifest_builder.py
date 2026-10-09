@@ -105,9 +105,24 @@ class TestManifestBuilder:
         required_keys = {
             "lecture_id", "created_at", "embedding_model",
             "embedding_dimension", "chunk_count", "segment_count",
-            "entity_count", "relation_count", "reranker_version",
+            "entity_count", "relation_count", "prerequisite_count",
+            "reranker_version",
         }
         assert set(data.keys()) == required_keys
+
+    def test_manifest_counts_optional_prerequisites(
+        self, cloud_settings, setup_manifest_inputs
+    ):
+        from cloud.packaging.manifest_builder import build_manifest
+
+        (setup_manifest_inputs / "prerequisites.json").write_text(json.dumps({
+            "prerequisites": [
+                {"source_id": "lec_001_entity_000001",
+                 "target_id": "lec_001_entity_000002", "confidence": 0.8}
+            ]
+        }))
+        manifest = build_manifest("lec_001", cloud_settings=cloud_settings)
+        assert manifest.prerequisite_count == 1
 
     def test_manifest_embedding_model(self, cloud_settings, setup_manifest_inputs):
         """embedding_model must be set correctly."""

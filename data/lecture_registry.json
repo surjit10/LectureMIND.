@@ -15,63 +15,64 @@
       "description": "",
       "language": "",
       "pipeline_version": "",
-      "package_version": ""
+      "package_version": "",
+      "package_sha256": "57d2b3011efc878d251aff4c014fd61247766a1c9f3e922525ceda6c8f4c3417"
     },
-    "CS162_Lecture_1_What_is_an_Operating_System_720P": {
-      "lecture_id": "CS162_Lecture_1_What_is_an_Operating_System_720P",
-      "title": "CS162 Lecture 1 What is an Operating System 720P",
-      "display_name": "CS162 Lecture 1 What is an Operating System 720P",
+    "lecture_05086e79": {
+      "lecture_id": "lecture_05086e79",
+      "title": "Package lecture_05086e79",
+      "display_name": "Package lecture_05086e79",
       "duration": 4982.08,
       "status": "READY",
       "chunk_count": 98,
-      "segment_count": 14,
-      "package_path": "/home/surjit/Desktop/lecuremid/0-output/CS162_Lecture_1_What_is_an_Operating_System_720P_knowledge_package.zip",
-      "created_at": "2026-09-14T13:07:15.220767+00:00",
+      "segment_count": 13,
+      "package_path": "/home/surjit/Desktop/lecuremid/data/packages/lecture_05086e79",
+      "created_at": "2026-10-09T19:12:13.618894+00:00",
       "course_name": "",
       "speaker": "",
       "description": "",
       "language": "",
       "pipeline_version": "",
-      "package_version": "0-output-2026-09-13",
-      "package_sha256": "a8aadc312e6ad863dabf423cf679a348d072d021fbe4a9a70493eefb1ec75529"
+      "package_version": "",
+      "package_sha256": "48371582a682a5137ebe0dedf4e888bca619ca57ae76e6ed5ad17c48da4aebd3"
     },
-    "MIT_Introduction_to_Deep_Learning_6_S191_720P": {
-      "lecture_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P",
-      "title": "MIT Introduction to Deep Learning 6 S191 720P",
-      "display_name": "MIT Introduction to Deep Learning 6 S191 720P",
+    "lecture_58c030b4": {
+      "lecture_id": "lecture_58c030b4",
+      "title": "Package lecture_58c030b4",
+      "display_name": "Package lecture_58c030b4",
       "duration": 3375.7390333333333,
       "status": "READY",
       "chunk_count": 70,
-      "segment_count": 7,
-      "package_path": "/home/surjit/Desktop/lecuremid/0-output/MIT_Introduction_to_Deep_Learning_6_S191_720P_knowledge_package.zip",
-      "created_at": "2026-09-14T13:07:15.222656+00:00",
+      "segment_count": 10,
+      "package_path": "/home/surjit/Desktop/lecuremid/data/packages/lecture_58c030b4",
+      "created_at": "2026-10-09T19:12:16.624814+00:00",
       "course_name": "",
       "speaker": "",
       "description": "",
       "language": "",
       "pipeline_version": "",
-      "package_version": "0-output-2026-09-13",
-      "package_sha256": "f98e77fd5321f052522e1ef8788dae6b601f1120a584961464522f791ac0e1f6"
+      "package_version": "",
+      "package_sha256": "600abd475b275feaccf1d7a1528cd63cdafe96ff44166a62e2314ba8077fc234"
     },
-    "Self_Attention_in_Transformers": {
-      "lecture_id": "Self_Attention_in_Transformers",
-      "title": "Self Attention in Transformers",
-      "display_name": "Self Attention in Transformers",
+    "lecture_ddf8d2b5": {
+      "lecture_id": "lecture_ddf8d2b5",
+      "title": "Package lecture_ddf8d2b5",
+      "display_name": "Package lecture_ddf8d2b5",
       "duration": 2627.52,
       "status": "READY",
       "chunk_count": 48,
-      "segment_count": 4,
-      "package_path": "/home/surjit/Desktop/lecuremid/0-output/Self_Attention_in_Transformers_knowledge_package.zip",
-      "created_at": "2026-09-14T13:07:15.223867+00:00",
+      "segment_count": 6,
+      "package_path": "/home/surjit/Desktop/lecuremid/data/packages/lecture_ddf8d2b5",
+      "created_at": "2026-10-09T19:12:17.727949+00:00",
       "course_name": "",
       "speaker": "",
       "description": "",
       "language": "",
       "pipeline_version": "",
-      "package_version": "0-output-2026-09-13",
-      "package_sha256": "476f2af49b500aeec253052039e80ee806c0cbebf3adef0ff21e959f06993f85"
+      "package_version": "",
+      "package_sha256": "10f177c923f1ebc2e1eeca93d02b074c6651d1226ee41a1bed79e359c9179284"
     }
   },
-  "last_active_lecture_id": "lecture_092f861b",
-  "last_opened": "2026-09-13T06:59:26.129967+00:00"
+  "last_active_lecture_id": "lecture_ddf8d2b5",
+  "last_opened": "2026-10-09T19:12:18.410627+00:00"
 }

@@ -1,7 +1,8 @@
 # cloud/packaging/manifest_builder.py
 # Manifest Generation — builds manifest.json from pipeline outputs.
 #
-# Input:  multimodal_chunks.json, segments.json, entities.json, relations.json
+# Input:  multimodal_chunks.json, segments.json, entities.json, relations.json,
+#         and optional prerequisites.json
 # Output: cloud_runtime/lectures/{lecture_id}/manifest.json
 # Environment: Kaggle GPU only.
 #
@@ -88,6 +89,11 @@ def build_manifest(
     segments = json.loads(segments_path.read_text(encoding="utf-8"))
     entities = json.loads(entities_path.read_text(encoding="utf-8"))
     relations = json.loads(relations_path.read_text(encoding="utf-8"))
+    prerequisites_path = lecture_dir / "prerequisites.json"
+    prerequisite_count = 0
+    if prerequisites_path.exists():
+        prerequisites_data = json.loads(prerequisites_path.read_text(encoding="utf-8"))
+        prerequisite_count = len(prerequisites_data.get("prerequisites", []))
 
     # Build manifest.
     manifest = Manifest(
@@ -99,6 +105,7 @@ def build_manifest(
         segment_count=len(segments),
         entity_count=len(entities),
         relation_count=len(relations),
+        prerequisite_count=prerequisite_count,
         reranker_version=reranker_version,
         # V7 optional metadata
         display_name=display_name,
@@ -122,9 +129,9 @@ def build_manifest(
     )
     logger.info("Manifest: manifest.json written to %s", manifest_path)
     logger.info(
-        "Manifest: chunks=%d, segments=%d, entities=%d, relations=%d",
+        "Manifest: chunks=%d, segments=%d, entities=%d, relations=%d, prerequisites=%d",
         manifest.chunk_count, manifest.segment_count,
-        manifest.entity_count, manifest.relation_count,
+        manifest.entity_count, manifest.relation_count, manifest.prerequisite_count,
     )
 
     return manifest

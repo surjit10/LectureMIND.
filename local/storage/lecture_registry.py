@@ -203,9 +203,11 @@ class LectureRegistry:
 
         report: Dict[str, list] = {
             "missing_dirs": [],
+            "non_runtime_paths": [],
             "orphaned_dirs": [],
             "duplicate_names": [],
             "hash_mismatches": [],
+            "unhashed_ready_entries": [],
         }
 
         logger.info("[registry] Starting consistency audit (packages_dir=%s).", packages_dir)
@@ -213,7 +215,16 @@ class LectureRegistry:
         # ── Check 1: registry entries with missing directories ─────────────
         for lid, entry in list(self._registry["lectures"].items()):
             pkg_path = Path(entry.get("package_path", ""))
-            if not pkg_path.exists() or not pkg_path.is_dir():
+            if pkg_path.exists() and not pkg_path.is_dir():
+                logger.warning(
+                    "[registry] Audit: runtime package_path for '%s' is not a "
+                    "directory: '%s'. Marking as FAILED.",
+                    lid, pkg_path,
+                )
+                self._registry["lectures"][lid]["status"] = "FAILED"
+                report["non_runtime_paths"].append(lid)
+                report["missing_dirs"].append(lid)
+            elif not pkg_path.is_dir():
                 logger.warning(
                     "[registry] Audit: package directory missing for '%s' at '%s'. "
                     "Marking as FAILED.",
@@ -254,7 +265,9 @@ class LectureRegistry:
         for lid, entry in self._registry["lectures"].items():
             expected_hash = entry.get("package_sha256")
             if not expected_hash:
-                continue  # legacy entry without a hash — nothing to verify
+                if entry.get("status") == "READY":
+                    report["unhashed_ready_entries"].append(lid)
+                continue
             pkg_path = Path(entry.get("package_path", ""))
             actual_hash = _hash_package_dir(pkg_path)
             if actual_hash is None:
@@ -266,6 +279,10 @@ class LectureRegistry:
                     lid, expected_hash[:12], actual_hash[:12],
                 )
                 report["hash_mismatches"].append(lid)
+                self._registry["lectures"][lid]["status"] = "FAILED"
+
+        if report["hash_mismatches"]:
+            self._save()
 
         total_issues = sum(len(v) for v in report.values())
         if total_issues == 0:

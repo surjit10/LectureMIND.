@@ -38,8 +38,10 @@ def evaluate_ragas(
             from ragas.metrics import faithfulness, answer_relevancy, context_precision
             from datasets import Dataset
         except ImportError:
-            logger.warning("ragas/datasets not installed. Using placeholder scores.")
-            return _placeholder_scores(test_data)
+            raise RuntimeError(
+                "RAGAS evaluation requires the optional 'ragas' and 'datasets' "
+                "packages; no placeholder metric report was written."
+            )
 
     # Build evaluation dataset.
     questions, answers, contexts, ground_truths = [], [], [], []
@@ -81,12 +83,12 @@ def evaluate_ragas(
 
 
 def _placeholder_scores(test_data: List[Dict]) -> Dict[str, float]:
-    """Placeholder scores when ragas is not installed."""
-    return {
-        "Faithfulness": 0.0,
-        "Answer Relevancy": 0.0,
-        "Context Precision": 0.0,
-    }
+    """Reject the former placeholder-zero behavior.
+
+    Kept as a callable only so older imports fail loudly instead of silently
+    publishing zeros that look like real evaluation results.
+    """
+    raise RuntimeError("Placeholder RAGAS scores are not valid measurements.")
 
 
 def main() -> int:
@@ -132,11 +134,24 @@ def main() -> int:
         )
         with urllib.request.urlopen(req, timeout=120) as resp:
             payload = json.loads(resp.read().decode())
+        context_parts = []
+        for source in payload.get("sources", []):
+            text = (
+                source.get("transcript")
+                or source.get("text")
+                or source.get("content")
+                or source.get("visual_context")
+            )
+            if text:
+                context_parts.append(str(text))
+        if not context_parts:
+            raise RuntimeError(
+                "The query API did not expose retrieved context text; refusing "
+                "to run RAGAS on chunk IDs masquerading as context."
+            )
         return {
             "answer": payload.get("answer", ""),
-            "context": "\n\n".join(
-                str(src.get("chunk_id", "")) for src in payload.get("sources", [])
-            ),
+            "context": "\n\n".join(context_parts),
         }
 
     test_data = [

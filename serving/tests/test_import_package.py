@@ -312,6 +312,28 @@ class TestImportPackage:
         )
         assert res.status_code == 400
 
+    def test_expanded_size_limit_rejects_zip_bomb_shape(self, client, monkeypatch):
+        from serving.fastapi.routes import lectures
+
+        monkeypatch.setattr(lectures.local_settings, "MAX_PACKAGE_EXTRACTED_MB", 0)
+        res = client.post(
+            "/upload",
+            files={"file": ("knowledge_package.zip", _make_zip(), "application/zip")},
+        )
+        assert res.status_code == 400
+        assert "expanded package exceeds" in res.json()["detail"].lower()
+
+    def test_archive_member_count_limit(self, client, monkeypatch):
+        from serving.fastapi.routes import lectures
+
+        monkeypatch.setattr(lectures.local_settings, "MAX_PACKAGE_FILE_COUNT", 1)
+        res = client.post(
+            "/upload",
+            files={"file": ("knowledge_package.zip", _make_zip(), "application/zip")},
+        )
+        assert res.status_code == 400
+        assert "too many files" in res.json()["detail"].lower()
+
     # ── List and detail after import ───────────────────────────────────────
 
     def test_imported_package_appears_in_list(self, client):
