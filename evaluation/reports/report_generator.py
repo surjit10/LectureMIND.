@@ -3,6 +3,7 @@ import json
 import csv
 import logging
 import statistics
+import math
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 from datetime import datetime
@@ -15,7 +16,7 @@ def _p95(values: List[float]) -> float:
     if not values:
         return 0.0
     sorted_vals = sorted(values)
-    idx = max(0, int(0.95 * len(sorted_vals)) - 1)
+    idx = max(0, math.ceil(0.95 * len(sorted_vals)) - 1)
     return sorted_vals[idx]
 
 

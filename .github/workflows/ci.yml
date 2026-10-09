@@ -27,7 +27,10 @@ jobs:
           pip install -r local_requirements.txt
 
       - name: Compile check
-        run: python -m compileall schemas/ config.py local/ agent/ retrieval/ serving/ -q
+        run: python -m compileall schemas/ config.py local/ agent/ retrieval/ serving/ evaluation/ mlops/ -q
+
+      - name: Validate benchmark structure
+        run: python -m evaluation.validate_benchmark evaluation/datasets/cs162_lecture1_qa_50.json --profile smoke
 
       - name: Run unit tests
         # evaluation/ is included: its tests are pure-unit (no live services

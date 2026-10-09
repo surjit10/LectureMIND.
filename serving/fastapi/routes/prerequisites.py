@@ -13,10 +13,9 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from config import LocalSettings, SharedSettings
 from retrieval.graph_retriever.neo4j_retriever import get_prerequisites_for_concept
 from local.loaders.prerequisite_enricher import enrich_and_load
-from local.storage.lecture_registry import PROJECT_ROOT
+from local.storage.registry_provider import get_registry
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +74,10 @@ async def get_prerequisites_endpoint(
 
     # Fallback: if Neo4j returned no items, check prerequisites.json on disk
     if not items:
-        pkg_dir = PROJECT_ROOT / "data" / "packages" / lecture_id
+        lecture = get_registry().get_lecture(lecture_id)
+        pkg_dir = Path(lecture.get("package_path", "")) if lecture else Path()
         prereqs_path = pkg_dir / "prerequisites.json"
-        if prereqs_path.exists():
+        if lecture and pkg_dir.is_dir() and prereqs_path.exists():
             try:
                 data = json.loads(prereqs_path.read_text(encoding="utf-8"))
                 raw_prereqs = data.get("prerequisites", []) if isinstance(data, dict) else data
@@ -126,8 +126,9 @@ async def enrich_lecture_prerequisites_endpoint(
     """
     Enrich an existing lecture package with inferred prerequisites and load them into Neo4j.
     """
-    pkg_dir = PROJECT_ROOT / "data" / "packages" / lecture_id
-    if not pkg_dir.exists():
+    lecture = get_registry().get_lecture(lecture_id)
+    pkg_dir = Path(lecture.get("package_path", "")) if lecture else Path()
+    if not lecture or not pkg_dir.is_dir():
         raise HTTPException(
             status_code=404,
             detail=f"Lecture package directory not found: {pkg_dir}",
@@ -144,6 +145,12 @@ async def enrich_lecture_prerequisites_endpoint(
             driver=driver,
             min_confidence=min_confidence,
         )
+        from local.storage.lecture_registry import compute_package_hash
+        package_sha256 = compute_package_hash(pkg_dir)
+        if package_sha256:
+            get_registry().update_metadata(
+                lecture_id, package_sha256=package_sha256
+            )
         return EnrichResponse(
             lecture_id=lecture_id,
             status="success",

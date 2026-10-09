@@ -51,6 +51,12 @@ PACKAGE_FILES = [
     "triplets.json",
 ]
 
+# Additive artifacts introduced after the original package contract.  They are
+# exported when available, while old packages remain valid and exportable.
+OPTIONAL_PACKAGE_FILES = [
+    "prerequisites.json",
+]
+
 # Directories included in the knowledge package.
 # NOTE: reranker_model/ is intentionally excluded — the global reranker
 # is trained separately and loaded at local application startup.
@@ -119,6 +125,12 @@ def export_package(
                 # chunk_segment_map.json is optional.
                 if filename != "chunk_segment_map.json":
                     logger.warning("C2: Expected file missing from package: %s", filename)
+
+        for filename in OPTIONAL_PACKAGE_FILES:
+            filepath = lecture_dir / filename
+            if filepath.exists():
+                zf.write(filepath, filename)
+                logger.debug("C2: Added optional artifact %s", filename)
 
         # Add directories.
         for dirname in PACKAGE_DIRS:

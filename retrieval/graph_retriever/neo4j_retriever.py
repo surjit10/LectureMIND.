@@ -298,8 +298,8 @@ def retrieve_graph(
     # Connect to Neo4j.
     close_driver = False
     if driver is None:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(settings)
         close_driver = True
 
     try:
@@ -397,8 +397,8 @@ def get_prerequisites_for_concept(
     settings = local_settings or LocalSettings()
     close_driver = False
     if driver is None:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(settings)
         close_driver = True
 
     cypher = (

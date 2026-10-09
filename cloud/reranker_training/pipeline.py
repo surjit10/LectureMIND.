@@ -331,7 +331,9 @@ def _build_metadata(
     report: DatasetReport,
     result: PipelineResult,
 ) -> Dict[str, Any]:
-    return {
+    from mlops.run_manifest import create_run_manifest
+
+    metadata = {
         "version": version,
         "run_id": run_id,
         "created_at": now_iso(),
@@ -363,6 +365,11 @@ def _build_metadata(
         },
         "eval_error": result.eval_error,
     }
+    metadata["run_manifest"] = create_run_manifest(
+        "reranker_training",
+        parameters=metadata["hyperparameters"],
+    )
+    return metadata
 
 
 # ---------------------------------------------------------------------------

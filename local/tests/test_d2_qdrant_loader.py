@@ -50,12 +50,23 @@ def package_dir(tmp_path):
 class TestQdrantLoader:
 
     def test_deterministic_uuid(self):
-        """Same chunk_id always produces the same UUID."""
-        id1 = _chunk_id_to_uuid("lec_001_chunk_000001")
-        id2 = _chunk_id_to_uuid("lec_001_chunk_000001")
-        id3 = _chunk_id_to_uuid("lec_001_chunk_000002")
+        """Same lecture and chunk always produce the same UUID."""
+        id1 = _chunk_id_to_uuid("lec_001_chunk_000001", "lecture_a")
+        id2 = _chunk_id_to_uuid("lec_001_chunk_000001", "lecture_a")
+        id3 = _chunk_id_to_uuid("lec_001_chunk_000002", "lecture_a")
         assert id1 == id2
         assert id1 != id3
+
+    def test_uuid_is_scoped_to_runtime_lecture(self):
+        """The same package chunk imported as two lectures must not collide."""
+        chunk_id = "lec_001_chunk_000001"
+        assert _chunk_id_to_uuid(chunk_id, "lecture_a") != _chunk_id_to_uuid(
+            chunk_id, "lecture_b"
+        )
+
+    def test_uuid_requires_lecture_id(self):
+        with pytest.raises(QdrantLoadError, match="lecture_id is required"):
+            _chunk_id_to_uuid("lec_001_chunk_000001", "")
 
     def test_build_chunk_segment_map_from_segments(self, package_dir):
         """Falls back to segments.json when chunk_segment_map.json absent."""

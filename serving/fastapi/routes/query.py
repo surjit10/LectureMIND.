@@ -100,12 +100,12 @@ def activate_lecture(lecture_id: str) -> None:
     clear_workflow()
     
     # 2. Establish fresh DB connections
-    from neo4j import GraphDatabase
     from qdrant_client import QdrantClient
     from config import local_settings
     from local.loaders.package_loader import load_package
+    from local.storage.neo4j_connection import create_neo4j_driver
 
-    driver = GraphDatabase.driver(local_settings.NEO4J_URI)
+    driver = create_neo4j_driver(local_settings)
     qdrant_client = QdrantClient(url=local_settings.QDRANT_URL)
     
     workflow = QueryWorkflow(neo4j_driver=driver, qdrant_client=qdrant_client)

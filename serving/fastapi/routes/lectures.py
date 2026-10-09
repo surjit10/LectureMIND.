@@ -136,8 +136,19 @@ async def import_knowledge_package(
                 # is_relative_to (not startswith) so sibling paths like
                 # "<root>_evil/file" cannot bypass the check.
                 extract_root = extract_dir.resolve()
-                for member in zf.namelist():
-                    member_path = (extract_dir / member).resolve()
+                members = zf.infolist()
+                if len(members) > local_settings.MAX_PACKAGE_FILE_COUNT:
+                    raise ValueError("ZIP archive contains too many files.")
+                max_extracted_bytes = (
+                    local_settings.MAX_PACKAGE_EXTRACTED_MB * 1024 * 1024
+                )
+                if sum(member.file_size for member in members) > max_extracted_bytes:
+                    raise ValueError(
+                        "Expanded package exceeds maximum allowed size "
+                        f"({local_settings.MAX_PACKAGE_EXTRACTED_MB} MB)."
+                    )
+                for member in members:
+                    member_path = (extract_dir / member.filename).resolve()
                     if not member_path.is_relative_to(extract_root):
                         raise ValueError("Invalid path in ZIP archive.")
                 zf.extractall(extract_dir)
@@ -185,6 +196,16 @@ async def import_knowledge_package(
             language=metadata.get("language", ""),
             pipeline_version=manifest_data.get("pipeline_version", ""),
             package_version=manifest_data.get("package_version", ""),
+        )
+
+        # Record the immutable package-content fingerprint used by registry
+        # audits and reproducible evaluation reports.
+        from local.storage.lecture_registry import compute_package_hash
+        package_sha256 = compute_package_hash(extract_dir)
+        if not package_sha256:
+            raise ValueError("Could not compute the extracted package content hash.")
+        get_registry().update_metadata(
+            lecture_id, package_sha256=package_sha256
         )
 
         # ── Step 9: load vectors into Qdrant ──────────────────────────────────
@@ -286,8 +307,8 @@ async def delete_lecture(lecture_id: str):
         
     # Delete from Neo4j
     try:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(local_settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(local_settings)
         with driver.session() as session:
             # Nodes store the runtime lecture_id as a property (see
             # neo4j_loader.py) — match on it so deletion actually removes
@@ -343,9 +364,9 @@ async def reset_all_lectures():
         
     # Reset Neo4j
     try:
-        from neo4j import GraphDatabase
         from config import local_settings
-        driver = GraphDatabase.driver(local_settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(local_settings)
         with driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")
     except Exception as e:

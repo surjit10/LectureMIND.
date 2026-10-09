@@ -3,10 +3,10 @@ import os
 sys.path.append(os.getcwd())
 
 from agent.langgraph.workflow import QueryWorkflow
-from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from config import local_settings
 from local.storage.registry_provider import get_registry
+from local.storage.neo4j_connection import create_neo4j_driver
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -23,7 +23,7 @@ if not lecture_id:
 
 print(f"Using lecture_id: {lecture_id}")
 
-driver = GraphDatabase.driver(local_settings.NEO4J_URI)
+driver = create_neo4j_driver(local_settings)
 qdrant_client = QdrantClient(url=local_settings.QDRANT_URL)
 
 workflow = QueryWorkflow(neo4j_driver=driver, qdrant_client=qdrant_client)

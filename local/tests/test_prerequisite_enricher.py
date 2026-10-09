@@ -61,6 +61,7 @@ def test_enrich_package(tmp_path: Path):
     (pkg / "multimodal_chunks.json").write_text(json.dumps(chunks))
     (pkg / "segments.json").write_text(json.dumps(segments))
     (pkg / "relations.json").write_text(json.dumps(relations))
+    (pkg / "manifest.json").write_text(json.dumps({"prerequisite_count": 0}))
 
     result = enrich_package(pkg, min_confidence=0.60)
     assert "prerequisites" in result
@@ -72,6 +73,8 @@ def test_enrich_package(tmp_path: Path):
     assert len(saved["prerequisites"]) == 1
     assert saved["prerequisites"][0]["source_name"] == "Page Table"
     assert saved["prerequisites"][0]["target_name"] == "Page Fault"
+    manifest = json.loads((pkg / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["prerequisite_count"] == 1
 
 
 def test_load_prerequisites_into_neo4j():
@@ -253,4 +256,3 @@ def test_edge_merging_simulation_preserves_single_semantic_edge():
     assert merged["relation_id"] == "rel_a9_001", "Original A9 relation_id must be preserved"
     assert merged["inferred_relation_id"] == "prereq_000001", "Inferred relation ID must be recorded"
     assert merged["confidence"] == 0.95, "Confidence must be updated"
-

@@ -21,6 +21,7 @@ from schemas.chunk import MultimodalChunk
 from schemas.segment import LectureSegment
 from schemas.entity import Entity
 from schemas.relation import Relation
+from schemas.prerequisite import validate_prerequisite_artifact
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,7 @@ def validate_package(
     segments = _validate_segments(lecture_dir)
     entities = _validate_entities(lecture_dir)
     relations = _validate_relations(lecture_dir)
+    prerequisites = _validate_prerequisites(lecture_dir, entities)
     embedding_ids = _validate_embedding_ids(lecture_dir)
 
     # 3. EMBEDDING DIMENSION
@@ -95,7 +97,9 @@ def validate_package(
     _validate_referential_integrity(chunks, segments, entities, relations, embedding_ids)
 
     # 5. MANIFEST CONSISTENCY
-    _validate_manifest_counts(manifest, chunks, segments, entities, relations)
+    _validate_manifest_counts(
+        manifest, chunks, segments, entities, relations, prerequisites
+    )
 
     summary = {
         "lecture_id": lecture_id,
@@ -104,6 +108,7 @@ def validate_package(
         "segment_count": len(segments),
         "entity_count": len(entities),
         "relation_count": len(relations),
+        "prerequisite_count": len(prerequisites),
         "embedding_count": len(embedding_ids),
         "embedding_dimension": ss.EMBEDDING_DIMENSION,
     }
@@ -177,6 +182,28 @@ def _validate_relations(lecture_dir: Path) -> List[Dict]:
     return data
 
 
+def _validate_prerequisites(
+    lecture_dir: Path, entities: List[Dict]
+) -> List[Dict]:
+    """Validate the optional prerequisite DAG artifact.
+
+    The file remains optional so packages created before prerequisite inference
+    was added continue to load.  If present, malformed or dangling edges are a
+    hard validation failure.
+    """
+    path = lecture_dir / "prerequisites.json"
+    if not path.exists():
+        return []
+
+    data = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return validate_prerequisite_artifact(
+            data, (entity["entity_id"] for entity in entities)
+        )
+    except Exception as exc:
+        raise ValidationError(f"C1: prerequisites.json validation failed: {exc}") from exc
+
+
 def _validate_embedding_ids(lecture_dir: Path) -> List[Dict]:
     """Load embedding_ids.json."""
     data = json.loads((lecture_dir / "embedding_ids.json").read_text(encoding="utf-8"))
@@ -247,6 +274,7 @@ def _validate_manifest_counts(
     segments: List[Dict],
     entities: List[Dict],
     relations: List[Dict],
+    prerequisites: List[Dict],
 ) -> None:
     """Verify manifest counts match actual artifact counts."""
     if manifest.chunk_count != len(chunks):
@@ -264,6 +292,11 @@ def _validate_manifest_counts(
     if manifest.relation_count != len(relations):
         raise ValidationError(
             f"C1: Manifest relation_count ({manifest.relation_count}) != actual ({len(relations)})"
+        )
+    if manifest.prerequisite_count != len(prerequisites):
+        raise ValidationError(
+            "C1: Manifest prerequisite_count "
+            f"({manifest.prerequisite_count}) != actual ({len(prerequisites)})"
         )
     if manifest.embedding_dimension != 1024:
         raise ValidationError(

@@ -2,7 +2,9 @@
 // Single source of truth for all API calls.
 // No direct fetch calls inside components — everything goes through this file.
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Same-origin by default. Next.js proxies this path to INTERNAL_API_URL on the
+// server, so a browser never needs to resolve Docker's private `backend` host.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
@@ -239,4 +241,3 @@ export const patchGlobalRerankerSettings = (max_upload_size_mb: number) =>
     method: "PATCH",
     body: JSON.stringify({ max_upload_size_mb }),
   });
-

@@ -126,7 +126,7 @@ def _run_training(
     learning_rate: Optional[float] = None,
     evaluation_steps: int = 0,
     dev_triplets: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """
     Execute real reranker fine-tuning using sentence-transformers CrossEncoder.
 
@@ -240,7 +240,7 @@ def compute_reranker_metrics(
     triplets: List[Dict[str, Any]],
 ) -> Dict[str, float]:
     """
-    Compute MRR, Recall@K, nDCG@10 on the given triplets.
+    Compute honest pairwise ranking diagnostics on the given triplets.
 
     For each triplet, scores positive and negative against query,
     then computes ranking metrics.
@@ -251,6 +251,8 @@ def compute_reranker_metrics(
     import numpy as np
 
     reciprocal_ranks = []
+    pairwise_hits = []
+    score_margins = []
     recall_at_5 = []
     recall_at_10 = []
     ndcg_at_10 = []
@@ -272,6 +274,8 @@ def compute_reranker_metrics(
             rank = 2
 
         reciprocal_ranks.append(1.0 / rank)
+        pairwise_hits.append(1.0 if rank == 1 else 0.0)
+        score_margins.append(pos_score - neg_score)
         recall_at_5.append(1.0 if rank <= 5 else 0.0)
         recall_at_10.append(1.0 if rank <= 10 else 0.0)
 
@@ -281,11 +285,18 @@ def compute_reranker_metrics(
         ndcg_at_10.append(float(dcg / idcg))
 
     metrics = {
+        "evaluation_scope": "pairwise_one_positive_one_negative",
+        "candidates_per_query": 2,
+        "pairwise_accuracy": round(float(np.mean(pairwise_hits)), 4),
+        "mean_score_margin": round(float(np.mean(score_margins)), 4),
         "mrr": round(float(np.mean(reciprocal_ranks)), 4),
+        # Retained for report compatibility only. With two candidates these
+        # are guaranteed to be 1.0 and must not be used as quality claims.
         "recall_at_5": round(float(np.mean(recall_at_5)), 4),
         "recall_at_10": round(float(np.mean(recall_at_10)), 4),
         "ndcg_at_10": round(float(np.mean(ndcg_at_10)), 4),
         "num_triplets": len(triplets),
+        "deprecated_metrics": ["recall_at_5", "recall_at_10"],
     }
     return metrics
 

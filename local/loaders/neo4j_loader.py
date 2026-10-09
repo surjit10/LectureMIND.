@@ -187,8 +187,8 @@ def load_neo4j(
     # Connect and load.
     close_driver = False
     if driver is None:
-        from neo4j import GraphDatabase
-        driver = GraphDatabase.driver(settings.NEO4J_URI)
+        from local.storage.neo4j_connection import create_neo4j_driver
+        driver = create_neo4j_driver(settings)
         close_driver = True
 
     try:

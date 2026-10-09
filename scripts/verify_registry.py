@@ -28,25 +28,23 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from local.storage.lecture_registry import (  # noqa: E402
-    LectureRegistry,
-    compute_package_zip_hash,
-)
+from local.storage.lecture_registry import LectureRegistry  # noqa: E402
 
 
 def _hash_recorded_path(entry: dict) -> tuple[str | None, str | None]:
     """Hash the artifact a registry entry points at.
 
-    Entries may point at a ZIP artifact (hash = file SHA-256) or a package
-    directory (hash = deterministic dir digest). Returns (hash, error).
+    ``package_path`` is a runtime contract and must point at an extracted
+    directory.  Transfer ZIPs are artifacts, not loadable runtime packages.
+    Returns (hash, error).
     """
     from local.storage.lecture_registry import _hash_package_dir
 
     p = Path(entry.get("package_path", ""))
-    if not p.exists():
-        return None, f"missing on disk: {p}"
-    if p.is_file():
-        return compute_package_zip_hash(p), None
+    if not p.is_dir():
+        if p.exists():
+            return None, f"runtime package_path is not a directory: {p}"
+        return None, f"missing runtime package directory: {p}"
     return _hash_package_dir(p), None
 
 
@@ -57,6 +55,11 @@ def main() -> int:
         "--registry-file",
         default=None,
         help="override registry file path (default: data/lecture_registry.json)",
+    )
+    parser.add_argument(
+        "--allow-unhashed",
+        action="store_true",
+        help="do not fail legacy entries that have no recorded content hash",
     )
     args = parser.parse_args()
 
@@ -72,6 +75,11 @@ def main() -> int:
     for lid, entry in lectures.items():
         if not entry.get("package_sha256"):
             unhashed.append(lid)
+            if not args.allow_unhashed:
+                problems.append({
+                    "lecture_id": lid,
+                    "issue": "READY package has no recorded content hash",
+                })
             continue
         actual, error = _hash_recorded_path(entry)
         if error is not None:

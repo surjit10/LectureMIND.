@@ -235,6 +235,25 @@ class TestTrainDevSplit:
     def test_empty(self):
         assert train_dev_split([]) == ([], [])
 
+    def test_same_positive_passage_never_leaks_between_splits(self):
+        triplets = [
+            _triplet("q1", "shared passage", "n1"),
+            _triplet("q2", " shared   passage ", "n2"),
+            _triplet("q3", "other passage", "n3"),
+        ]
+        train, dev = train_dev_split(triplets, dev_fraction=0.34, seed=42)
+        train_positive = {" ".join(t["positive"].lower().split()) for t in train}
+        dev_positive = {" ".join(t["positive"].lower().split()) for t in dev}
+        assert train_positive.isdisjoint(dev_positive)
+
+    def test_one_positive_group_has_no_leaky_dev_split(self):
+        triplets = [
+            _triplet("q1", "shared", "n1"),
+            _triplet("q2", "shared", "n2"),
+        ]
+        train, dev = train_dev_split(triplets)
+        assert train == triplets and dev == []
+
 
 # ---------------------------------------------------------------------------
 # Versioning

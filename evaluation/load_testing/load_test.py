@@ -1,5 +1,5 @@
 # evaluation/load_testing/load_test.py
-# Load testing — measures TTFT, Latency, Throughput, GPU Utilization.
+# Load testing — measures TTFT, latency, throughput, and errors.
 #
 # Tests: 100, 500, 1000 concurrent users.
 # Generates CSV report.
@@ -8,6 +8,7 @@ import csv
 import json
 import logging
 import time
+import math
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -55,10 +56,15 @@ def run_load_test(
     api_url: str = "http://localhost:8000",
     queries: Optional[List[str]] = None,
     user_levels: List[int] = USER_LEVELS,
+    requests_per_level: Optional[int] = None,
     report_dir: Path = Path("evaluation/reports"),
 ) -> List[Dict]:
     """
-    Run load tests at 100, 500, 1000 concurrent users.
+    Run load tests at the requested concurrency levels.
+
+    ``user_levels`` is retained for API compatibility, but each value now
+    means actual worker concurrency. Previously it was capped at 50 while the
+    report still claimed 100/500/1000 concurrent users.
 
     Returns:
         List of result dicts per user level.
@@ -75,14 +81,24 @@ def run_load_test(
     report_dir.mkdir(parents=True, exist_ok=True)
     all_results = []
 
+    def _percentile(values: List[float], percentile: float) -> float:
+        if not values:
+            return 0.0
+        ordered = sorted(values)
+        index = max(0, min(len(ordered) - 1, math.ceil(percentile * len(ordered)) - 1))
+        return ordered[index]
+
     for level in user_levels:
+        if level < 1:
+            raise ValueError("Concurrency levels must be positive integers.")
         logger.info("Load test: %d concurrent users...", level)
-        test_queries = [queries[i % len(queries)] for i in range(level)]
+        request_count = requests_per_level or level
+        test_queries = [queries[i % len(queries)] for i in range(request_count)]
 
         start = time.perf_counter()
         results = []
 
-        with ThreadPoolExecutor(max_workers=min(level, 50)) as executor:
+        with ThreadPoolExecutor(max_workers=level) as executor:
             futures = {executor.submit(_send_query, api_url, q): q for q in test_queries}
             for future in as_completed(futures):
                 results.append(future.result())
@@ -93,15 +109,19 @@ def run_load_test(
         errors = sum(1 for r in results if r["error"] is not None)
 
         summary = {
+            "concurrency": level,
+            # Legacy column consumed by the existing dashboard.
             "users": level,
-            "total_requests": level,
-            "successful": level - errors,
+            "total_requests": request_count,
+            "successful": request_count - errors,
             "errors": errors,
+            "error_rate": errors / max(request_count, 1),
             "avg_ttft": sum(ttfts) / max(len(ttfts), 1),
             "avg_latency": sum(latencies) / max(len(latencies), 1),
-            "p95_latency": sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0,
-            "throughput_rps": (level - errors) / max(elapsed, 0.01),
-            "gpu_utilization": "N/A",  # Requires nvidia-smi integration.
+            "p50_latency": _percentile(latencies, 0.50),
+            "p95_latency": _percentile(latencies, 0.95),
+            "p99_latency": _percentile(latencies, 0.99),
+            "throughput_rps": (request_count - errors) / max(elapsed, 0.01),
         }
         all_results.append(summary)
         logger.info("  → %d users: avg_latency=%.2fs, throughput=%.1f rps", level, summary["avg_latency"], summary["throughput_rps"])

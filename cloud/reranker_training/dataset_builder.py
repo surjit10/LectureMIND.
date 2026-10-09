@@ -143,11 +143,14 @@ def train_dev_split(
     min_dev: int = 1,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
-    Deterministically split merged triplets into train/dev sets.
+    Deterministically split merged triplets into train/dev sets by positive
+    passage group.
 
     Guarantees at least `min_dev` dev triplets whenever there are enough rows
     (>= 2). With a single triplet the dev set is empty and post-training
-    evaluation is skipped rather than evaluated on training data.
+    evaluation is skipped rather than evaluated on training data.  Keeping all
+    rows with the same positive passage in one split prevents passage leakage
+    when several generated questions target the same lecture chunk.
     """
     n = len(triplets)
     if n == 0:
@@ -155,12 +158,40 @@ def train_dev_split(
     if n == 1:
         return list(triplets), []
 
-    n_dev = max(min_dev, int(round(n * dev_fraction)))
-    n_dev = min(n_dev, n - 1)  # keep at least one training row
-
     rng = random.Random(seed)
-    shuffled = list(triplets)
-    rng.shuffle(shuffled)
-    dev = shuffled[:n_dev]
-    train = shuffled[n_dev:]
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for triplet in triplets:
+        # Case/whitespace normalization is enough to group generated variants
+        # without altering the text passed to the trainer.
+        key = " ".join(str(triplet.get("positive", "")).lower().split())
+        groups.setdefault(key, []).append(triplet)
+
+    if len(groups) == 1:
+        logger.warning(
+            "Pipeline B: all %d triplets share one positive passage; a "
+            "leakage-free dev split is impossible, so dev is empty.", n,
+        )
+        return list(triplets), []
+
+    target_dev = max(min_dev, int(round(n * dev_fraction)))
+    target_dev = min(target_dev, n - 1)
+    group_items = list(groups.items())
+    rng.shuffle(group_items)
+
+    dev: List[Dict[str, Any]] = []
+    train: List[Dict[str, Any]] = []
+    for _, rows in group_items:
+        # Add whole groups until the requested dev size is met.  The result may
+        # be slightly larger than target_dev, which is preferable to leakage.
+        if len(dev) < target_dev and len(rows) < n:
+            dev.extend(rows)
+        else:
+            train.extend(rows)
+
+    if not train:
+        # Move the final complete group back to train.
+        final_key, final_rows = group_items[-1]
+        train.extend(final_rows)
+        final_ids = {id(row) for row in final_rows}
+        dev = [row for row in dev if id(row) not in final_ids]
     return train, dev
