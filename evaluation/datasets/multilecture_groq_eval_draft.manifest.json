@@ -1,0 +1,11 @@
+{
+  "dataset_name": "LectureMind multi-lecture Groq evaluation draft",
+  "label_status": "not_human_reviewed",
+  "record_count": 160,
+  "sources": {
+    "groq_generated": 60,
+    "historical_unreviewed": 50,
+    "graph_and_negative_additions": 50
+  },
+  "warning": "Do not use as release-grade ground truth until every item is independently human reviewed."
+}

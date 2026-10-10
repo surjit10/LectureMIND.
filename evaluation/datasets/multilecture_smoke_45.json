@@ -1,0 +1,1133 @@
+[
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the instructor's name mentioned in the first lecture?",
+    "ground_truth_answer": "Sean Kubitowicz.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "lecture introduction",
+    "keywords": [
+      "instructor",
+      "name"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001",
+      "timestamp": 0.0
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How many devices could the original ARPANET support?",
+    "ground_truth_answer": "256 devices.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "history of the internet",
+    "keywords": [
+      "ARPANET",
+      "devices",
+      "limit"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005",
+      "timestamp": 232.9
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What topics related to security will be covered in this course?",
+    "ground_truth_answer": "Device-level security, SSL, communication protocols, persistent storage, transactions, consistency, resilience, and interfaces to devices.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "security",
+    "keywords": [
+      "security",
+      "SSL",
+      "persistence",
+      "resilience"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009",
+      "timestamp": 460.14
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What are the main qualities highlighted in the lecture that make a complex system function effectively?",
+    "ground_truth_answer": "Multiple interrelated parts, meticulous error handling, defense against malicious or careless users, and treating the computer as a concrete machine with all its limitations and failure cases.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "system robustness",
+    "keywords": [
+      "robustness",
+      "error handling",
+      "interrelated parts"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+      "timestamp": 915.52
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Will the lecture videos be automatically captioned on YouTube, and if so, will they be live captions?",
+    "ground_truth_answer": "They will be automatically captioned by YouTube when uploaded, but they will not be live captions.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Accessibility",
+    "keywords": [
+      "closed captioning",
+      "YouTube",
+      "live captions"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025",
+      "timestamp": 1413.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why are multiple layers of abstraction necessary in operating systems?",
+    "ground_truth_answer": "Because squashing all layers leads to an undebuggable mess; multiple abstractions make systems manageable and protect from becoming undebuggable.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Abstraction Layers",
+    "keywords": [
+      "abstraction",
+      "layers",
+      "debugging",
+      "operating system"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029",
+      "timestamp": 1636.56
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "According to the slide, which of the following is listed as a typical function of an operating system: memory management, internet browser, or file system?",
+    "ground_truth_answer": "Internet browser is not typically considered part of an operating system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "operating system functions",
+    "keywords": [
+      "OS",
+      "memory management",
+      "file system",
+      "internet browser"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "timestamp": 663.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which hardware component is connected to the cache as shown on the slide?",
+    "ground_truth_answer": "Processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Hardware-Software Interface",
+    "keywords": [
+      "processor",
+      "cache",
+      "hardware",
+      "slide"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+      "timestamp": 1155.4
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What role does the 'Referee' play in the operating system slide described in the lecture?",
+    "ground_truth_answer": "The 'Referee' manages protection, isolation, and sharing of resources by allocating resources and enabling communication.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Operating System Basics",
+    "keywords": [
+      "referee",
+      "protection",
+      "isolation",
+      "resource allocation",
+      "communication"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041",
+      "timestamp": 2352.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "According to the slide, what is the purpose of completing the time-zone survey?",
+    "ground_truth_answer": "The purpose of completing the time-zone survey is to determine participants' time zones for planning section and midterm times.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Course logistics",
+    "keywords": [
+      "time-zone survey",
+      "planning",
+      "sections"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+      "timestamp": 3946.7
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the prerequisite relationship between Operating System and Process?",
+    "ground_truth_answer": "In the lecture knowledge graph, Operating System is a direct prerequisite of Process (Operating System ==[PREREQUISITE_OF]==> Process); the OS must be understood as the resource referee before defining running processes.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "Operating System",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is Process Abstraction related to Process in the lecture graph?",
+    "ground_truth_answer": "Process Abstraction is a direct prerequisite of Process (Process Abstraction ==[PREREQUISITE_OF]==> Process) and Process is derived from Process Abstraction (Process ==[DERIVED_FROM]==> Process Abstraction).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "Process Abstraction",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which subsystem does Kernel connect to via USED_BY for memory handling?",
+    "ground_truth_answer": "In the knowledge graph, Kernel is directly connected via USED_BY to Memory Management (Kernel ==[USED_BY]==> Memory Management).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "memory-management",
+    "keywords": [
+      "Kernel",
+      "Memory Management"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Kernel",
+        "Memory Management"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What direct prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture?",
+    "ground_truth_answer": "No direct or indirect prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture. The Global Data Plane is an edge-storage research project, while CPU scheduling is a core single-node kernel mechanism.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Global Data Plane",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is Bell's Law a prerequisite for the implementation of semaphores in the kernel?",
+    "ground_truth_answer": "There is no relationship connecting Bell's Law to semaphores or locks in the lecture knowledge graph. Bell's Law describes trends in computer classes per decade, whereas synchronization primitives are concurrency mechanisms.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Bell's Law",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Who is the instructor for MIT 6.S191?",
+    "ground_truth_answer": "Alexander Amini.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Course introduction",
+    "keywords": [
+      "MIT 6.S191",
+      "Alexander Amini",
+      "course overview"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001",
+      "timestamp": 0.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the infrastructure and cost requirements for building large language models mentioned in the lecture?",
+    "ground_truth_answer": "They cost hundreds of millions of dollars and require tons of infrastructure to build, maintain, and manage data centers.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Large language model infrastructure",
+    "keywords": [
+      "large language models",
+      "data centers",
+      "edge devices"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004",
+      "timestamp": 192.18
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "According to the lecture, what is the difference between artificial intelligence (AI) and machine learning (ML)?",
+    "ground_truth_answer": "AI is the practice of building algorithms to process information for future decisions, while ML is a subset of AI that performs this without explicitly programming the steps.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Definitions of AI and ML",
+    "keywords": [
+      "artificial intelligence",
+      "machine learning",
+      "decision-making"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010",
+      "timestamp": 499.36
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which programming frameworks will be offered for the software labs in the course?",
+    "ground_truth_answer": "TensorFlow and PyTorch.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Project labs and TEDxMIT",
+    "keywords": [
+      "TEDxMIT",
+      "software labs",
+      "TensorFlow",
+      "PyTorch"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013",
+      "timestamp": 609.34
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three main factors that have enabled deep learning's recent success according to the lecture?",
+    "ground_truth_answer": "Massive amounts of data, powerful GPUs from companies like AMD and NVIDIA, and accessible software tools.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Resources",
+    "keywords": [
+      "data",
+      "GPU",
+      "hardware",
+      "software",
+      "deep learning",
+      "AMD",
+      "NVIDIA"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019",
+      "timestamp": 892.38
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What role does the bias term play in a neuron?",
+    "ground_truth_answer": "It shifts the activation function up or down, allowing the neuron to adjust the output without changing the input weights.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "Neuron Structure",
+    "keywords": [
+      "bias",
+      "neuron",
+      "weights",
+      "activation",
+      "shift",
+      "function"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022",
+      "timestamp": 1026.78
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are activation functions necessary in neural networks?",
+    "ground_truth_answer": "They introduce non-linearities so the network can model complex, real-world relationships rather than just linear ones.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Activation Functions",
+    "keywords": [
+      "activation function",
+      "non-linearity",
+      "modeling",
+      "real-world",
+      "neural network"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025",
+      "timestamp": 1166.7
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What is the sign of the neuron's output for the point (-1, 2) and what does it indicate about its position relative to the decision boundary?",
+    "ground_truth_answer": "The output is negative, indicating the point lies on the left side of the decision boundary.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Decision Boundary",
+    "keywords": [
+      "decision boundary",
+      "neuron",
+      "input",
+      "output",
+      "left side",
+      "dot product"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028",
+      "timestamp": 1317.14
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three steps involved in the operation of a single neuron?",
+    "ground_truth_answer": "A single neuron performs a dot product of inputs and weights, adds a bias term, and applies a non‑linearity.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Neural Network Fundamentals",
+    "keywords": [
+      "dot product",
+      "bias",
+      "non-linearity",
+      "neuron"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031",
+      "timestamp": 1463.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "How do TensorFlow and PyTorch allow users to create a fully connected layer without writing custom code?",
+    "ground_truth_answer": "Both frameworks provide built‑in layer objects that automatically handle matrix multiplication, bias addition, and non‑linearity application.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Frameworks",
+    "keywords": [
+      "TensorFlow",
+      "PyTorch",
+      "fully connected layer",
+      "built‑in layer"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034",
+      "timestamp": 1621.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are fully connected layers stacked with nonlinearities in a neural network?",
+    "ground_truth_answer": "Stacking them introduces non‑linear transformations at each layer, allowing the network to learn complex, hierarchical representations.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Network Architecture",
+    "keywords": [
+      "fully connected",
+      "stacking",
+      "nonlinearity",
+      "depth"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037",
+      "timestamp": 1767.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What probability does the neural network predict for passing the class when given 4 lectures and 5 hours of project work?",
+    "ground_truth_answer": "It predicts a probability of 0.1, or 10%, that the student will pass the class.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Model Prediction",
+    "keywords": [
+      "probability",
+      "pass",
+      "lectures",
+      "project hours"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040",
+      "timestamp": 1910.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why do classification networks output values between 0 and 1?",
+    "ground_truth_answer": "They use a sigmoid activation function, which maps any input to a probability range of 0 to 1, suitable for yes/no decisions.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Loss Functions and Outputs",
+    "keywords": [
+      "classification",
+      "sigmoid",
+      "probability",
+      "output range"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043",
+      "timestamp": 2047.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What device was used to run the live demonstration of the end‑to‑end audio model during the lecture?",
+    "ground_truth_answer": "A phone.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "End-to-end audio model",
+    "keywords": [
+      "audio model",
+      "latency",
+      "Liquid AI",
+      "multimodal"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007",
+      "timestamp": 388.76
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which companies and institutions are listed as sponsors on the slide?",
+    "ground_truth_answer": "The slide lists Google, Liquid, Microsoft, comet, and CSAIL (Computer Science and Artificial Intelligence Laboratory).",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Sponsorship",
+    "keywords": [
+      "Google",
+      "Liquid",
+      "Microsoft",
+      "comet",
+      "CSAIL",
+      "sponsorship",
+      "logos"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016",
+      "timestamp": 754.9
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What are the three different contexts in which the word 'light' is discussed in the video?",
+    "ground_truth_answer": "The video discusses 'light' as electromagnetic radiation, as a measure of weight (lightweight), and as a color shade (light blue).",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000003"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "polysemy",
+    "keywords": [
+      "light",
+      "electromagnetic radiation",
+      "weight",
+      "color"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000003",
+      "timestamp": 85.52
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why is a static word embedding insufficient for representing words like 'Apple' in different sentences?",
+    "ground_truth_answer": "A static embedding mixes properties of technology and fruit equally, so it cannot accurately represent 'Apple' when the context is either the tech company or the fruit.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000005"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "word embeddings",
+    "keywords": [
+      "static embedding",
+      "Apple",
+      "technology",
+      "fruit"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000005",
+      "timestamp": 180.62
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How does self-attention modify the embedding of a word such as 'Apple' when it appears with different accompanying words?",
+    "ground_truth_answer": "Self‑attention shifts the word’s embedding toward the properties relevant to its context—for example, toward fruit when paired with 'juice' and toward technology when paired with 'phones'.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "self‑attention",
+    "keywords": [
+      "self-attention",
+      "Apple",
+      "juice",
+      "phones",
+      "embedding"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000007",
+      "timestamp": 281.02
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "According to the speaker, what determines the meaning of a word within a sentence?",
+    "ground_truth_answer": "The meaning of a word is determined by the other words in the sentence, which provide the context.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000009"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "easy",
+    "topic": "contextual meaning",
+    "keywords": [
+      "context",
+      "other words",
+      "meaning"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000009",
+      "timestamp": 374.44
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What effect does adding phone embeddings have on the new representation of Apple?",
+    "ground_truth_answer": "It shifts Apple’s word embedding towards the technology side, making it more similar to phones.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000011"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "word embeddings",
+    "keywords": [
+      "Apple",
+      "phone",
+      "embedding",
+      "shift",
+      "technology"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000011",
+      "timestamp": 461.7
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why do the coefficients used for combining word embeddings vary across different words?",
+    "ground_truth_answer": "The coefficients differ because they capture how strongly each word relates to the other words in the sentence.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "embedding coefficients",
+    "keywords": [
+      "coefficients",
+      "word embeddings",
+      "relationships",
+      "sentence"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000013",
+      "timestamp": 612.26
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How is the similarity between two words determined in the embedding space?",
+    "ground_truth_answer": "By computing the distance between their vectors; the smaller the distance, the greater the similarity.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000015"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "similarity measurement",
+    "keywords": [
+      "distance",
+      "similarity",
+      "word embeddings"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000015",
+      "timestamp": 732.48
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which function is used to convert similarity scores into probabilities?",
+    "ground_truth_answer": "The softmax function is applied to transform similarity scores into probabilities.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "probability conversion",
+    "keywords": [
+      "softmax",
+      "probabilities",
+      "similarity scores"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000019",
+      "timestamp": 998.9
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What is one limitation of using only fixed word embeddings for self-attention without learnable parameters?",
+    "ground_truth_answer": "It cannot be trained for task‑specific behavior, so the model cannot adapt to specific tasks.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000023"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Limitations of self-attention",
+    "keywords": [
+      "learnable parameters",
+      "fixed word embeddings",
+      "task-specific training",
+      "self-attention"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000023",
+      "timestamp": 1215.92
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why does the speaker want to introduce learnable parameters in the self-attention mechanism?",
+    "ground_truth_answer": "To capture relevant similarities and allow the model to adapt to specific tasks.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Parameterizing self-attention",
+    "keywords": [
+      "learnable parameters",
+      "similarity",
+      "task-specific",
+      "self-attention"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000025",
+      "timestamp": 1299.18
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which brand of microphone is visible in the podcast recording setup?",
+    "ground_truth_answer": "The microphone visible in the setup is a RODE microphone.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "audio equipment",
+    "keywords": [
+      "microphone",
+      "RODE",
+      "podcast"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000001",
+      "timestamp": 0.16
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "In the 2D embedding plot described, what do the X‑axis and Y‑axis represent?",
+    "ground_truth_answer": "The X‑axis is the horizontal line extending from the center to the right, and the Y‑axis is the vertical line extending from the center to the top.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000017"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "embedding visualization",
+    "keywords": [
+      "X‑axis",
+      "Y‑axis",
+      "2D plot",
+      "embedding",
+      "coordinates"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000017",
+      "timestamp": 845.12
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which function is used to normalize similarity scores before combining them with word embeddings in the described self‑attention process?",
+    "ground_truth_answer": "Softmax.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000021"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Self‑attention mechanism",
+    "keywords": [
+      "softmax",
+      "similarity",
+      "word embeddings",
+      "self-attention"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000021",
+      "timestamp": 1112.48
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "In the educational slide, which Q vector is used when calculating the new representation of \"love\"?",
+    "ground_truth_answer": "The Q vector used for the word \"love\" is Qlove.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000033"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Softmax Weighting of Word Representations",
+    "keywords": [
+      "Qlove",
+      "softmax",
+      "word representation"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000033",
+      "timestamp": 1779.52
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What feature is highlighted in the educational slide as essential for capturing long‑range dependencies in a sentence?",
+    "ground_truth_answer": "The slide emphasizes capturing the similarities between the word \"apple\" and words later in the sentence, such as \"voicemail\" and \"music player\".",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "Long‑Range Dependencies in Self‑Attention",
+    "keywords": [
+      "long‑range dependencies",
+      "apple",
+      "voicemail",
+      "music player"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000037",
+      "timestamp": 2034.54
+    }
+  }
+]

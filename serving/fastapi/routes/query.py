@@ -184,6 +184,20 @@ def _build_debug_trace(state: Dict[str, Any]) -> Dict[str, Any]:
             "rerank_score": _round(r.get("rerank_score", 0.0)),
         })
 
+    # Scores are deliberately annotated: timeline sampling uses a constant
+    # selection score and the historical no-model fallback copied retrieval
+    # scores into ``rerank_score``.  Neither should be shown as confidence.
+    try:
+        from retrieval.reranker import rerank_service as _rerank_module
+        reranker_active = _rerank_module._GLOBAL_RERANKER_SERVICE is not None
+    except Exception:
+        reranker_active = False
+    vector_score_semantics = (
+        "timeline_sampling"
+        if plan_info.get("is_lecture_wide")
+        else "cosine_similarity"
+    )
+
     return {
         "retrieval_route": route_str or "",
         "plan": plan_info,
@@ -193,6 +207,9 @@ def _build_debug_trace(state: Dict[str, Any]) -> Dict[str, Any]:
             "graph": len(state.get("graph_results", [])),
             "reranked": len(state.get("reranked_results", [])),
         },
+        "reranker_active": reranker_active,
+        "rerank_score_semantics": "cross_encoder" if reranker_active else "retrieval_fallback",
+        "vector_score_semantics": vector_score_semantics,
         "vector_results": vector_results,
         "graph_results": graph_results,
         "reranked_results": reranked_results,

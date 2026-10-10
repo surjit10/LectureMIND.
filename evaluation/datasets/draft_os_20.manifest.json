@@ -1,0 +1,511 @@
+{
+  "dataset_name": "LectureMind multi-lecture Groq evaluation draft",
+  "dataset_version": "draft-1",
+  "label_status": "auto_generated_pending_human_review",
+  "generation_provider": "Groq",
+  "generation_model": "openai/gpt-oss-20b",
+  "lectures": [
+    {
+      "lecture_id": "lecture_092f861b",
+      "display_name": "operating system",
+      "record_count": 20
+    }
+  ],
+  "records": [
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What is the instructor's name mentioned in the first lecture?",
+      "ground_truth_answer": "Sean Kubitowicz.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "lecture introduction",
+      "keywords": [
+        "instructor",
+        "name"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001",
+        "timestamp": 0.0
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "How many devices could the original ARPANET support?",
+      "ground_truth_answer": "256 devices.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "history of the internet",
+      "keywords": [
+        "ARPANET",
+        "devices",
+        "limit"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005",
+        "timestamp": 232.9
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What topics related to security will be covered in this course?",
+      "ground_truth_answer": "Device-level security, SSL, communication protocols, persistent storage, transactions, consistency, resilience, and interfaces to devices.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "security",
+      "keywords": [
+        "security",
+        "SSL",
+        "persistence",
+        "resilience"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009",
+        "timestamp": 460.14
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "According to the slide, which of the following is listed as a typical function of an operating system: memory management, internet browser, or file system?",
+      "ground_truth_answer": "Internet browser is not typically considered part of an operating system.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "operating system functions",
+      "keywords": [
+        "OS",
+        "memory management",
+        "file system",
+        "internet browser"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "timestamp": 663.96
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What are the main qualities highlighted in the lecture that make a complex system function effectively?",
+      "ground_truth_answer": "Multiple interrelated parts, meticulous error handling, defense against malicious or careless users, and treating the computer as a concrete machine with all its limitations and failure cases.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "system robustness",
+      "keywords": [
+        "robustness",
+        "error handling",
+        "interrelated parts"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+        "timestamp": 915.52
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Which hardware component is connected to the cache as shown on the slide?",
+      "ground_truth_answer": "Processor.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "Hardware-Software Interface",
+      "keywords": [
+        "processor",
+        "cache",
+        "hardware",
+        "slide"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+        "timestamp": 1155.4
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Will the lecture videos be automatically captioned on YouTube, and if so, will they be live captions?",
+      "ground_truth_answer": "They will be automatically captioned by YouTube when uploaded, but they will not be live captions.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Accessibility",
+      "keywords": [
+        "closed captioning",
+        "YouTube",
+        "live captions"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025",
+        "timestamp": 1413.96
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Why are multiple layers of abstraction necessary in operating systems?",
+      "ground_truth_answer": "Because squashing all layers leads to an undebuggable mess; multiple abstractions make systems manageable and protect from becoming undebuggable.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "Abstraction Layers",
+      "keywords": [
+        "abstraction",
+        "layers",
+        "debugging",
+        "operating system"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029",
+        "timestamp": 1636.56
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "At what point does a program become a process according to the lecture?",
+      "ground_truth_answer": "When its binary is loaded into memory, a process structure is allocated, and it is entered into the scheduler queue.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Process Creation",
+      "keywords": [
+        "process",
+        "binary loaded",
+        "scheduler",
+        "memory"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+        "timestamp": 1895.74
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "How does virtual memory protect one process from accessing another’s memory?",
+      "ground_truth_answer": "It isolates each process’s address space, preventing it from touching memory mapped to another process, thus enforcing protection boundaries.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "Virtual Memory",
+      "keywords": [
+        "virtual memory",
+        "process protection",
+        "memory isolation",
+        "address space"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037",
+        "timestamp": 2160.28
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What role does the 'Referee' play in the operating system slide described in the lecture?",
+      "ground_truth_answer": "The 'Referee' manages protection, isolation, and sharing of resources by allocating resources and enabling communication.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "Operating System Basics",
+      "keywords": [
+        "referee",
+        "protection",
+        "isolation",
+        "resource allocation",
+        "communication"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041",
+        "timestamp": 2352.96
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Which core operating system concept mentioned in the lecture can be applied across hardware design, OS kernels, and cloud systems?",
+      "ground_truth_answer": "Scheduling can be used in hardware processors, operating system kernels, and large cloud systems.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "Scheduling",
+      "keywords": [
+        "scheduling",
+        "hardware",
+        "OS",
+        "cloud",
+        "core concept"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045",
+        "timestamp": 2548.8
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What type of computing is described as moving between edge devices and the cloud?",
+      "ground_truth_answer": "Edge computing is designed to be moved between edge devices and the cloud.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Edge Computing",
+      "keywords": [
+        "edge computing",
+        "cloud",
+        "devices",
+        "computing"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+        "timestamp": 2725.88
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Why does the instructor advise against turning on cameras during the lecture session?",
+      "ground_truth_answer": "Because the class has 328 people in the chat, and turning on cameras would be overwhelming.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Virtual Classroom Logistics",
+      "keywords": [
+        "cameras",
+        "Zoom",
+        "class size",
+        "chat",
+        "virtual"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053",
+        "timestamp": 2946.2
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What is one reason the instructor stresses keeping cameras on during remote interactions?",
+      "ground_truth_answer": "Keeping cameras on helps prevent misunderstandings and hurt feelings that can arise from email-only communication.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "Remote Collaboration",
+      "keywords": [
+        "remote",
+        "cameras",
+        "miscommunication",
+        "email",
+        "interaction"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
+        "timestamp": 3140.9
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What is the primary place students are expected to get course information according to the lecture?",
+      "ground_truth_answer": "Students are expected to get course information primarily from the Piazza forum.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000061"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Course logistics",
+      "keywords": [
+        "Piazza",
+        "information",
+        "course"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000061",
+        "timestamp": 3333.2
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Which distributed systems protocols are mentioned in the lecture?",
+      "ground_truth_answer": "The lecture mentions RPC, NFS, and DHTs as distributed systems protocols.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "medium",
+      "topic": "Distributed systems",
+      "keywords": [
+        "RPC",
+        "NFS",
+        "DHTs",
+        "distributed protocols"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+        "timestamp": 3543.42
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "Why does the instructor emphasize having cameras on during group meetings?",
+      "ground_truth_answer": "Cameras are emphasized to foster communication, cooperation, and to allow students to see each other during group meetings.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "Collaboration",
+      "keywords": [
+        "camera",
+        "communication",
+        "cooperation"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+        "timestamp": 3741.22
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "According to the slide, what is the purpose of completing the time-zone survey?",
+      "ground_truth_answer": "The purpose of completing the time-zone survey is to determine participants' time zones for planning section and midterm times.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "Course logistics",
+      "keywords": [
+        "time-zone survey",
+        "planning",
+        "sections"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+        "timestamp": 3946.7
+      }
+    },
+    {
+      "lecture_id": "lecture_092f861b",
+      "query": "What is not allowed when helping someone debug code according to the lecture?",
+      "ground_truth_answer": "It is not allowed to sit down for a long debugging session to help someone else, as the code may start to resemble your own.",
+      "expected_chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "medium",
+      "topic": "Debugging policies",
+      "keywords": [
+        "debugging",
+        "session",
+        "code similarity"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077",
+        "timestamp": 4145.7
+      }
+    }
+  ]
+}

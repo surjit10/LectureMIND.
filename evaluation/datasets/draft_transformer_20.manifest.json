@@ -1,0 +1,515 @@
+{
+  "dataset_name": "LectureMind multi-lecture Groq evaluation draft",
+  "dataset_version": "draft-1",
+  "label_status": "auto_generated_pending_human_review",
+  "generation_provider": "Groq",
+  "generation_model": "openai/gpt-oss-20b",
+  "lectures": [
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "display_name": "Package lecture_ddf8d2b5",
+      "record_count": 20
+    }
+  ],
+  "records": [
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Which brand of microphone is visible in the podcast recording setup?",
+      "ground_truth_answer": "The microphone visible in the setup is a RODE microphone.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000001"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "audio equipment",
+      "keywords": [
+        "microphone",
+        "RODE",
+        "podcast"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000001",
+        "timestamp": 0.16
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What are the three different contexts in which the word 'light' is discussed in the video?",
+      "ground_truth_answer": "The video discusses 'light' as electromagnetic radiation, as a measure of weight (lightweight), and as a color shade (light blue).",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000003"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "polysemy",
+      "keywords": [
+        "light",
+        "electromagnetic radiation",
+        "weight",
+        "color"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000003",
+        "timestamp": 85.52
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Why is a static word embedding insufficient for representing words like 'Apple' in different sentences?",
+      "ground_truth_answer": "A static embedding mixes properties of technology and fruit equally, so it cannot accurately represent 'Apple' when the context is either the tech company or the fruit.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000005"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "word embeddings",
+      "keywords": [
+        "static embedding",
+        "Apple",
+        "technology",
+        "fruit"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000005",
+        "timestamp": 180.62
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "How does self-attention modify the embedding of a word such as 'Apple' when it appears with different accompanying words?",
+      "ground_truth_answer": "Self‑attention shifts the word’s embedding toward the properties relevant to its context—for example, toward fruit when paired with 'juice' and toward technology when paired with 'phones'.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000007"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "self‑attention",
+      "keywords": [
+        "self-attention",
+        "Apple",
+        "juice",
+        "phones",
+        "embedding"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000007",
+        "timestamp": 281.02
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "According to the speaker, what determines the meaning of a word within a sentence?",
+      "ground_truth_answer": "The meaning of a word is determined by the other words in the sentence, which provide the context.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000009"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "definition",
+      "difficulty": "easy",
+      "topic": "contextual meaning",
+      "keywords": [
+        "context",
+        "other words",
+        "meaning"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000009",
+        "timestamp": 374.44
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What effect does adding phone embeddings have on the new representation of Apple?",
+      "ground_truth_answer": "It shifts Apple’s word embedding towards the technology side, making it more similar to phones.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000011"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "word embeddings",
+      "keywords": [
+        "Apple",
+        "phone",
+        "embedding",
+        "shift",
+        "technology"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000011",
+        "timestamp": 461.7
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Why do the coefficients used for combining word embeddings vary across different words?",
+      "ground_truth_answer": "The coefficients differ because they capture how strongly each word relates to the other words in the sentence.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000013"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "conceptual",
+      "difficulty": "medium",
+      "topic": "embedding coefficients",
+      "keywords": [
+        "coefficients",
+        "word embeddings",
+        "relationships",
+        "sentence"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000013",
+        "timestamp": 612.26
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "How is the similarity between two words determined in the embedding space?",
+      "ground_truth_answer": "By computing the distance between their vectors; the smaller the distance, the greater the similarity.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000015"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "similarity measurement",
+      "keywords": [
+        "distance",
+        "similarity",
+        "word embeddings"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000015",
+        "timestamp": 732.48
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "In the 2D embedding plot described, what do the X‑axis and Y‑axis represent?",
+      "ground_truth_answer": "The X‑axis is the horizontal line extending from the center to the right, and the Y‑axis is the vertical line extending from the center to the top.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000017"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "embedding visualization",
+      "keywords": [
+        "X‑axis",
+        "Y‑axis",
+        "2D plot",
+        "embedding",
+        "coordinates"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000017",
+        "timestamp": 845.12
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Which function is used to convert similarity scores into probabilities?",
+      "ground_truth_answer": "The softmax function is applied to transform similarity scores into probabilities.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000019"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "probability conversion",
+      "keywords": [
+        "softmax",
+        "probabilities",
+        "similarity scores"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000019",
+        "timestamp": 998.9
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Which function is used to normalize similarity scores before combining them with word embeddings in the described self‑attention process?",
+      "ground_truth_answer": "Softmax.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000021"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Self‑attention mechanism",
+      "keywords": [
+        "softmax",
+        "similarity",
+        "word embeddings",
+        "self-attention"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000021",
+        "timestamp": 1112.48
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What is one limitation of using only fixed word embeddings for self-attention without learnable parameters?",
+      "ground_truth_answer": "It cannot be trained for task‑specific behavior, so the model cannot adapt to specific tasks.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000023"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Limitations of self-attention",
+      "keywords": [
+        "learnable parameters",
+        "fixed word embeddings",
+        "task-specific training",
+        "self-attention"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000023",
+        "timestamp": 1215.92
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "Why does the speaker want to introduce learnable parameters in the self-attention mechanism?",
+      "ground_truth_answer": "To capture relevant similarities and allow the model to adapt to specific tasks.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000025"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Parameterizing self-attention",
+      "keywords": [
+        "learnable parameters",
+        "similarity",
+        "task-specific",
+        "self-attention"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000025",
+        "timestamp": 1299.18
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What issue arises from using the same vector for the horizontal, vertical, and post‑softmax multiplication in self-attention?",
+      "ground_truth_answer": "The similarity becomes symmetric, so the similarity between two words is the same in both directions.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000027"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Vector roles in self-attention",
+      "keywords": [
+        "same vector",
+        "horizontal",
+        "vertical",
+        "symmetry",
+        "similarity"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000027",
+        "timestamp": 1414.74
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What bias occurs if weight parameters are omitted in self-attention?",
+      "ground_truth_answer": "The similarity of a word with itself dominates, preventing proper capture of inter‑word similarity.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000029"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Bias in self-attention",
+      "keywords": [
+        "bias",
+        "self similarity",
+        "weight parameters",
+        "self-attention"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000029",
+        "timestamp": 1561.06
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "How is the similarity between the word \"Apple\" and another word calculated in self‑attention?",
+      "ground_truth_answer": "It is calculated by multiplying the Q vector of Apple with the K vector of the other word, producing a single scalar value.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000031"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Similarity Computation in Self‑Attention",
+      "keywords": [
+        "Apple",
+        "Q vector",
+        "K vector",
+        "similarity"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000031",
+        "timestamp": 1684.88
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "In the educational slide, which Q vector is used when calculating the new representation of \"love\"?",
+      "ground_truth_answer": "The Q vector used for the word \"love\" is Qlove.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000033"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "topic": "Softmax Weighting of Word Representations",
+      "keywords": [
+        "Qlove",
+        "softmax",
+        "word representation"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000033",
+        "timestamp": 1779.52
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What advantage does self‑attention have over RNNs regarding sequential processing of words?",
+      "ground_truth_answer": "Self‑attention eliminates the need for sequential processing; it can compute all word representations in parallel, allowing faster training on large sentences.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000035"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Parallelization in Self‑Attention",
+      "keywords": [
+        "self‑attention",
+        "parallel processing",
+        "RNN",
+        "training speed"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000035",
+        "timestamp": 1914.08
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "What feature is highlighted in the educational slide as essential for capturing long‑range dependencies in a sentence?",
+      "ground_truth_answer": "The slide emphasizes capturing the similarities between the word \"apple\" and words later in the sentence, such as \"voicemail\" and \"music player\".",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000037"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "visual",
+      "difficulty": "medium",
+      "topic": "Long‑Range Dependencies in Self‑Attention",
+      "keywords": [
+        "long‑range dependencies",
+        "apple",
+        "voicemail",
+        "music player"
+      ],
+      "need_visual": true,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000037",
+        "timestamp": 2034.54
+      }
+    },
+    {
+      "lecture_id": "lecture_ddf8d2b5",
+      "query": "How can the new representation of the word \"Apple\" be constructed from other words in the sentence?",
+      "ground_truth_answer": "It can be built as a weighted sum: 0.1 × love + 0.5 × Apple + 0.4 × phones.",
+      "expected_chunk_ids": [
+        "Self_Attention_in_Transformers_chunk_000039"
+      ],
+      "expected_route": "vector_only",
+      "question_type": "factual",
+      "difficulty": "easy",
+      "topic": "Contextual Weighting of Word Representations",
+      "keywords": [
+        "Apple",
+        "weights",
+        "love",
+        "phones"
+      ],
+      "need_visual": false,
+      "answerable": true,
+      "review_status": "auto_generated_pending_human_review",
+      "source_evidence": {
+        "chunk_id": "Self_Attention_in_Transformers_chunk_000039",
+        "timestamp": 2167.2
+      }
+    }
+  ]
+}

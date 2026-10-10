@@ -49,6 +49,7 @@ site/
 # Virtual environments
 # ------------------------------------------------------------
 .venv/
+.venv_clean/
 venv/
 env/
 ENV/

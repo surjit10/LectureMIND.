@@ -201,10 +201,13 @@ class ReportGenerator:
         for i, res in enumerate(results, 1):
             m = res.get("metrics", {})
             query = (res.get("query", "") or "")[:50].replace("|", "/")
+            def _display(metric: str, digits: int = 3) -> str:
+                value = m.get(metric)
+                return "n/a" if value is None else f"{float(value):.{digits}f}"
             md_content.append(
                 f"| {i} | {res.get('question_type','')} | {res.get('difficulty','')} | {query} | "
-                f"{res.get('expected_route','')} | {m.get('mrr_at_5', 0.0):.3f} | {m.get('recall_at_5', 0.0):.3f} | "
-                f"{m.get('answer_f1', 0.0):.3f} | {m.get('citation_coverage', 0.0):.3f} | {m.get('total_latency', 0.0):.2f} |"
+                f"{res.get('expected_route','')} | {_display('mrr_at_5')} | {_display('recall_at_5')} | "
+                f"{_display('answer_f1')} | {_display('citation_coverage')} | {_display('total_latency', 2)} |"
             )
 
         with open(output_path, "w", encoding="utf-8") as f:

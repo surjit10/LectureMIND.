@@ -1,0 +1,12 @@
+{
+  "dataset_name": "LectureMind balanced smoke benchmark",
+  "record_count": 45,
+  "per_lecture": {
+    "lecture_092f861b": 15,
+    "lecture_58c030b4": 15,
+    "lecture_ddf8d2b5": 15
+  },
+  "status": "provisional_not_human_reviewed",
+  "selection_policy": "fixed category-balanced smoke sample; no score optimization",
+  "source": "/home/surjit/Desktop/lecuremid/evaluation/datasets/multilecture_groq_eval_draft.json"
+}
