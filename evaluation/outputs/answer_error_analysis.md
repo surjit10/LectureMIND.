@@ -1,5 +1,9 @@
 # LectureMIND — Answer F1 Deep Error Analysis
 
+> **Archive notice:** This analysis covers the historical 50-question CS162 run and its
+> Answer F1 of 0.4594. The current 45-question smoke run reports Answer F1 0.2667 and
+> is stored under `evaluation/reports/smoke_groq_20261010_fixed/`.
+
 **Benchmark Population:** N = 50 questions (`cs162_lecture1_qa_50.json`)  
 **Mean Unigram Token F1:** 0.4594 (45.94%)  
 **Mean Keyword Recall:** 0.5453 (54.53%)  
