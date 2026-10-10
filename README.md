@@ -144,7 +144,7 @@ graph TD
 | **Learning Service** | `serving/fastapi/learning_service.py` | Notes, flashcards, quiz, and learning-path generation reusing the retrieval pipeline |
 | **Evaluation Framework** | `evaluation/benchmark_runner.py` | Offline RAG quality benchmark over a QA dataset, bypassing HTTP |
 | **RAGAS Scaffold** | `evaluation/ragas/eval_ragas.py` | Scaffolded evaluation interface for optional Faithfulness, Answer Relevancy, Context Precision |
-| **Load Test Scaffold** | `evaluation/load_testing/load_test.py` | Concurrency profiling scaffold for 100/500/1000 simulated users; avg/p95 latency + RPS |
+| **Load Test Scaffold** | `evaluation/load_testing/load_test.py` | Configurable concurrency profiling; reports avg/p50/p95/p99 latency, errors, and RPS |
 | **Frontend** | `frontend/` | Next.js 14 + React 18 + TypeScript + custom CSS design system; Student/Developer modes |
 
 ---
