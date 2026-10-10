@@ -406,7 +406,11 @@ def get_prerequisites_for_concept(
         f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
         f"(target {{lecture_id: $lecture_id}}) "
         f"WHERE toLower(target.name) = toLower($concept_name) "
-        f"  AND all(rel IN relationships(path) WHERE rel.lecture_id = $lecture_id AND (rel.confidence IS NULL OR rel.confidence >= $min_confidence)) "
+        # Access relationship metadata through properties(rel) rather than
+        # direct unknown-property expressions.  Older graph imports contain
+        # only relation_id/lecture_id; this keeps those graphs queryable
+        # without Neo4j emitting unknown-property warnings.
+        f"  AND all(rel IN relationships(path) WHERE properties(rel)['lecture_id'] = $lecture_id AND (properties(rel)['confidence'] IS NULL OR properties(rel)['confidence'] >= $min_confidence)) "
         f"RETURN prereq.entity_id AS entity_id, "
         f"       prereq.name AS concept, "
         f"       prereq.type AS type, "
@@ -416,13 +420,13 @@ def get_prerequisites_for_concept(
         f"       [rel IN relationships(path) | {{ "
         f"           source: startNode(rel).name, "
         f"           target: endNode(rel).name, "
-        f"           confidence: rel.confidence, "
-        f"           chunk_id: rel.evidence_chunk_id, "
-        f"           timestamp: rel.evidence_timestamp "
+        f"           confidence: properties(rel)['confidence'], "
+        f"           chunk_id: properties(rel)['evidence_chunk_id'], "
+        f"           timestamp: properties(rel)['evidence_timestamp'] "
         f"       }}] AS edge_provenance, "
-        f"       relationships(path)[0].confidence AS direct_confidence, "
-        f"       relationships(path)[0].evidence_chunk_id AS chunk_id, "
-        f"       relationships(path)[0].evidence_timestamp AS timestamp "
+        f"       properties(relationships(path)[0])['confidence'] AS direct_confidence, "
+        f"       properties(relationships(path)[0])['evidence_chunk_id'] AS chunk_id, "
+        f"       properties(relationships(path)[0])['evidence_timestamp'] AS timestamp "
         f"ORDER BY depth DESC, timestamp ASC"
     )
 
@@ -444,7 +448,7 @@ def get_prerequisites_for_concept(
                     f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
                     f"(target {{lecture_id: $lecture_id}}) "
                     f"WHERE toLower(target.name) CONTAINS toLower($concept_name) "
-                    f"  AND all(rel IN relationships(path) WHERE rel.lecture_id = $lecture_id AND (rel.confidence IS NULL OR rel.confidence >= $min_confidence)) "
+                    f"  AND all(rel IN relationships(path) WHERE properties(rel)['lecture_id'] = $lecture_id AND (properties(rel)['confidence'] IS NULL OR properties(rel)['confidence'] >= $min_confidence)) "
                     f"RETURN prereq.entity_id AS entity_id, "
                     f"       prereq.name AS concept, "
                     f"       prereq.type AS type, "
@@ -454,13 +458,13 @@ def get_prerequisites_for_concept(
                     f"       [rel IN relationships(path) | {{ "
                     f"           source: startNode(rel).name, "
                     f"           target: endNode(rel).name, "
-                    f"           confidence: rel.confidence, "
-                    f"           chunk_id: rel.evidence_chunk_id, "
-                    f"           timestamp: rel.evidence_timestamp "
+                    f"           confidence: properties(rel)['confidence'], "
+                    f"           chunk_id: properties(rel)['evidence_chunk_id'], "
+                    f"           timestamp: properties(rel)['evidence_timestamp'] "
                     f"       }}] AS edge_provenance, "
-                    f"       relationships(path)[0].confidence AS direct_confidence, "
-                    f"       relationships(path)[0].evidence_chunk_id AS chunk_id, "
-                    f"       relationships(path)[0].evidence_timestamp AS timestamp "
+                    f"       properties(relationships(path)[0])['confidence'] AS direct_confidence, "
+                    f"       properties(relationships(path)[0])['evidence_chunk_id'] AS chunk_id, "
+                    f"       properties(relationships(path)[0])['evidence_timestamp'] AS timestamp "
                     f"ORDER BY depth DESC, timestamp ASC"
                 )
                 records = list(session.run(cypher_partial, **params))

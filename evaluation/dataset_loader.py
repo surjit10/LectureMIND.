@@ -19,6 +19,9 @@ class BenchmarkSample:
     topic: str
     keywords: List[str] = None  # optional: key terms expected in the answer
     need_visual: bool = False   # optional: query requires visual context (planner need_visual)
+    answerable: bool = True     # false for explicit unanswerable/refusal items
+    review_status: str = "unknown"  # human_reviewed, auto_generated_pending_human_review, etc.
+    source_evidence: Dict[str, Any] = None  # provenance metadata, not model input
 
 class DatasetLoader:
     def __init__(self, dataset_path: str):
@@ -56,3 +59,7 @@ class DatasetLoader:
         # Optional need_visual field must be a bool if present.
         if "need_visual" in item and not isinstance(item["need_visual"], bool):
             raise ValueError(f"Sample 'need_visual' must be a bool. Sample: {item.get('query', 'Unknown')}")
+        if "answerable" in item and not isinstance(item["answerable"], bool):
+            raise ValueError(f"Sample 'answerable' must be a bool. Sample: {item.get('query', 'Unknown')}")
+        if "review_status" in item and not isinstance(item["review_status"], str):
+            raise ValueError(f"Sample 'review_status' must be a string. Sample: {item.get('query', 'Unknown')}")

@@ -73,6 +73,9 @@ export interface QueryDebug {
     need_visual?: boolean;
   };
   telemetry?: Record<string, number>;
+  reranker_active?: boolean;
+  rerank_score_semantics?: "cross_encoder" | "retrieval_fallback" | string;
+  vector_score_semantics?: "cosine_similarity" | "timeline_sampling" | string;
   stage_counts?: { vector: number; graph: number; reranked: number };
   vector_results?: { chunk_id: string; score: number }[];
   graph_results?: { start: string; related: string; rel_types: string[]; hops: number }[];

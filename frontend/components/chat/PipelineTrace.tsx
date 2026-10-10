@@ -65,6 +65,16 @@ export default function PipelineTrace({ debug }: { debug: QueryDebug }) {
             </div>
           )}
 
+          {/* Score semantics: prevent placeholder scores being read as confidence. */}
+          <div className="trace-block">
+            <span className="trace-label">Scoring</span>
+            <span className="trace-value">
+              reranker={debug.reranker_active ? "active" : "fallback"}
+              {debug.rerank_score_semantics ? ` · ${debug.rerank_score_semantics}` : ""}
+              {debug.vector_score_semantics ? ` · vector=${debug.vector_score_semantics}` : ""}
+            </span>
+          </div>
+
           {/* Graph path */}
           {debug.graph_path && debug.graph_path.length > 0 && (
             <div className="trace-block">

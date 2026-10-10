@@ -30,7 +30,7 @@ def validate_benchmark(path: str | Path, profile: str = "smoke") -> Dict[str, An
     for index, sample in enumerate(samples):
         if not sample.query.strip() or not sample.ground_truth_answer.strip():
             issues.append(f"sample {index} has an empty query or ground-truth answer")
-        if not sample.expected_chunk_ids:
+        if not sample.expected_chunk_ids and sample.answerable:
             issues.append(f"sample {index} has no expected_chunk_ids")
 
     lecture_counts = Counter(sample.lecture_id for sample in samples)
@@ -55,6 +55,17 @@ def validate_benchmark(path: str | Path, profile: str = "smoke") -> Dict[str, An
             issues.append(
                 "each represented question type needs at least 5 samples; sparse: "
                 + ", ".join(sparse_types)
+            )
+        review_statuses = {sample.review_status for sample in samples}
+        # Preserve compatibility with legacy datasets that predate review
+        # metadata (unknown is a warning). Explicitly marked generated or
+        # historical records must not pass as release-grade.
+        if review_statuses == {"unknown"}:
+            warnings.append("review_status is absent; human review cannot be verified")
+        elif review_statuses != {"human_reviewed"}:
+            issues.append(
+                "release benchmark requires every sample to have review_status=human_reviewed; "
+                f"found: {sorted(review_statuses)}"
             )
     elif profile != "smoke":
         raise ValueError("profile must be 'smoke' or 'release'")

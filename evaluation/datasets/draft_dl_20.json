@@ -1,0 +1,514 @@
+[
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Who is the instructor for MIT 6.S191?",
+    "ground_truth_answer": "Alexander Amini.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Course introduction",
+    "keywords": [
+      "MIT 6.S191",
+      "Alexander Amini",
+      "course overview"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001",
+      "timestamp": 0.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the infrastructure and cost requirements for building large language models mentioned in the lecture?",
+    "ground_truth_answer": "They cost hundreds of millions of dollars and require tons of infrastructure to build, maintain, and manage data centers.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Large language model infrastructure",
+    "keywords": [
+      "large language models",
+      "data centers",
+      "edge devices"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004",
+      "timestamp": 192.18
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What device was used to run the live demonstration of the end‑to‑end audio model during the lecture?",
+    "ground_truth_answer": "A phone.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "End-to-end audio model",
+    "keywords": [
+      "audio model",
+      "latency",
+      "Liquid AI",
+      "multimodal"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007",
+      "timestamp": 388.76
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "According to the lecture, what is the difference between artificial intelligence (AI) and machine learning (ML)?",
+    "ground_truth_answer": "AI is the practice of building algorithms to process information for future decisions, while ML is a subset of AI that performs this without explicitly programming the steps.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Definitions of AI and ML",
+    "keywords": [
+      "artificial intelligence",
+      "machine learning",
+      "decision-making"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010",
+      "timestamp": 499.36
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which programming frameworks will be offered for the software labs in the course?",
+    "ground_truth_answer": "TensorFlow and PyTorch.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Project labs and TEDxMIT",
+    "keywords": [
+      "TEDxMIT",
+      "software labs",
+      "TensorFlow",
+      "PyTorch"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013",
+      "timestamp": 609.34
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which companies and institutions are listed as sponsors on the slide?",
+    "ground_truth_answer": "The slide lists Google, Liquid, Microsoft, comet, and CSAIL (Computer Science and Artificial Intelligence Laboratory).",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Sponsorship",
+    "keywords": [
+      "Google",
+      "Liquid",
+      "Microsoft",
+      "comet",
+      "CSAIL",
+      "sponsorship",
+      "logos"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016",
+      "timestamp": 754.9
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three main factors that have enabled deep learning's recent success according to the lecture?",
+    "ground_truth_answer": "Massive amounts of data, powerful GPUs from companies like AMD and NVIDIA, and accessible software tools.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Resources",
+    "keywords": [
+      "data",
+      "GPU",
+      "hardware",
+      "software",
+      "deep learning",
+      "AMD",
+      "NVIDIA"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019",
+      "timestamp": 892.38
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What role does the bias term play in a neuron?",
+    "ground_truth_answer": "It shifts the activation function up or down, allowing the neuron to adjust the output without changing the input weights.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "Neuron Structure",
+    "keywords": [
+      "bias",
+      "neuron",
+      "weights",
+      "activation",
+      "shift",
+      "function"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022",
+      "timestamp": 1026.78
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are activation functions necessary in neural networks?",
+    "ground_truth_answer": "They introduce non-linearities so the network can model complex, real-world relationships rather than just linear ones.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Activation Functions",
+    "keywords": [
+      "activation function",
+      "non-linearity",
+      "modeling",
+      "real-world",
+      "neural network"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025",
+      "timestamp": 1166.7
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What is the sign of the neuron's output for the point (-1, 2) and what does it indicate about its position relative to the decision boundary?",
+    "ground_truth_answer": "The output is negative, indicating the point lies on the left side of the decision boundary.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Decision Boundary",
+    "keywords": [
+      "decision boundary",
+      "neuron",
+      "input",
+      "output",
+      "left side",
+      "dot product"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028",
+      "timestamp": 1317.14
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three steps involved in the operation of a single neuron?",
+    "ground_truth_answer": "A single neuron performs a dot product of inputs and weights, adds a bias term, and applies a non‑linearity.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Neural Network Fundamentals",
+    "keywords": [
+      "dot product",
+      "bias",
+      "non-linearity",
+      "neuron"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031",
+      "timestamp": 1463.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "How do TensorFlow and PyTorch allow users to create a fully connected layer without writing custom code?",
+    "ground_truth_answer": "Both frameworks provide built‑in layer objects that automatically handle matrix multiplication, bias addition, and non‑linearity application.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Frameworks",
+    "keywords": [
+      "TensorFlow",
+      "PyTorch",
+      "fully connected layer",
+      "built‑in layer"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034",
+      "timestamp": 1621.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are fully connected layers stacked with nonlinearities in a neural network?",
+    "ground_truth_answer": "Stacking them introduces non‑linear transformations at each layer, allowing the network to learn complex, hierarchical representations.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Network Architecture",
+    "keywords": [
+      "fully connected",
+      "stacking",
+      "nonlinearity",
+      "depth"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037",
+      "timestamp": 1767.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What probability does the neural network predict for passing the class when given 4 lectures and 5 hours of project work?",
+    "ground_truth_answer": "It predicts a probability of 0.1, or 10%, that the student will pass the class.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Model Prediction",
+    "keywords": [
+      "probability",
+      "pass",
+      "lectures",
+      "project hours"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040",
+      "timestamp": 1910.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why do classification networks output values between 0 and 1?",
+    "ground_truth_answer": "They use a sigmoid activation function, which maps any input to a probability range of 0 to 1, suitable for yes/no decisions.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Loss Functions and Outputs",
+    "keywords": [
+      "classification",
+      "sigmoid",
+      "probability",
+      "output range"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043",
+      "timestamp": 2047.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What does the loss value represent in the two-parameter network visualization?",
+    "ground_truth_answer": "The loss value is a single scalar representing the average error across all data points; on the visualization it appears as the height at a given (W0, W1) configuration.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000046"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Loss Function",
+    "keywords": [
+      "loss",
+      "scalar",
+      "average error",
+      "two-parameter",
+      "visualization"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000046",
+      "timestamp": 2199.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why is the gradient considered a key part of the gradient descent algorithm?",
+    "ground_truth_answer": "The gradient tells exactly how to update each weight at each iteration because it indicates the direction and magnitude that will most reduce the loss.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000049"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "Gradient Descent",
+    "keywords": [
+      "gradient",
+      "update",
+      "weights",
+      "loss",
+      "direction"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000049",
+      "timestamp": 2340.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What role does backpropagation play in determining how each weight affects the final loss?",
+    "ground_truth_answer": "Backpropagation calculates the gradient for each weight by propagating derivatives from output back to input, showing how changes in that weight will alter the loss.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000052"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Backpropagation",
+    "keywords": [
+      "backpropagation",
+      "gradient",
+      "weights",
+      "loss",
+      "chain rule"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000052",
+      "timestamp": 2500.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What is a potential drawback of using a learning rate that is too large?",
+    "ground_truth_answer": "A large learning rate can cause the loss to overshoot minima and even explode, preventing convergence.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000055"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Learning Rates",
+    "keywords": [
+      "learning rate",
+      "overshoot",
+      "loss explode",
+      "convergence"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000055",
+      "timestamp": 2638.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why is stochastic gradient descent (SGD) preferred over full-batch gradient descent in many real-life problems?",
+    "ground_truth_answer": "SGD is preferred because computing gradients over a single data point is much cheaper and more scalable than over the entire dataset, making training feasible.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000058"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Stochastic Gradient Descent",
+    "keywords": [
+      "SGD",
+      "full-batch",
+      "single data point",
+      "scalable",
+      "training"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000058",
+      "timestamp": 2780.5
+    }
+  }
+]

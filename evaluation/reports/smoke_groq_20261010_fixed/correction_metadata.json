@@ -1,0 +1,6 @@
+{
+  "source_report": "evaluation/reports/smoke_groq_20261010/evaluation_report_20261010_113144.json",
+  "correction": "exclude unanswerable samples from evidence-based retrieval/reranker/citation denominators",
+  "unanswerable_samples": 2,
+  "note": "Raw model responses are unchanged; only metric aggregation was corrected."
+}

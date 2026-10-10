@@ -451,6 +451,20 @@ LLM provider selection is managed at runtime via `data/llm_config.json` (written
 
 ### Cloud vs. local inference
 
+#### Local ML runtime setup
+
+The local API needs a CPU/GPU embedding runtime for semantic retrieval. On a
+CPU-only machine, install PyTorch from the CPU index before the pinned local
+requirements so pip does not select a large CUDA distribution:
+
+```bash
+.venv/bin/python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.3.1
+.venv/bin/python -m pip install -r local_requirements.txt
+```
+
+The reranker model is recovered at API startup. Answer generation additionally
+needs either the configured Ollama model or an online provider in `/settings`.
+
 Answer generation runs through a pluggable `LLMBackend` selected by `ProviderRegistry` at runtime:
 
 - **Offline mode (default):** local Ollama model (e.g. `qwen2.5:3b`) — fully private, no internet needed.
@@ -558,23 +572,40 @@ The evaluation framework measures RAG pipeline quality offline — no running se
 
 ### Run Benchmark
 ```bash
-source .venv/bin/activate
-python -c "
-from evaluation.benchmark_runner import BenchmarkRunner
-runner = BenchmarkRunner(
-    dataset_path='evaluation/datasets/cs162_lecture1_qa_50.json',
-    output_dir='evaluation/outputs'
-)
-runner.setup()
-runner.run()
-"
+./.venv_clean/bin/python scripts/run_mlops_smoke.py
 ```
 
-Reports are written to `evaluation/outputs/` in CSV, JSON, and Markdown formats. The runner
-uses the **real** workflow (Qdrant → Neo4j → cross-encoder reranker → active LLM backend),
-with injectable dependencies; per-question `llm.provider/model` provenance is recorded.
+The default command validates the 45-question, three-lecture smoke benchmark and refreshes
+the dashboard without calling an LLM. To run the real workflow (Qdrant → Neo4j → cross-encoder
+reranker → active LLM backend), use `scripts/run_mlops_smoke.py --run`; this may consume provider
+quota. Reports are written to the selected run directory in CSV, JSON, and Markdown formats,
+with run-manifest and package-hash provenance.
 
 ### Measured Results
+
+#### Current three-lecture smoke run (45 questions)
+
+The current corrected report is `evaluation/reports/smoke_groq_20261010_fixed/`. It contains
+15 questions for each of three lectures and was executed with the local embedding model,
+active BGE cross-encoder, Qdrant, Neo4j, and Groq. It is a **provisional smoke benchmark**:
+the labels are not yet human-reviewed. Unanswerable questions are excluded from retrieval
+denominators rather than counted as perfect retrieval.
+
+| Metric | Mean | Denominator |
+|---|---:|---:|
+| Hit@5 | **0.8605** | 43 answerable questions |
+| Recall@5 | **0.8488** | 43 answerable questions |
+| MRR@5 | **0.7333** | 43 answerable questions |
+| Reranker ranking quality | **0.7644** | 43 answerable questions |
+| Citation coverage | **0.7674** | 43 answerable questions |
+| Answer F1 | **0.2667** | 45 questions |
+| Routing accuracy | **0.8889** | 45 questions |
+| Mean total latency | **17.32 s** | 45 questions |
+
+The graph slice is currently weak and answer F1 is substantially below retrieval quality;
+these results should not be presented as production or human-validated accuracy.
+
+#### Historical single-lecture benchmark (comparison only)
 
 Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 questions, 0 errors, on a single backend (Groq `openai/gpt-oss-120b`)**. Full per-type breakdowns and verified performance metrics are documented in [METRICS_MATRIX.md](./METRICS_MATRIX.md) §2.4.
 
@@ -656,11 +687,12 @@ python -m evaluation.ragas.eval_ragas  # writes evaluation/reports/ragas_report.
 ```bash
 python -m evaluation.load_testing.load_test  # writes evaluation/reports/load_test_report.csv
 ```
-> Requires the FastAPI server to be running. No load-test report exists yet in this repository.
+> Requires the FastAPI server to be running. The current small report is
+> `evaluation/reports/load_test_report.csv`; it is a smoke test, not a production capacity claim.
 
 ### Benchmark Dashboard (renders existing outputs — never re-runs evals)
 ```bash
-python -m evaluation.dashboard.dashboard_generator
+./.venv_clean/bin/python scripts/run_mlops_smoke.py
 # → evaluation/dashboard/index.html (self-contained, inline SVG charts)
 ```
 

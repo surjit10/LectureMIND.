@@ -1,0 +1,4378 @@
+[
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the instructor's name mentioned in the first lecture?",
+    "ground_truth_answer": "Sean Kubitowicz.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "lecture introduction",
+    "keywords": [
+      "instructor",
+      "name"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001",
+      "timestamp": 0.0
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How many devices could the original ARPANET support?",
+    "ground_truth_answer": "256 devices.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "history of the internet",
+    "keywords": [
+      "ARPANET",
+      "devices",
+      "limit"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005",
+      "timestamp": 232.9
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What topics related to security will be covered in this course?",
+    "ground_truth_answer": "Device-level security, SSL, communication protocols, persistent storage, transactions, consistency, resilience, and interfaces to devices.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "security",
+    "keywords": [
+      "security",
+      "SSL",
+      "persistence",
+      "resilience"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009",
+      "timestamp": 460.14
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "According to the slide, which of the following is listed as a typical function of an operating system: memory management, internet browser, or file system?",
+    "ground_truth_answer": "Internet browser is not typically considered part of an operating system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "operating system functions",
+    "keywords": [
+      "OS",
+      "memory management",
+      "file system",
+      "internet browser"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "timestamp": 663.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What are the main qualities highlighted in the lecture that make a complex system function effectively?",
+    "ground_truth_answer": "Multiple interrelated parts, meticulous error handling, defense against malicious or careless users, and treating the computer as a concrete machine with all its limitations and failure cases.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "system robustness",
+    "keywords": [
+      "robustness",
+      "error handling",
+      "interrelated parts"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+      "timestamp": 915.52
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which hardware component is connected to the cache as shown on the slide?",
+    "ground_truth_answer": "Processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Hardware-Software Interface",
+    "keywords": [
+      "processor",
+      "cache",
+      "hardware",
+      "slide"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+      "timestamp": 1155.4
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Will the lecture videos be automatically captioned on YouTube, and if so, will they be live captions?",
+    "ground_truth_answer": "They will be automatically captioned by YouTube when uploaded, but they will not be live captions.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Accessibility",
+    "keywords": [
+      "closed captioning",
+      "YouTube",
+      "live captions"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000025",
+      "timestamp": 1413.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why are multiple layers of abstraction necessary in operating systems?",
+    "ground_truth_answer": "Because squashing all layers leads to an undebuggable mess; multiple abstractions make systems manageable and protect from becoming undebuggable.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Abstraction Layers",
+    "keywords": [
+      "abstraction",
+      "layers",
+      "debugging",
+      "operating system"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029",
+      "timestamp": 1636.56
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "At what point does a program become a process according to the lecture?",
+    "ground_truth_answer": "When its binary is loaded into memory, a process structure is allocated, and it is entered into the scheduler queue.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Process Creation",
+    "keywords": [
+      "process",
+      "binary loaded",
+      "scheduler",
+      "memory"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+      "timestamp": 1895.74
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does virtual memory protect one process from accessing another’s memory?",
+    "ground_truth_answer": "It isolates each process’s address space, preventing it from touching memory mapped to another process, thus enforcing protection boundaries.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Virtual Memory",
+    "keywords": [
+      "virtual memory",
+      "process protection",
+      "memory isolation",
+      "address space"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037",
+      "timestamp": 2160.28
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What role does the 'Referee' play in the operating system slide described in the lecture?",
+    "ground_truth_answer": "The 'Referee' manages protection, isolation, and sharing of resources by allocating resources and enabling communication.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Operating System Basics",
+    "keywords": [
+      "referee",
+      "protection",
+      "isolation",
+      "resource allocation",
+      "communication"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041",
+      "timestamp": 2352.96
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which core operating system concept mentioned in the lecture can be applied across hardware design, OS kernels, and cloud systems?",
+    "ground_truth_answer": "Scheduling can be used in hardware processors, operating system kernels, and large cloud systems.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Scheduling",
+    "keywords": [
+      "scheduling",
+      "hardware",
+      "OS",
+      "cloud",
+      "core concept"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045",
+      "timestamp": 2548.8
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What type of computing is described as moving between edge devices and the cloud?",
+    "ground_truth_answer": "Edge computing is designed to be moved between edge devices and the cloud.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Edge Computing",
+    "keywords": [
+      "edge computing",
+      "cloud",
+      "devices",
+      "computing"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+      "timestamp": 2725.88
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why does the instructor advise against turning on cameras during the lecture session?",
+    "ground_truth_answer": "Because the class has 328 people in the chat, and turning on cameras would be overwhelming.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Virtual Classroom Logistics",
+    "keywords": [
+      "cameras",
+      "Zoom",
+      "class size",
+      "chat",
+      "virtual"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053",
+      "timestamp": 2946.2
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is one reason the instructor stresses keeping cameras on during remote interactions?",
+    "ground_truth_answer": "Keeping cameras on helps prevent misunderstandings and hurt feelings that can arise from email-only communication.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Remote Collaboration",
+    "keywords": [
+      "remote",
+      "cameras",
+      "miscommunication",
+      "email",
+      "interaction"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
+      "timestamp": 3140.9
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the primary place students are expected to get course information according to the lecture?",
+    "ground_truth_answer": "Students are expected to get course information primarily from the Piazza forum.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000061"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Course logistics",
+    "keywords": [
+      "Piazza",
+      "information",
+      "course"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000061",
+      "timestamp": 3333.2
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which distributed systems protocols are mentioned in the lecture?",
+    "ground_truth_answer": "The lecture mentions RPC, NFS, and DHTs as distributed systems protocols.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "Distributed systems",
+    "keywords": [
+      "RPC",
+      "NFS",
+      "DHTs",
+      "distributed protocols"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+      "timestamp": 3543.42
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why does the instructor emphasize having cameras on during group meetings?",
+    "ground_truth_answer": "Cameras are emphasized to foster communication, cooperation, and to allow students to see each other during group meetings.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Collaboration",
+    "keywords": [
+      "camera",
+      "communication",
+      "cooperation"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+      "timestamp": 3741.22
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "According to the slide, what is the purpose of completing the time-zone survey?",
+    "ground_truth_answer": "The purpose of completing the time-zone survey is to determine participants' time zones for planning section and midterm times.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Course logistics",
+    "keywords": [
+      "time-zone survey",
+      "planning",
+      "sections"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+      "timestamp": 3946.7
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is not allowed when helping someone debug code according to the lecture?",
+    "ground_truth_answer": "It is not allowed to sit down for a long debugging session to help someone else, as the code may start to resemble your own.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "Debugging policies",
+    "keywords": [
+      "debugging",
+      "session",
+      "code similarity"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077",
+      "timestamp": 4145.7
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Who is the instructor for MIT 6.S191?",
+    "ground_truth_answer": "Alexander Amini.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Course introduction",
+    "keywords": [
+      "MIT 6.S191",
+      "Alexander Amini",
+      "course overview"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000001",
+      "timestamp": 0.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the infrastructure and cost requirements for building large language models mentioned in the lecture?",
+    "ground_truth_answer": "They cost hundreds of millions of dollars and require tons of infrastructure to build, maintain, and manage data centers.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Large language model infrastructure",
+    "keywords": [
+      "large language models",
+      "data centers",
+      "edge devices"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000004",
+      "timestamp": 192.18
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What device was used to run the live demonstration of the end‑to‑end audio model during the lecture?",
+    "ground_truth_answer": "A phone.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "End-to-end audio model",
+    "keywords": [
+      "audio model",
+      "latency",
+      "Liquid AI",
+      "multimodal"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000007",
+      "timestamp": 388.76
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "According to the lecture, what is the difference between artificial intelligence (AI) and machine learning (ML)?",
+    "ground_truth_answer": "AI is the practice of building algorithms to process information for future decisions, while ML is a subset of AI that performs this without explicitly programming the steps.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Definitions of AI and ML",
+    "keywords": [
+      "artificial intelligence",
+      "machine learning",
+      "decision-making"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000010",
+      "timestamp": 499.36
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which programming frameworks will be offered for the software labs in the course?",
+    "ground_truth_answer": "TensorFlow and PyTorch.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Project labs and TEDxMIT",
+    "keywords": [
+      "TEDxMIT",
+      "software labs",
+      "TensorFlow",
+      "PyTorch"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000013",
+      "timestamp": 609.34
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Which companies and institutions are listed as sponsors on the slide?",
+    "ground_truth_answer": "The slide lists Google, Liquid, Microsoft, comet, and CSAIL (Computer Science and Artificial Intelligence Laboratory).",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Sponsorship",
+    "keywords": [
+      "Google",
+      "Liquid",
+      "Microsoft",
+      "comet",
+      "CSAIL",
+      "sponsorship",
+      "logos"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000016",
+      "timestamp": 754.9
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three main factors that have enabled deep learning's recent success according to the lecture?",
+    "ground_truth_answer": "Massive amounts of data, powerful GPUs from companies like AMD and NVIDIA, and accessible software tools.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Resources",
+    "keywords": [
+      "data",
+      "GPU",
+      "hardware",
+      "software",
+      "deep learning",
+      "AMD",
+      "NVIDIA"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000019",
+      "timestamp": 892.38
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What role does the bias term play in a neuron?",
+    "ground_truth_answer": "It shifts the activation function up or down, allowing the neuron to adjust the output without changing the input weights.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "Neuron Structure",
+    "keywords": [
+      "bias",
+      "neuron",
+      "weights",
+      "activation",
+      "shift",
+      "function"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000022",
+      "timestamp": 1026.78
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are activation functions necessary in neural networks?",
+    "ground_truth_answer": "They introduce non-linearities so the network can model complex, real-world relationships rather than just linear ones.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Activation Functions",
+    "keywords": [
+      "activation function",
+      "non-linearity",
+      "modeling",
+      "real-world",
+      "neural network"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000025",
+      "timestamp": 1166.7
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What is the sign of the neuron's output for the point (-1, 2) and what does it indicate about its position relative to the decision boundary?",
+    "ground_truth_answer": "The output is negative, indicating the point lies on the left side of the decision boundary.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Decision Boundary",
+    "keywords": [
+      "decision boundary",
+      "neuron",
+      "input",
+      "output",
+      "left side",
+      "dot product"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000028",
+      "timestamp": 1317.14
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What are the three steps involved in the operation of a single neuron?",
+    "ground_truth_answer": "A single neuron performs a dot product of inputs and weights, adds a bias term, and applies a non‑linearity.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Neural Network Fundamentals",
+    "keywords": [
+      "dot product",
+      "bias",
+      "non-linearity",
+      "neuron"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000031",
+      "timestamp": 1463.0
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "How do TensorFlow and PyTorch allow users to create a fully connected layer without writing custom code?",
+    "ground_truth_answer": "Both frameworks provide built‑in layer objects that automatically handle matrix multiplication, bias addition, and non‑linearity application.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Deep Learning Frameworks",
+    "keywords": [
+      "TensorFlow",
+      "PyTorch",
+      "fully connected layer",
+      "built‑in layer"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000034",
+      "timestamp": 1621.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why are fully connected layers stacked with nonlinearities in a neural network?",
+    "ground_truth_answer": "Stacking them introduces non‑linear transformations at each layer, allowing the network to learn complex, hierarchical representations.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Network Architecture",
+    "keywords": [
+      "fully connected",
+      "stacking",
+      "nonlinearity",
+      "depth"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000037",
+      "timestamp": 1767.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What probability does the neural network predict for passing the class when given 4 lectures and 5 hours of project work?",
+    "ground_truth_answer": "It predicts a probability of 0.1, or 10%, that the student will pass the class.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Model Prediction",
+    "keywords": [
+      "probability",
+      "pass",
+      "lectures",
+      "project hours"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000040",
+      "timestamp": 1910.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why do classification networks output values between 0 and 1?",
+    "ground_truth_answer": "They use a sigmoid activation function, which maps any input to a probability range of 0 to 1, suitable for yes/no decisions.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Loss Functions and Outputs",
+    "keywords": [
+      "classification",
+      "sigmoid",
+      "probability",
+      "output range"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000043",
+      "timestamp": 2047.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What does the loss value represent in the two-parameter network visualization?",
+    "ground_truth_answer": "The loss value is a single scalar representing the average error across all data points; on the visualization it appears as the height at a given (W0, W1) configuration.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000046"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Loss Function",
+    "keywords": [
+      "loss",
+      "scalar",
+      "average error",
+      "two-parameter",
+      "visualization"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000046",
+      "timestamp": 2199.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why is the gradient considered a key part of the gradient descent algorithm?",
+    "ground_truth_answer": "The gradient tells exactly how to update each weight at each iteration because it indicates the direction and magnitude that will most reduce the loss.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000049"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "Gradient Descent",
+    "keywords": [
+      "gradient",
+      "update",
+      "weights",
+      "loss",
+      "direction"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000049",
+      "timestamp": 2340.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What role does backpropagation play in determining how each weight affects the final loss?",
+    "ground_truth_answer": "Backpropagation calculates the gradient for each weight by propagating derivatives from output back to input, showing how changes in that weight will alter the loss.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000052"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Backpropagation",
+    "keywords": [
+      "backpropagation",
+      "gradient",
+      "weights",
+      "loss",
+      "chain rule"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000052",
+      "timestamp": 2500.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "What is a potential drawback of using a learning rate that is too large?",
+    "ground_truth_answer": "A large learning rate can cause the loss to overshoot minima and even explode, preventing convergence.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000055"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Learning Rates",
+    "keywords": [
+      "learning rate",
+      "overshoot",
+      "loss explode",
+      "convergence"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000055",
+      "timestamp": 2638.5
+    }
+  },
+  {
+    "lecture_id": "lecture_58c030b4",
+    "query": "Why is stochastic gradient descent (SGD) preferred over full-batch gradient descent in many real-life problems?",
+    "ground_truth_answer": "SGD is preferred because computing gradients over a single data point is much cheaper and more scalable than over the entire dataset, making training feasible.",
+    "expected_chunk_ids": [
+      "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000058"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "Stochastic Gradient Descent",
+    "keywords": [
+      "SGD",
+      "full-batch",
+      "single data point",
+      "scalable",
+      "training"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "MIT_Introduction_to_Deep_Learning_6_S191_720P_chunk_000058",
+      "timestamp": 2780.5
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which brand of microphone is visible in the podcast recording setup?",
+    "ground_truth_answer": "The microphone visible in the setup is a RODE microphone.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "audio equipment",
+    "keywords": [
+      "microphone",
+      "RODE",
+      "podcast"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000001",
+      "timestamp": 0.16
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What are the three different contexts in which the word 'light' is discussed in the video?",
+    "ground_truth_answer": "The video discusses 'light' as electromagnetic radiation, as a measure of weight (lightweight), and as a color shade (light blue).",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000003"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "polysemy",
+    "keywords": [
+      "light",
+      "electromagnetic radiation",
+      "weight",
+      "color"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000003",
+      "timestamp": 85.52
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why is a static word embedding insufficient for representing words like 'Apple' in different sentences?",
+    "ground_truth_answer": "A static embedding mixes properties of technology and fruit equally, so it cannot accurately represent 'Apple' when the context is either the tech company or the fruit.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000005"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "word embeddings",
+    "keywords": [
+      "static embedding",
+      "Apple",
+      "technology",
+      "fruit"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000005",
+      "timestamp": 180.62
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How does self-attention modify the embedding of a word such as 'Apple' when it appears with different accompanying words?",
+    "ground_truth_answer": "Self‑attention shifts the word’s embedding toward the properties relevant to its context—for example, toward fruit when paired with 'juice' and toward technology when paired with 'phones'.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "self‑attention",
+    "keywords": [
+      "self-attention",
+      "Apple",
+      "juice",
+      "phones",
+      "embedding"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000007",
+      "timestamp": 281.02
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "According to the speaker, what determines the meaning of a word within a sentence?",
+    "ground_truth_answer": "The meaning of a word is determined by the other words in the sentence, which provide the context.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000009"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "easy",
+    "topic": "contextual meaning",
+    "keywords": [
+      "context",
+      "other words",
+      "meaning"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000009",
+      "timestamp": 374.44
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What effect does adding phone embeddings have on the new representation of Apple?",
+    "ground_truth_answer": "It shifts Apple’s word embedding towards the technology side, making it more similar to phones.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000011"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "word embeddings",
+    "keywords": [
+      "Apple",
+      "phone",
+      "embedding",
+      "shift",
+      "technology"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000011",
+      "timestamp": 461.7
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why do the coefficients used for combining word embeddings vary across different words?",
+    "ground_truth_answer": "The coefficients differ because they capture how strongly each word relates to the other words in the sentence.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000013"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "embedding coefficients",
+    "keywords": [
+      "coefficients",
+      "word embeddings",
+      "relationships",
+      "sentence"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000013",
+      "timestamp": 612.26
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How is the similarity between two words determined in the embedding space?",
+    "ground_truth_answer": "By computing the distance between their vectors; the smaller the distance, the greater the similarity.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000015"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "similarity measurement",
+    "keywords": [
+      "distance",
+      "similarity",
+      "word embeddings"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000015",
+      "timestamp": 732.48
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "In the 2D embedding plot described, what do the X‑axis and Y‑axis represent?",
+    "ground_truth_answer": "The X‑axis is the horizontal line extending from the center to the right, and the Y‑axis is the vertical line extending from the center to the top.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000017"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "embedding visualization",
+    "keywords": [
+      "X‑axis",
+      "Y‑axis",
+      "2D plot",
+      "embedding",
+      "coordinates"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000017",
+      "timestamp": 845.12
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which function is used to convert similarity scores into probabilities?",
+    "ground_truth_answer": "The softmax function is applied to transform similarity scores into probabilities.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000019"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "probability conversion",
+    "keywords": [
+      "softmax",
+      "probabilities",
+      "similarity scores"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000019",
+      "timestamp": 998.9
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Which function is used to normalize similarity scores before combining them with word embeddings in the described self‑attention process?",
+    "ground_truth_answer": "Softmax.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000021"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Self‑attention mechanism",
+    "keywords": [
+      "softmax",
+      "similarity",
+      "word embeddings",
+      "self-attention"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000021",
+      "timestamp": 1112.48
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What is one limitation of using only fixed word embeddings for self-attention without learnable parameters?",
+    "ground_truth_answer": "It cannot be trained for task‑specific behavior, so the model cannot adapt to specific tasks.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000023"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Limitations of self-attention",
+    "keywords": [
+      "learnable parameters",
+      "fixed word embeddings",
+      "task-specific training",
+      "self-attention"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000023",
+      "timestamp": 1215.92
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "Why does the speaker want to introduce learnable parameters in the self-attention mechanism?",
+    "ground_truth_answer": "To capture relevant similarities and allow the model to adapt to specific tasks.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000025"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Parameterizing self-attention",
+    "keywords": [
+      "learnable parameters",
+      "similarity",
+      "task-specific",
+      "self-attention"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000025",
+      "timestamp": 1299.18
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What issue arises from using the same vector for the horizontal, vertical, and post‑softmax multiplication in self-attention?",
+    "ground_truth_answer": "The similarity becomes symmetric, so the similarity between two words is the same in both directions.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000027"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Vector roles in self-attention",
+    "keywords": [
+      "same vector",
+      "horizontal",
+      "vertical",
+      "symmetry",
+      "similarity"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000027",
+      "timestamp": 1414.74
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What bias occurs if weight parameters are omitted in self-attention?",
+    "ground_truth_answer": "The similarity of a word with itself dominates, preventing proper capture of inter‑word similarity.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000029"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Bias in self-attention",
+    "keywords": [
+      "bias",
+      "self similarity",
+      "weight parameters",
+      "self-attention"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000029",
+      "timestamp": 1561.06
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How is the similarity between the word \"Apple\" and another word calculated in self‑attention?",
+    "ground_truth_answer": "It is calculated by multiplying the Q vector of Apple with the K vector of the other word, producing a single scalar value.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000031"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Similarity Computation in Self‑Attention",
+    "keywords": [
+      "Apple",
+      "Q vector",
+      "K vector",
+      "similarity"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000031",
+      "timestamp": 1684.88
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "In the educational slide, which Q vector is used when calculating the new representation of \"love\"?",
+    "ground_truth_answer": "The Q vector used for the word \"love\" is Qlove.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000033"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "Softmax Weighting of Word Representations",
+    "keywords": [
+      "Qlove",
+      "softmax",
+      "word representation"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000033",
+      "timestamp": 1779.52
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What advantage does self‑attention have over RNNs regarding sequential processing of words?",
+    "ground_truth_answer": "Self‑attention eliminates the need for sequential processing; it can compute all word representations in parallel, allowing faster training on large sentences.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000035"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Parallelization in Self‑Attention",
+    "keywords": [
+      "self‑attention",
+      "parallel processing",
+      "RNN",
+      "training speed"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000035",
+      "timestamp": 1914.08
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "What feature is highlighted in the educational slide as essential for capturing long‑range dependencies in a sentence?",
+    "ground_truth_answer": "The slide emphasizes capturing the similarities between the word \"apple\" and words later in the sentence, such as \"voicemail\" and \"music player\".",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "Long‑Range Dependencies in Self‑Attention",
+    "keywords": [
+      "long‑range dependencies",
+      "apple",
+      "voicemail",
+      "music player"
+    ],
+    "need_visual": true,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000037",
+      "timestamp": 2034.54
+    }
+  },
+  {
+    "lecture_id": "lecture_ddf8d2b5",
+    "query": "How can the new representation of the word \"Apple\" be constructed from other words in the sentence?",
+    "ground_truth_answer": "It can be built as a weighted sum: 0.1 × love + 0.5 × Apple + 0.4 × phones.",
+    "expected_chunk_ids": [
+      "Self_Attention_in_Transformers_chunk_000039"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "Contextual Weighting of Word Representations",
+    "keywords": [
+      "Apple",
+      "weights",
+      "love",
+      "phones"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "auto_generated_pending_human_review",
+    "source_evidence": {
+      "chunk_id": "Self_Attention_in_Transformers_chunk_000039",
+      "timestamp": 2167.2
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the Global Data Plane project?",
+    "ground_truth_answer": "The Global Data Plane is a project looking at hardened data containers — cryptographically hardened containers of data, like shipping containers at the Port of Oakland, that can be moved to edge devices and back into the cloud, ideal for edge computing.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "medium",
+    "topic": "research",
+    "keywords": [
+      "Global Data Plane",
+      "shipping containers",
+      "cryptographically hardened",
+      "edge computing"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000053"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How many devices could the original ARPANET handle?",
+    "ground_truth_answer": "The original ARPANET couldn't handle more than 256 devices; today there are billions — about four and a half billion devices penetrating maybe 60% of the world.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "networking",
+    "keywords": [
+      "256 devices",
+      "ARPANET",
+      "billions"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000005"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the main challenge of operating systems that the lecture closes with?",
+    "ground_truth_answer": "The challenge is complexity: many software modules running on many devices and hardware platforms, running different applications at the same time, failing in unexpected ways and under attack from malicious people — and it is not feasible to test software for all possible environments and combinations of components.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "complexity",
+    "keywords": [
+      "challenge is complexity",
+      "malicious people",
+      "not feasible to test"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about how many processes typically run on a laptop?",
+    "ground_truth_answer": "There are many processes running all the time on typical laptops — often 50 or 100 of them. Mostly they're sleeping, but they are there to wake up and do some execution at some point.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "processes",
+    "keywords": [
+      "many processes running all the time",
+      "50 or 100",
+      "mostly they're sleeping"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000030"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about SSL and security models?",
+    "ground_truth_answer": "As the class builds out into the network, it will talk about things like SSL and security models at both the device level and network level.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "security",
+    "keywords": [
+      "SSL",
+      "security models"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How many processors does a modern car have according to the lecture?",
+    "ground_truth_answer": "Modern cars have hundreds of processors in them, along with cell phones, laptops, and little computers inside devices and thermostats.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000084"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "scaling",
+    "keywords": [
+      "hundreds of processors",
+      "modern cars"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000084"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which topics will the class cover according to the lecture?",
+    "ground_truth_answer": "The class covers processes, threads, concurrency, scheduling, coordination, address spaces, protection, isolation, sharing, and security.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-content",
+    "keywords": [
+      "processes",
+      "threads",
+      "scheduling",
+      "address spaces",
+      "security"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000008",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about the honor code?",
+    "ground_truth_answer": "There is an academic honor code — as a member of the UC Berkeley community, one acts with honesty, integrity, and respect for others. The class is heavily collaborative within a group but not across groups or other people on homeworks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "academic honor code",
+      "honesty, integrity",
+      "respect for others"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the enrollment limit for CS162?",
+    "ground_truth_answer": "The class has a limit of 428; the instructor just raised it and it is not going any higher.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000054"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "limit of 428",
+      "raised it"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000054"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the challenge of testing software for all environments?",
+    "ground_truth_answer": "It is not feasible to test software for all possible environments and combinations of components, so systems must be designed to be correct by design rather than correct by accident.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "complexity",
+    "keywords": [
+      "not feasible to test",
+      "all possible environments",
+      "combinations of components"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the syllabus of CS162 according to the lecture?",
+    "ground_truth_answer": "The syllabus covers navigating as a system programmer: processes, I/O, networks, virtual machines; concurrency (threads, scheduling, locks, deadlock, scalability, fairness); virtual memory, address translation, protection, and sharing; file systems (device drivers, file objects, storage, block stores, naming, caching); and distributed systems protocols like RPC, NFS, plus reliability and security.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "summary",
+    "difficulty": "medium",
+    "topic": "course-content",
+    "keywords": [
+      "processes, I.O., networks",
+      "concurrency is going to be a big part",
+      "virtual memory",
+      "file systems work"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000069",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000068"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about the word 'system'?",
+    "ground_truth_answer": "A system is something with many interrelated parts where the sum is much greater than the sum of its parts, and every interrelated part potentially interacts with others — at least N-squared complexity, which is why APIs and other techniques are needed to avoid it.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "medium",
+    "topic": "etymology",
+    "keywords": [
+      "many interrelated parts",
+      "sum is much greater",
+      "N squared"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about the Intel Skylake example?",
+    "ground_truth_answer": "The 2017 Intel Skylake chip has 28 cores, each with two hyper-threads, giving 58 threads per chip; many chips together form a huge parallel system in a tiny box, and many boxes make the world.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000092"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "parallelism",
+    "keywords": [
+      "Skylake",
+      "28 cores",
+      "two hyper threads"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000092"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is Alewife?",
+    "ground_truth_answer": "Alewife is a chip the instructor designed for his PhD work — one of the first shared-memory multiprocessors that also did message passing.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "medium",
+    "topic": "research",
+    "keywords": [
+      "Alewife",
+      "shared memory multiprocessors",
+      "message passing"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about the number of computers per person?",
+    "ground_truth_answer": "The number of computers per person is increasing as devices get smaller — people carry cell phones and laptops and have little computers inside devices and thermostats; the trend is described with an inverse Moore's law style graph.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "scaling",
+    "keywords": [
+      "computers per person",
+      "increasing",
+      "smaller",
+      "devices"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000006"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does a DNS lookup work when you use your phone to browse the web?",
+    "ground_truth_answer": "Your phone first issues a DNS request to figure out the internet IP address of where you're trying to go; DNS servers on the network return the information, the phone routes through the internet to a data center where a load balancer picks one of several devices, which does the search, retrieves information from a page store, reassembles the page, and returns the result.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "networking",
+    "keywords": [
+      "DNS request",
+      "IP address",
+      "load balancer"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000009"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why must the OS provide a consistent programming abstraction to applications?",
+    "ground_truth_answer": "Because technology advances continuously and every device and generation is a little different, the OS must provide a consistent programming abstraction to applications no matter how complicated the hardware is, and it must manage sharing of resources.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "os-roles",
+    "keywords": [
+      "consistent programming abstraction",
+      "manage sharing of resources"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What are the requirements for group projects in CS162?",
+    "ground_truth_answer": "Group projects have exactly four members (never five; three requires serious justification). All group members must be in the same section with the same TA, and students must work in groups because that is how the real world works.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000075"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "four members",
+      "same section",
+      "same TA"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000073",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000075"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What happens when a program becomes a process?",
+    "ground_truth_answer": "A program becomes a process when its binary has been loaded into memory and into the proper OS structures — it needs a process structure allocated for it and must be put into the scheduler queue. After that the process is an instantiation of a running program.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "processes",
+    "keywords": [
+      "binary has been loaded",
+      "process structure",
+      "scheduler queue"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000037"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about the Mars Rover and its operating system?",
+    "ground_truth_answer": "The Mars Rover ran for a decade or more with very limited processing — 20 megahertz processors and 128 megabytes of DRAM — running a real-time operating system. You can't hit reset or debug it easily, yet engineers debugged and repaired it remotely, including timing problems.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "embedded",
+    "keywords": [
+      "Mars Rover",
+      "20 megahertz processors",
+      "real time operating system"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about files being an abstraction?",
+    "ground_truth_answer": "Files are an abstraction of a bunch of individual blocks on a disk, put together with I-nodes to give you a file — so the OS hides whether data is on disk, a USB key, or cloud storage.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "abstractions",
+    "keywords": [
+      "abstraction of a bunch of individual blocks",
+      "I nodes",
+      "file system"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000022",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the lecture describe networking as part of the internet system?",
+    "ground_truth_answer": "Networking is just one of the amazing aspects of the huge global computing system, and operating systems are what tie it all together — tying everybody else together is part of what's very cool about the internet.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "networking",
+    "keywords": [
+      "networking is just one of the amazing aspects",
+      "ties it all together"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Why does the lecture describe the internet as looking like a brain?",
+    "ground_truth_answer": "The internet looks like a big brain because it has huge numbers of connections and interconnectivity with multiple redundancies — billions of people and devices interconnected in one huge system, so the brain analogy is not entirely off base.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "networking",
+    "keywords": [
+      "big brain",
+      "huge numbers of connections",
+      "multiple redundancies"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000004"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What homework should students start right away?",
+    "ground_truth_answer": "Students should get going on Homework Zero right away: it covers getting a GitHub account and registration, setting up a virtual machine, getting familiar with the 162 tools, and submitting to the autograder. Project Zero is done individually and will be posted soon.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000072"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "Homework Zero",
+      "GitHub account",
+      "autograder"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000077",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000072"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the power density problem described in the lecture?",
+    "ground_truth_answer": "If processors had kept growing in performance at the same rate, chips would have reached the power density of a rocket nozzle — putting a laptop like that on your lap would be very uncomfortable. Power density and capacitance are what led the industry to multi-core processors instead of faster single cores.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000088"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "moores-law",
+    "keywords": [
+      "power density",
+      "rocket nozzle",
+      "uncomfortable"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000088"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What collaboration is allowed and not allowed between groups?",
+    "ground_truth_answer": "Explaining a concept, discussing algorithms, testing strategies, or debugging approaches with another group is okay — but sharing code or test cases with another group, copying or reading another group's code, copying online code or previous years' test cases, and helping another group debug their code are not okay, because a long debugging session tends to make code look like your own.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "course-logistics",
+    "keywords": [
+      "sharing code",
+      "another group",
+      "not okay"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000080"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about time scales like nanoseconds and femtoseconds?",
+    "ground_truth_answer": "The system must work across time scales from nanoseconds or even femtoseconds (laser communications) up to seconds and tens of seconds; sub-nanosecond times are definitely current.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "scaling",
+    "keywords": [
+      "nanoseconds or femtoseconds",
+      "time scales",
+      "sub nanoseconds"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000007"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about the cloud and cloud operating systems?",
+    "ground_truth_answer": "The cloud has really become part of day-to-day life; while a monolithic 'cloud operating system' may not have taken over, many mechanisms have been synthesized together, and by the end of the term students should be able to evaluate whether the cloud is a monolithic thing or a bunch of mechanisms.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "cloud",
+    "keywords": [
+      "cloud",
+      "mechanisms have been synthesized",
+      "monolithic"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about caches?",
+    "ground_truth_answer": "Caches make slow memory look fast: the goal is to make a system as fast as the smallest item (registers) while having the size of the largest item (memory or disk), which is what caches accomplish.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000018"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "hardware",
+    "keywords": [
+      "caches",
+      "make the slow memory look fast",
+      "registers"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000018"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the course website and where should students get information?",
+    "ground_truth_answer": "The course website is cs162.eecs.berkeley.edu, home for the course schedule, posted slides, and videos; Piazza is the primary place for everything else.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "cs162",
+      "Piazza",
+      "class schedule"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000001"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What role does virtual memory play in protecting processes from each other?",
+    "ground_truth_answer": "Virtual memory is what prevents one process from reaching out and touching another process's memory: it stops access past the boundaries of what the OS has mapped for each process, forming part of the protection boundary.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000042",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "virtual-memory",
+    "keywords": [
+      "virtual memory prevents",
+      "mapped for you",
+      "boundaries"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000042",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000041"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about the OS providing common services like file systems?",
+    "ground_truth_answer": "The OS provides a bunch of glue — common services: a file system (storage abstraction), windows that properly take in mouse clicks, and a networking system that talks from Berkeley to Beijing without worrying about packets. These common services are typically linked in with libraries that programmers depend on.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "os-roles",
+    "keywords": [
+      "common services",
+      "file system",
+      "windows that properly take in mouse clicks",
+      "linked in with libraries"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000044",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000045"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the kernel and why do people disagree about what it includes?",
+    "ground_truth_answer": "The kernel is the one program running at all times on the computer — the core of the operating system. Nobody disagrees the kernel is part of the OS, but people disagree widely about whether everything else a vendor ships should count.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "kernel",
+    "keywords": [
+      "kernel",
+      "core",
+      "program",
+      "disagree"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about how to think like an engineer?",
+    "ground_truth_answer": "Making a system like the internet robust and failure-resistant requires an engineering mindset — students must start thinking like engineers, and the class gives tools to make complicated systems actually work.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000016",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000010"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "engineering",
+    "keywords": [
+      "engineering mindset",
+      "thinking like engineers",
+      "robust"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000016",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000017",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000010"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Who is the instructor of CS162 and what is his background?",
+    "ground_truth_answer": "The instructor is John Kubiatowicz (Professor Kuby). His background: hardware design — he designed the Alewife chip, one of the first shared-memory multiprocessors with message passing; OS development at Project Athena at MIT (device drivers and network file systems); clustered high-availability systems; the Tessellation OS for multi-core processors; peer-to-peer and cloud storage (OceanStore); quantum computing; and the Global Data Plane project on hardened data containers for edge computing.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000052",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "instructor",
+    "keywords": [
+      "John Kubiatowicz",
+      "Alewife",
+      "Project Athena",
+      "Global Data Plane"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000052",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about Linux and other systems' lines of code?",
+    "ground_truth_answer": "The lecture shows millions of lines of code: Linux 2.2 and the Mars Rover are on the low end, Firefox, Android, Linux 3.1, and Windows 7 are mid-range, and Windows Vista, the Facebook system, and Mac OS are much larger — illustrating how complicated modern systems are.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000089"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "complexity",
+    "keywords": [
+      "millions of lines of code",
+      "Linux",
+      "Windows"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000089"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about whether the windowing system belongs in the kernel?",
+    "ground_truth_answer": "It depends on the OS: Windows NT initially was a microkernel-type OS with the windowing system outside the kernel, then Microsoft moved the windowing entirely inside the kernel for performance — so windowing can be both in and out of the kernel, with trade-offs involving protection, security, durability, and reliability.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000048",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000047"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "hard",
+    "topic": "kernel",
+    "keywords": [
+      "Windows NT",
+      "microkernel",
+      "windowing system was outside of the kernel"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000048",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000047"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about cameras being required for the class?",
+    "ground_truth_answer": "Cameras are required for discussion sessions, design reviews, and possibly office hours, and certainly for exams. The camera is a tool of collaboration — it lets the class approximate in-person interaction when everyone is remote.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000062",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "camera",
+      "discussion sessions",
+      "design reviews"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000062",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000057",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000064"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the definition of an operating system according to the lecture?",
+    "ground_truth_answer": "There is no universally accepted definition — the operating system is whatever a vendor ships, ranging from a kernel (the one program running at all times) to the full set of bundled software. The lecture emphasizes that the kernel is unquestionably part of the OS, while everything else is debatable.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "definition",
+    "difficulty": "easy",
+    "topic": "what-is-an-os",
+    "keywords": [
+      "definition",
+      "kernel",
+      "vendor",
+      "universally accepted"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000012"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the grading breakdown for CS162?",
+    "ground_truth_answer": "The tentative grading breakdown is about 36% projects, 18% homework, 10% participation, with three Zoom-proctored midterms and no final; cameras are required for the midterms.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000078"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "three midterms",
+      "36% projects",
+      "18% homework",
+      "10% participation"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000079",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000078"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Where does the word 'operating' come from according to the lecture?",
+    "ground_truth_answer": "The word 'operating' comes from human operators: there used to be switchboard operators who physically plugged calls into the right connections, and computer operators who sat at big machines making sure they ran correctly; the OS became about making the disk, network, and graphics cards 'operate' correctly.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "medium",
+    "topic": "etymology",
+    "keywords": [
+      "switchboard operator",
+      "computer operators",
+      "plug you into the right connection"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000015"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the operating system switch between two processes to give the illusion of parallelism?",
+    "ground_truth_answer": "The OS periodically performs a process switch: the running process's registers are stored through the OS into its own process descriptor block, the other process's registers are reloaded, and execution picks up where it left off. A timer triggers switching back, and done frequently enough this creates the illusion that multiple processes run simultaneously on one core.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000035",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "hard",
+    "topic": "scheduling",
+    "keywords": [
+      "process switch",
+      "registers are stored",
+      "timer"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000035",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What did the lecture say about the course website and Piazza?",
+    "ground_truth_answer": "The course website (cs162.eecs.berkeley.edu) is the central hub for the schedule, posted slides, and videos, while Piazza is the primary place where students get course information and announcements. The textbook is Principles and Practices of Operating Systems with suggested readings in the schedule, and Berkeley students can access O'Reilly books online with their credentials.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000067"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "factual",
+    "difficulty": "easy",
+    "topic": "course-logistics",
+    "keywords": [
+      "course website",
+      "cs162.eecs.berkeley.edu",
+      "Piazza",
+      "primary place",
+      "textbook",
+      "O'Reilly"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000065",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000066",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000067"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What abstractions and higher-level objects does the operating system provide to applications?",
+    "ground_truth_answer": "The OS acts as an illusionist: it provides clean, easy-to-use abstractions of physical resources — infinite memory, a machine dedicated to the user, and higher-level objects like files, users, and messages — masking hardware limitations via virtualization.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "medium",
+    "topic": "abstractions",
+    "keywords": [
+      "abstraction",
+      "illusion",
+      "infinite memory",
+      "files",
+      "messages"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What does the lecture say about the OS being an illusionist?",
+    "ground_truth_answer": "The OS is an illusionist: it provides clean, easy-to-use abstractions of physical resources so that you can temporarily think you have infinite memory, a machine entirely dedicated to you, and higher-level objects like files, users, and messages — hiding hardware limitations via virtualization.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "conceptual",
+    "difficulty": "easy",
+    "topic": "os-roles",
+    "keywords": [
+      "illusionist",
+      "infinite memory",
+      "machine entirely dedicated"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000046",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000021",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000091",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000049",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000033"
+      ]
+    }
+  },
+  {
+    "query": "What does the slide about network capacity show?",
+    "ground_truth_answer": "The slide shows a graph titled 'Network Capacity Still Increasing' from 1995 to 2020: 100 Gigabit Ethernet and core networking double roughly every 18 months, reaching rates around 1,000,000 Mbps, while server I/O doubles roughly every 24 months — illustrating that networking capacity keeps growing over time.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "networking",
+    "keywords": [
+      "network capacity",
+      "gigabit ethernet",
+      "18 months",
+      "mbps"
+    ],
+    "need_visual": true,
+    "lecture_id": "lecture_092f861b",
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000090"
+      ]
+    }
+  },
+  {
+    "query": "What does the slide say about societal-scale information systems?",
+    "ground_truth_answer": "The slide, titled 'Societal Scale Information Systems (or the Internet of Things?)', explains that the world is a large distributed system with microprocessors in everything and vast infrastructure behind them — internet connectivity, scalable reliable connectivity, secure services, databases, information collection, remote storage, online games and commerce, and MEMS for sensor networks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000085"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "networking",
+    "keywords": [
+      "societal scale",
+      "distributed system",
+      "microprocessors in everything",
+      "internet of things"
+    ],
+    "need_visual": true,
+    "lecture_id": "lecture_092f861b",
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000085"
+      ]
+    }
+  },
+  {
+    "query": "According to the slide, what does a process consist of?",
+    "ground_truth_answer": "The slide 'What's in a Process?' states that a process consists of an address space, one or more threads of control executing in that address space, and additional system state such as open files and open sockets (network connections).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "easy",
+    "topic": "processes",
+    "keywords": [
+      "address space",
+      "threads of control",
+      "open files",
+      "open sockets"
+    ],
+    "need_visual": true,
+    "lecture_id": "lecture_092f861b",
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000029"
+      ]
+    }
+  },
+  {
+    "query": "What does the diagram of a compiled program's view of the world show?",
+    "ground_truth_answer": "The diagram shows a compiled program using system libraries running inside a process — an execution environment with restricted rights provided by the OS — layered over threads, address spaces, files and sockets, with the operating system on the hardware below. Each running program runs in its own process, and processes provide nicer interfaces than raw hardware.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "compiled program",
+      "system libs",
+      "restricted rights",
+      "own process"
+    ],
+    "need_visual": true,
+    "lecture_id": "lecture_092f861b",
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ]
+    }
+  },
+  {
+    "query": "What does the protection slide show about processes?",
+    "ground_truth_answer": "The slide 'OS Basics: Protection' shows two compiled programs running as separate processes, Process 1 and Process 2, each with its own threads, address spaces, files and sockets, illustrating that processes are isolated from one another with protection provided by the operating system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000040"
+    ],
+    "expected_route": "vector_only",
+    "question_type": "visual",
+    "difficulty": "medium",
+    "topic": "protection",
+    "keywords": [
+      "protection",
+      "process 1",
+      "process 2",
+      "isolated"
+    ],
+    "need_visual": true,
+    "lecture_id": "lecture_092f861b",
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000040"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the prerequisite relationship between Operating System and Process?",
+    "ground_truth_answer": "In the lecture knowledge graph, Operating System is a direct prerequisite of Process (Operating System ==[PREREQUISITE_OF]==> Process); the OS must be understood as the resource referee before defining running processes.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "Operating System",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is Process Abstraction related to Process in the lecture graph?",
+    "ground_truth_answer": "Process Abstraction is a direct prerequisite of Process (Process Abstraction ==[PREREQUISITE_OF]==> Process) and Process is derived from Process Abstraction (Process ==[DERIVED_FROM]==> Process Abstraction).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "processes",
+    "keywords": [
+      "Process Abstraction",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which subsystem does Kernel connect to via USED_BY for memory handling?",
+    "ground_truth_answer": "In the knowledge graph, Kernel is directly connected via USED_BY to Memory Management (Kernel ==[USED_BY]==> Memory Management).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "memory-management",
+    "keywords": [
+      "Kernel",
+      "Memory Management"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Kernel",
+        "Memory Management"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What relation connects Kernel to CPU Scheduling in the knowledge graph?",
+    "ground_truth_answer": "Kernel is connected to CPU Scheduling via a USED_BY relationship (Kernel ==[USED_BY]==> CPU Scheduling).",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "scheduling",
+    "keywords": [
+      "Kernel",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "gold_path": [
+        "Kernel",
+        "CPU Scheduling"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is Kernel related to File System according to the graph schema?",
+    "ground_truth_answer": "Kernel connects directly to File System via the USED_BY relationship (Kernel ==[USED_BY]==> File System), representing the kernel's core abstraction layer for persistent storage.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "file-systems",
+    "keywords": [
+      "Kernel",
+      "File System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Kernel",
+        "File System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What concurrency concept does Process directly explain in the graph?",
+    "ground_truth_answer": "The Process entity directly explains Threads (Process ==[EXPLAINS]==> Threads) as execution contexts within an address space.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "concurrency",
+    "keywords": [
+      "Process",
+      "Threads"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process",
+        "Threads"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Which synchronization primitive does Process explain in the 1-hop neighborhood?",
+    "ground_truth_answer": "In the 1-hop graph neighborhood, Process explains Locks (Process ==[EXPLAINS]==> Locks) to synchronize concurrent thread execution.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "concurrency",
+    "keywords": [
+      "Process",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process",
+        "Locks"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What CPU management topic does Process explain in the lecture graph?",
+    "ground_truth_answer": "Process explains Scheduling (Process ==[EXPLAINS]==> Scheduling), covering how multiple running threads/processes share the processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "scheduling",
+    "keywords": [
+      "Process",
+      "Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process",
+        "Scheduling"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What security concept does Operating System directly explain in the graph?",
+    "ground_truth_answer": "Operating System explains Protection (Operating System ==[EXPLAINS]==> Protection) as part of its referee role isolating programs.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "protection",
+    "keywords": [
+      "Operating System",
+      "Protection"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Protection"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What isolation property does Operating System directly explain in the graph?",
+    "ground_truth_answer": "Operating System explains Isolation (Operating System ==[EXPLAINS]==> Isolation) preventing buggy or malicious programs from corrupting each other.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "protection",
+    "keywords": [
+      "Operating System",
+      "Isolation"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Isolation"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the 2-hop connection from Process Abstraction to Threads via Process?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which in turn explains Threads: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "concurrency",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Threads"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Threads"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does Process Abstraction connect to Locks through Process in the graph?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, and Process explains Locks: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Locks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "concurrency",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Locks"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace the 2-hop path from Operating System to Memory Management via Kernel",
+    "ground_truth_answer": "Operating System introduces Kernel, which is used by Memory Management: Operating System ==[INTRODUCED_BEFORE]==> Kernel ==[USED_BY]==> Memory Management.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "memory-management",
+    "keywords": [
+      "Operating System",
+      "Kernel",
+      "Memory Management"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Kernel",
+        "Memory Management"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What 2-hop path links Operating System to File System through the Kernel?",
+    "ground_truth_answer": "Operating System introduces Kernel, which is used by File System: Operating System ==[INTRODUCED_BEFORE]==> Kernel ==[USED_BY]==> File System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "file-systems",
+    "keywords": [
+      "Operating System",
+      "Kernel",
+      "File System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Kernel",
+        "File System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace the 2-hop path from Operating System to Threads via Process",
+    "ground_truth_answer": "Operating System is a prerequisite of Process, which explains Threads: Operating System ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "concurrency",
+    "keywords": [
+      "Operating System",
+      "Process",
+      "Threads"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process",
+        "Threads"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the 3-hop prerequisite chain leading from Process Abstraction to Threads and back to Operating System?",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which explains Threads, and Threads are used by Operating System: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Threads ==[USED_BY]==> Operating System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "concurrency",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Threads",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Threads",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace the 3-hop relationship from Process Abstraction to Locks and back to Operating System",
+    "ground_truth_answer": "Process Abstraction is a prerequisite of Process, which explains Locks, which are used by Operating System: Process Abstraction ==[PREREQUISITE_OF]==> Process ==[EXPLAINS]==> Locks ==[USED_BY]==> Operating System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "concurrency",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Locks",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Locks",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What 3-hop path connects Kernel to Operating System via memory and processor hardware?",
+    "ground_truth_answer": "Kernel is used by memory, memory is used by processor, and processor is used by Operating System: Kernel ==[USED_BY]==> memory ==[USED_BY]==> processor ==[USED_BY]==> Operating System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "hardware",
+    "keywords": [
+      "Kernel",
+      "memory",
+      "processor",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "Kernel",
+        "memory",
+        "processor",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What 3-hop chain leads from Operating System through Process to Protection and back to Operating System?",
+    "ground_truth_answer": "Operating System is a prerequisite of Process, Process is used by Protection, and Protection is used by Operating System: Operating System ==[PREREQUISITE_OF]==> Process ==[USED_BY]==> Protection ==[USED_BY]==> Operating System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "protection",
+    "keywords": [
+      "Operating System",
+      "Process",
+      "Protection"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process",
+        "Protection",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace the 3-hop path connecting disk to Operating System via memory and processor",
+    "ground_truth_answer": "disk is used by memory, which is used by processor, which is used by Operating System: disk ==[USED_BY]==> memory ==[USED_BY]==> processor ==[USED_BY]==> Operating System.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "hardware",
+    "keywords": [
+      "disk",
+      "memory",
+      "processor",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "disk",
+        "memory",
+        "processor",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the operating system relate to a running process according to the lecture?",
+    "ground_truth_answer": "The operating system provides the fundamental execution environment and process abstraction for running programs, acting as the referee and resource manager that precedes process definition.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What core execution entity inside a process does the lecture introduce for concurrent program execution?",
+    "ground_truth_answer": "Threads are the fundamental units of execution within a process that share its address space and enable concurrency.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process",
+      "Thread"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process",
+        "Thread"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What core architectural concept is an essential prerequisite before defining a running process?",
+    "ground_truth_answer": "Process Abstraction must be understood as the foundational model of a virtual computer with an address space before defining individual running processes.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is the kernel connected to memory management subsystems in the operating system architecture?",
+    "ground_truth_answer": "The kernel provides the core privilege layer and low-level resource mechanisms utilized by the memory management subsystem to allocate and protect address spaces.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Kernel",
+      "Memory Management"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Kernel",
+        "Memory Management"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What hardware interface does the operating system directly interact with to schedule tasks on physical execution units?",
+    "ground_truth_answer": "The kernel provides the timer interrupt and context switching infrastructure used by CPU scheduling algorithms to allocate execution time across running tasks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Kernel",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "gold_path": [
+        "Kernel",
+        "CPU Scheduling"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is the kernel connected to persistent storage abstractions like the file system?",
+    "ground_truth_answer": "The kernel provides device drivers and block I/O primitives utilized by the file system to translate logical files and directories into persistent storage operations.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Kernel",
+      "File System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Kernel",
+        "File System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What synchronization mechanism does the lecture discuss for coordinating concurrent threads sharing data?",
+    "ground_truth_answer": "Locks (mutual exclusion primitives) are explained as the mechanism for coordinating threads within a process to prevent race conditions when updating shared state.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process",
+        "Locks"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What isolation mechanism does an operating system referee provide to prevent rogue processes from compromising other programs?",
+    "ground_truth_answer": "Protection and memory isolation are core OS referee responsibilities that prevent buggy or malicious applications from corrupting each other or crashing the host system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Protection"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Protection"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the concept of a process abstraction connect to concurrent threads through the process model?",
+    "ground_truth_answer": "Process abstraction defines the virtual address space and isolated program state (prerequisite), which is instantiated into concrete processes that contain concurrent threads as their execution units.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Thread"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Thread"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the process abstraction lead to thread synchronization primitives like locks?",
+    "ground_truth_answer": "Process abstraction establishes the multi-threaded execution environment within a single address space, necessitating locks to coordinate thread access to shared memory.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Locks"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What is the structural relationship connecting the operating system to memory management via the kernel?",
+    "ground_truth_answer": "The operating system architecture introduces the kernel as its core privileged component, which provides page allocation and address translation services utilized by memory management.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Kernel",
+      "Memory Management"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Kernel",
+        "Memory Management"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the operating system link to file system storage abstractions through the kernel?",
+    "ground_truth_answer": "The operating system defines the system boundary and introduces the kernel, which implements disk device drivers and buffer caches used by the file system to manage files.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Kernel",
+      "File System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Kernel",
+        "File System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the operating system relate to individual threads through the process container?",
+    "ground_truth_answer": "The operating system serves as the foundational referee managing processes, each of which contains and multiplexes one or more execution threads across the CPU.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Process",
+      "Thread"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process",
+        "Thread"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the operating system connect to CPU scheduling mechanisms through the kernel?",
+    "ground_truth_answer": "The operating system defines the coordinator role implemented by the kernel, which executes CPU scheduling to alternate processor execution among ready tasks.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Kernel",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Kernel",
+        "CPU Scheduling"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the process abstraction relate to CPU scheduling through the process model?",
+    "ground_truth_answer": "Process abstraction establishes the illusion of dedicated processor ownership, which concrete processes fulfill through CPU scheduling multiplexing time on the physical cores.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "CPU Scheduling"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does physical disk storage connect to processor execution through system memory?",
+    "ground_truth_answer": "Data stored on persistent disk must be transferred into primary memory before it can be fetched, cached, and operated on by the processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "disk",
+      "memory",
+      "processor"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "disk",
+        "memory",
+        "processor"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the kernel interface with the physical processor through the memory hierarchy?",
+    "ground_truth_answer": "The kernel allocates and organizes physical memory pages that supply instructions and data operands to the hardware processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Kernel",
+      "memory",
+      "processor"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "Kernel",
+        "memory",
+        "processor"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the process abstraction lead to memory protection through the running process?",
+    "ground_truth_answer": "Process abstraction guarantees isolated address spaces, which running processes enforce via hardware memory protection mechanisms.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Protection"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Protection"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace how process abstraction connects to concurrent threads and loops back to operating system resource allocation.",
+    "ground_truth_answer": "Process abstraction defines isolated execution, processes contain concurrent threads, and threads are scheduled and multiplexed by the operating system referee across system hardware.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Thread",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Thread",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does process abstraction connect to synchronization locks and return to operating system management?",
+    "ground_truth_answer": "Process abstraction enables multi-threading, processes define locks for mutual exclusion, and the operating system mediates lock waiting queues and thread sleep/wake transitions.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "Locks",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000070"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "Locks",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does persistent disk storage interact with the operating system through memory and the processor?",
+    "ground_truth_answer": "Disk data is loaded into memory, which feeds processor registers and cache, while the operating system multiplexes and controls the processor executing those operations.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "disk",
+      "memory",
+      "processor",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "disk",
+        "memory",
+        "processor",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace how the kernel connects to the operating system through the hardware memory and processor chain.",
+    "ground_truth_answer": "The kernel configures physical memory mappings, memory supplies the hardware processor with instructions, and the operating system coordinates execution across the processor.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Kernel",
+      "memory",
+      "processor",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000013",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000020"
+      ],
+      "gold_path": [
+        "Kernel",
+        "memory",
+        "processor",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace how the operating system establishes process isolation and protects system resources.",
+    "ground_truth_answer": "The operating system instantiates processes, processes are subjected to memory protection boundaries, and protection mechanisms preserve the overall stability of the operating system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Operating System",
+      "Process",
+      "Protection",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000036",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000038"
+      ],
+      "gold_path": [
+        "Operating System",
+        "Process",
+        "Protection",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the process abstraction lead to CPU scheduling and return to the operating system's role as coordinator?",
+    "ground_truth_answer": "Process abstraction defines runnable units, processes require CPU scheduling to share time slices, and CPU scheduling functions as the operating system's core coordinator role.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "CPU Scheduling",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000051"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "CPU Scheduling",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace how process abstraction connects to the file system and returns to operating system refereeing.",
+    "ground_truth_answer": "Process abstraction establishes the execution context with file descriptors, processes interact with the file system for persistent I/O, and the operating system mediates access control across the file system.",
+    "expected_chunk_ids": [
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+      "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+    ],
+    "expected_route": "graph_only",
+    "question_type": "graph",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Process Abstraction",
+      "Process",
+      "File System",
+      "Operating System"
+    ],
+    "need_visual": false,
+    "answerable": true,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000014",
+        "CS162_Lecture_1_What_is_an_Operating_System_720P_chunk_000027"
+      ],
+      "gold_path": [
+        "Process Abstraction",
+        "Process",
+        "File System",
+        "Operating System"
+      ]
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What direct prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture?",
+    "ground_truth_answer": "No direct or indirect prerequisite relationship exists between the Global Data Plane and CPU Scheduling in the lecture. The Global Data Plane is an edge-storage research project, while CPU scheduling is a core single-node kernel mechanism.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Global Data Plane",
+      "CPU Scheduling"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How is Bell's Law a prerequisite for the implementation of semaphores in the kernel?",
+    "ground_truth_answer": "There is no relationship connecting Bell's Law to semaphores or locks in the lecture knowledge graph. Bell's Law describes trends in computer classes per decade, whereas synchronization primitives are concurrency mechanisms.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "Bell's Law",
+      "Locks"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "What 2-hop path connects ARPANET to the translation lookaside buffer through the file system?",
+    "ground_truth_answer": "No valid path connects the historical ARPANET to the hardware TLB through the file system. These concepts belong to completely disjoint domains (wide-area networking vs virtual memory hardware).",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "ARPANET",
+      "File System",
+      "TLB"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "How does the instruction set architecture directly explain the grading policy of the course?",
+    "ground_truth_answer": "No relationship exists between the hardware instruction set architecture and course grading policies in the knowledge graph.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "medium",
+    "topic": "graph",
+    "keywords": [
+      "instruction set architecture"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  },
+  {
+    "lecture_id": "lecture_092f861b",
+    "query": "Trace how Git version control serves as a prerequisite for hardware cache coherence protocols in multi-core processors.",
+    "ground_truth_answer": "No relationship exists linking Git version control to hardware cache coherence protocols in the knowledge graph. Git is a developer tool used for course projects, entirely unrelated to hardware cache architectures.",
+    "expected_chunk_ids": [],
+    "expected_route": "graph_only",
+    "question_type": "unanswerable",
+    "difficulty": "hard",
+    "topic": "graph",
+    "keywords": [
+      "Git",
+      "cache",
+      "processor"
+    ],
+    "need_visual": false,
+    "answerable": false,
+    "review_status": "historical_unreviewed",
+    "source_evidence": {
+      "chunk_ids": [],
+      "gold_path": []
+    }
+  }
+]

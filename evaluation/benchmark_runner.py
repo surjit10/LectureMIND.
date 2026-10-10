@@ -140,6 +140,8 @@ class BenchmarkRunner:
             "question_type": sample.question_type,
             "difficulty": sample.difficulty,
             "expected_route": sample.expected_route,
+            "answerable": bool(getattr(sample, "answerable", True)),
+            "review_status": getattr(sample, "review_status", "unknown"),
             "error": "",
             "metrics": {}
         }
@@ -190,6 +192,7 @@ class BenchmarkRunner:
                     retrieved_ids.append(cid)
 
             expected_ids = sample.expected_chunk_ids
+            answerable = bool(getattr(sample, "answerable", True))
 
             # 3. Compute metrics.
             metrics: Dict[str, Any] = {}
@@ -204,21 +207,48 @@ class BenchmarkRunner:
                 "need_visual" if actual_need_visual else "no_visual",
             )
 
-            metrics["precision_at_5"] = retrieval_metrics.calculate_precision_at_k(expected_ids, retrieved_ids, 5)
-            metrics["recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, retrieved_ids, 5)
-            metrics["r_precision"] = retrieval_metrics.calculate_r_precision(expected_ids, retrieved_ids)
-            metrics["hit_at_5"] = retrieval_metrics.calculate_hit_at_k(expected_ids, retrieved_ids, 5)
-            # Primary rank metric: strict MRR@5 — a relevant chunk ranked below
-            # position 5 contributes 0, matching Hit@5 semantics.
-            metrics["mrr_at_5"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids, k=5)
-            # Diagnostic: unbounded MRR over the whole ranked list.
-            metrics["mrr"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids)
-            metrics["ndcg_at_5"] = retrieval_metrics.calculate_ndcg(expected_ids, retrieved_ids, 5)
+            # Evidence-based retrieval/reranker metrics have no meaningful
+            # denominator for an unanswerable question.  Do not turn an empty
+            # expected set into a perfect retrieval score (vacuous truth).
+            # ``None`` is intentionally omitted by ReportGenerator, so the
+            # aggregate denominator contains answerable samples only.
+            if answerable:
+                metrics["precision_at_5"] = retrieval_metrics.calculate_precision_at_k(expected_ids, retrieved_ids, 5)
+                metrics["recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, retrieved_ids, 5)
+                metrics["r_precision"] = retrieval_metrics.calculate_r_precision(expected_ids, retrieved_ids)
+                metrics["hit_at_5"] = retrieval_metrics.calculate_hit_at_k(expected_ids, retrieved_ids, 5)
+                # Primary rank metric: strict MRR@5 — a relevant chunk ranked below
+                # position 5 contributes 0, matching Hit@5 semantics.
+                metrics["mrr_at_5"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids, k=5)
+                # Diagnostic: unbounded MRR over the whole ranked list.
+                metrics["mrr"] = retrieval_metrics.calculate_mrr(expected_ids, retrieved_ids)
+                metrics["ndcg_at_5"] = retrieval_metrics.calculate_ndcg(expected_ids, retrieved_ids, 5)
 
-            metrics["ranking_quality"] = reranker_metrics.evaluate_ranking_quality(expected_ids, reranked_results)
-            metrics["avg_cross_encoder_score"] = reranker_metrics.average_cross_encoder_score(reranked_results)
-            metrics["top1_cross_encoder_score"] = reranker_metrics.top1_cross_encoder_score(reranked_results)
-            metrics["top3_cross_encoder_score"] = reranker_metrics.top_k_cross_encoder_score(reranked_results, k=3)
+                metrics["ranking_quality"] = reranker_metrics.evaluate_ranking_quality(expected_ids, reranked_results)
+                metrics["avg_cross_encoder_score"] = reranker_metrics.average_cross_encoder_score(reranked_results)
+                metrics["top1_cross_encoder_score"] = reranker_metrics.top1_cross_encoder_score(reranked_results)
+                metrics["top3_cross_encoder_score"] = reranker_metrics.top_k_cross_encoder_score(reranked_results, k=3)
+            else:
+                metrics.update({
+                    "precision_at_5": None,
+                    "recall_at_5": None,
+                    "r_precision": None,
+                    "hit_at_5": None,
+                    "mrr_at_5": None,
+                    "mrr": None,
+                    "ndcg_at_5": None,
+                    "ranking_quality": None,
+                    "avg_cross_encoder_score": None,
+                    "top1_cross_encoder_score": None,
+                    "top3_cross_encoder_score": None,
+                })
+                answer_text = (answer or "").lower()
+                refusal_markers = (
+                    "insufficient evidence", "not enough evidence", "cannot answer",
+                    "does not provide enough information", "no evidence", "unable to answer",
+                )
+                metrics["refusal_correct"] = 1.0 if any(marker in answer_text for marker in refusal_markers) else 0.0
+                metrics["unanswerable_retrieval_empty"] = 1.0 if not retrieved_ids else 0.0
 
             metrics["lexical_content_jaccard"] = answer_metrics.calculate_lexical_content_jaccard(
                 sample.ground_truth_answer, answer
@@ -229,7 +259,10 @@ class BenchmarkRunner:
             metrics["context_length"] = answer_metrics.get_context_length(final_context)
             metrics["answer_length"] = answer_metrics.get_answer_length(answer)
 
-            metrics["citation_coverage"] = citation_metrics.calculate_citation_coverage(expected_ids, sources)
+            metrics["citation_coverage"] = (
+                citation_metrics.calculate_citation_coverage(expected_ids, sources)
+                if answerable else None
+            )
             metrics["citation_provenance_precision"] = citation_metrics.calculate_citation_provenance_precision(
                 final_context, sources, reranked_results
             )
