@@ -1,5 +1,10 @@
 # LectureMIND — Independent Forensic Metric Audit
 
+> **Archive notice:** This audit analyzes the historical 50-question CS162 benchmark.
+> Its metrics are retained for traceability and are not the current headline results.
+> Use `evaluation/reports/smoke_groq_20261010_fixed/` for the current corrected
+> three-lecture smoke evaluation.
+
 **Audit Date:** September 25, 2026  
 **Auditor:** Antigravity Autonomous Forensic Agent  
 **Target Repository:** `/home/surjit/Desktop/lecuremid`  

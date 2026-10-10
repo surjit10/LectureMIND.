@@ -1,5 +1,11 @@
 # LectureMIND — Final Comprehensive Evaluation & Hardening Report
 
+> **Archive notice:** This report documents the historical 50-question single-lecture
+> evaluation. It is not the current headline result. The current corrected evaluation is
+> the 45-question, three-lecture smoke report at
+> `evaluation/reports/smoke_groq_20261010_fixed/` (Hit@5 0.8605, Recall@5 0.8488,
+> MRR@5 0.7333, Answer F1 0.2667).
+
 **Evaluation Date:** September 2026  
 **Target Lecture:** `CS162_Lecture_1_What_is_an_Operating_System_720P` (Package ID: `lecture_092f861b`)  
 **Repository State:** Frozen Production Pipeline & Knowledge Packages (Zero Retraining / Zero Re-extraction)  
