@@ -250,7 +250,7 @@ def _build_html(
             [h for _, h in _LOAD_COLS],
             [[row.get(k, "") for k, _ in _LOAD_COLS] for row in load_test_rows],
         )
-        sections.append(_section("Load test (100/500/1000 users)", body))
+        sections.append(_section("Load test results (recorded scenarios)", body))
     else:
         sections.append(_section("Load test", '<p class="no-data">No load_test_report.csv found in evaluation/reports/.</p>'))
 

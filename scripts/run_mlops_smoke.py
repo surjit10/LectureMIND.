@@ -25,6 +25,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Validate, optionally run, and report a LectureMind smoke benchmark")
     parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/multilecture_smoke_45.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("evaluation/reports/smoke_groq_20261010_fixed"))
+    parser.add_argument("--reports-dir", type=Path, default=Path("evaluation/reports"),
+                        help="Directory containing shared RAGAS/load-test artifacts")
     parser.add_argument("--dashboard", type=Path, default=Path("evaluation/dashboard/index.html"))
     parser.add_argument("--run", action="store_true", help="Run live retrieval and generation; may consume provider quota")
     args = parser.parse_args()
@@ -47,12 +49,12 @@ def main() -> int:
     else:
         print("Validation-only mode; use --run to execute the live benchmark")
 
-    # The dashboard is a pure renderer over existing artifacts.  Point both
-    # inputs at the selected run directory so it cannot silently display an
-    # unrelated historical report from evaluation/outputs/.
+    # The dashboard is a pure renderer over existing artifacts.  Benchmark
+    # history comes from the selected run directory; shared RAGAS/load-test
+    # artifacts come from the reports directory.
     dashboard_path = generate_dashboard(
         outputs_dir=args.output_dir,
-        reports_dir=args.output_dir,
+        reports_dir=args.reports_dir,
         out_html=args.dashboard,
     )
     print(f"Dashboard written to {dashboard_path}")

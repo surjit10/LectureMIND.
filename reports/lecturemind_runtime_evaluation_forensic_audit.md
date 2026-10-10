@@ -27,7 +27,7 @@ Verdict: the demonstrated online RAG path works, but current reranker status and
 | GraphRAG | Implemented, quality mixed | Held-out artifact plus source |
 | Historical benchmark | Reproducible but limited | Raw JSON and verification artifacts |
 | Current tests | Clean environment green for non-serving code | 576 targeted tests passed; service-dependent serving tests remain unverified |
-| Production readiness | Not demonstrated | No current load/RAGAS report or live DB run here |
+| Production readiness | Not demonstrated | A small load smoke report exists; no RAGAS result or production-scale capacity evidence |
 
 ## B. Actual runtime architecture
 
