@@ -18,13 +18,15 @@ import pytest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from agent.dspy.planner import QueryPlanner, NORMAL_TOP_K, LECTURE_WIDE_TOP_K
+from agent.planner.planner import (
+    QueryPlanner, NORMAL_TOP_K, LECTURE_WIDE_TOP_K, NORMAL_CONTEXT_BUDGET, LECTURE_WIDE_CONTEXT_BUDGET,
+)
 from retrieval.vector_retriever.qdrant_retriever import (
     retrieve_vectors,
     RETRIEVAL_FETCH_SLACK,
     MIN_TRANSCRIPT_CHARS,
 )
-from agent.langgraph.nodes.vector_retriever import vector_retriever_node
+from agent.pipeline.nodes.vector_retriever import vector_retriever_node
 
 
 def _payload(chunk_id, transcript="", ocr_text="", visual_context="", timestamp=10.0, lecture_id="lec_001", segment_id="s_001"):
@@ -70,12 +72,13 @@ class TestCandidatePoolSize:
         plan = QueryPlanner().plan_full("Summarize the lecture")
         assert plan.is_lecture_wide is True
         assert plan.top_k == LECTURE_WIDE_TOP_K == 15
-        assert plan.context_budget == 6000
+        assert plan.context_budget == LECTURE_WIDE_CONTEXT_BUDGET
 
-    def test_normal_context_budget_unchanged(self):
-        """Widening the pool must not widen the LLM context budget."""
+    def test_normal_context_budget_is_the_configured_constant(self):
+        """The point-query budget comes from NORMAL_CONTEXT_BUDGET (6000 since the
+        2026-11 ablation), independent of the retrieval pool size."""
         plan = QueryPlanner().plan_full("What is a primary key?")
-        assert plan.context_budget == 4000
+        assert plan.context_budget == NORMAL_CONTEXT_BUDGET == 6000
 
     def test_vector_node_passes_expanded_top_k(self, monkeypatch):
         """vector_retriever_node hands the planner's top_k to retrieve_vectors."""
@@ -86,7 +89,7 @@ class TestCandidatePoolSize:
             captured["lecture_id"] = lecture_id
             return []
         monkeypatch.setattr(
-            "agent.langgraph.nodes.vector_retriever.retrieve_vectors",
+            "agent.pipeline.nodes.vector_retriever.retrieve_vectors",
             fake_retrieve,
         )
         state = {"query": "What is a primary key?", "lecture_id": "lec_001"}

@@ -3,7 +3,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from agent.dspy.planner import QueryPlanner
+from agent.planner.planner import QueryPlanner
 from evaluation.benchmark_runner import BenchmarkRunner
 from evaluation.dataset_loader import BenchmarkSample
 from evaluation.metrics import retrieval_metrics

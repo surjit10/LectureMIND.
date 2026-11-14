@@ -1,4 +1,4 @@
-# agent/dspy/query_plan.py
+# agent/planner/query_plan.py
 # V7 — Query Plan dataclass.
 #
 # Carries the full planner output beyond just the retrieval route.

@@ -15,8 +15,8 @@ from fastapi import APIRouter, HTTPException
 from local.storage.course_registry import get_course_registry
 from retrieval.course_retriever import retrieve_course_context
 from retrieval.reranker.rerank_service import rerank
-from agent.langgraph.nodes.answer_generator import answer_generator_node
-from agent.dspy.planner import QueryPlanner
+from agent.pipeline.nodes.answer_generator import answer_generator_node
+from agent.planner.planner import QueryPlanner
 from serving.fastapi.schemas import (
     CourseAddLectureRequest,
     CourseCreateRequest,

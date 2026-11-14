@@ -34,7 +34,7 @@
 | Framework | Purpose |
 |---|---|
 | **FastAPI** | Local inference server — HTTP REST API (JSON responses) |
-| **Single-pass orchestrator** | `agent/langgraph/workflow.py` — imperative single-pass pipeline (planner → retrievers → reranker → generator); node functions are structured to be drop-in LangGraph-compatible, with no external `langgraph` dependency |
+| **Single-pass orchestrator** | `agent/pipeline/workflow.py` — imperative single-pass pipeline (planner → retrievers → reranker → generator); node functions are structured to be drop-in LangGraph-compatible, with no external `langgraph` dependency |
 | **Pydantic** | Data validation and serialization (DTOs, `QueryState`, schemas) |
 | **pydantic-settings** | Environment-variable-driven configuration (`CloudSettings`, `LocalSettings`, `SharedSettings`) |
 | **uvicorn** | ASGI server — serves the FastAPI application |
@@ -165,9 +165,9 @@
 | Default local LLM | `qwen2.5:3b` | Defined in `config.py` as `OLLAMA_MODEL`. Used as a fallback if `llm_config.json` is absent. |
 | Ollama default port | `localhost:11434` | Hardcoded in `ollama_backend.py` (Ollama SDK default). |
 | Reranker model | `BAAI/bge-reranker-base` | Loaded eagerly at startup in `rerank_service.py`. |
-| `NORMAL_TOP_K` / `LECTURE_WIDE_TOP_K` | `15` | `agent/dspy/planner.py` — retrieval candidate pool. The reranker sees 15 candidates; the LLM still receives a budget-capped context. |
+| `NORMAL_TOP_K` / `LECTURE_WIDE_TOP_K` | `15` | `agent/planner/planner.py` — retrieval candidate pool. The reranker sees 15 candidates; the LLM still receives a budget-capped context. |
 | `MIN_TRANSCRIPT_CHARS` / `RETRIEVAL_FETCH_SLACK` | `15` / `15` | `retrieval/vector_retriever/qdrant_retriever.py` — transcript-only filler filter + fetch slack so filtering never shrinks the pool. |
-| Context budget | `4,000` chars normal / `6,000` lecture-wide | `agent/dspy/planner.py`; `rerank_service.MAX_CONTEXT_CHARS = 4000` fallback. |
+| Context budget | `4,000` chars normal / `6,000` lecture-wide | `agent/planner/planner.py`; `rerank_service.MAX_CONTEXT_CHARS = 4000` fallback. |
 | Prerequisite threshold | `0.65` | `cloud/extraction/prerequisite_extractor.py` — minimum multi-signal score for prerequisite edge admission. |
 
 ---

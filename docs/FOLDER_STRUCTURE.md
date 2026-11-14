@@ -27,10 +27,11 @@ lecturemind/
 │           ├── models/        # Cached model weights
 │           ├── neo4j_data/    # Neo4j graph database persistent storage
 │           └── qdrant_data/   # Qdrant vector database persistent storage
-├── agent/                     # Query orchestration engine (LangGraph-compatible)
-│   └── langgraph/
-│       ├── nodes/             # Individual DAG node implementations
-│       └── workflow.py        # Graph definition and QueryWorkflow class
+├── agent/                     # Query orchestration (plain Python, LangGraph-style nodes)
+│   ├── planner/           # Regex-heuristic QueryPlanner + QueryPlan
+│   └── pipeline/
+│       ├── nodes/             # Pipeline node functions (state -> partial update)
+│       └── workflow.py        # Single-pass QueryWorkflow (plain Python, no LangGraph dependency)
 ├── retrieval/                 # Vector, graph, hybrid BM25, and course retrieval clients
 ├── serving/
 │   └── fastapi/
@@ -127,13 +128,13 @@ Docker bind-mount targets for persistent data:
 
 **Sub-structure:**
 
-#### `agent/langgraph/workflow.py`
+#### `agent/pipeline/workflow.py`
 - Defines `QueryWorkflow` class.
 - Executes the single-pass pipeline connecting all nodes in sequence.
 - Manages `QueryState` (TypedDict) that accumulates data across nodes.
 - Records telemetry (per-node latency timestamps) into `state["telemetry"]`.
 
-#### `agent/langgraph/nodes/`
+#### `agent/pipeline/nodes/`
 Each file is a self-contained stage in the single-pass flow (structured to be drop-in
 LangGraph-compatible; the orchestrator itself is a plain Python class — no `langgraph` dependency):
 
@@ -144,7 +145,7 @@ LangGraph-compatible; the orchestrator itself is a plain Python class — no `la
 | `reranker.py` | `reranker_node` | `query`, `graph_results`, `vector_results` | `reranked_results`, `final_context` |
 | `answer_generator.py` | `answer_generator_node` | `query`, `final_context` | `answer`, `sources`, `graph_path` |
 
-Routing is done by `QueryPlanner` (`agent/dspy/planner.py`), invoked directly by `workflow.run()`.
+Routing is done by `QueryPlanner` (`agent/planner/planner.py`), invoked directly by `workflow.run()`.
 
 **Design note:** All nodes are completely independent. `answer_generator_node` depends on `LLMBackend` through `ProviderRegistry`, not on any concrete backend. This enables seamless switching between Ollama and cloud APIs.
 

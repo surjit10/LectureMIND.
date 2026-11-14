@@ -22,6 +22,7 @@ class BenchmarkSample:
     answerable: bool = True     # false for explicit unanswerable/refusal items
     review_status: str = "unknown"  # human_reviewed, auto_generated_pending_human_review, etc.
     source_evidence: Dict[str, Any] = None  # provenance metadata, not model input
+    review_note: str = ""  # optional: what a label review changed or flagged (not model input)
 
 class DatasetLoader:
     def __init__(self, dataset_path: str):

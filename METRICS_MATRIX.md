@@ -22,7 +22,7 @@
 
 | Dimension | Value | Evidence |
 |---|---|---|
-| Architecture layers | Multimodal ingestion → segmentation → entity/relation extraction → prerequisite DAG inference → hybrid GraphRAG (vector + BM25 + graph) → cross-encoder rerank → evidence-gated generation | `cloud/`, `retrieval/`, `agent/langgraph/` |
+| Architecture layers | Multimodal ingestion → segmentation → entity/relation extraction → prerequisite DAG inference → hybrid GraphRAG (vector + BM25 + graph) → cross-encoder rerank → evidence-gated generation | `cloud/`, `retrieval/`, `agent/pipeline/` |
 | Modalities captured | Audio (100% chunk coverage) + slide visuals + OCR at slide keyframes | `multimodal_fusion.py`, live scan |
 | Serving model | Local Ollama `qwen2.5:3b` (offline, fully private) **or** cloud APIs — OpenAI, Gemini, Groq, OpenRouter, Anthropic — hot-swappable via `ProviderRegistry` | `local/llm/provider_registry.py` |
 | Embedding | `bge-large-en-v1.5` (1024-dim) | startup log |
@@ -64,53 +64,54 @@ Source: `data/packages/<lecture>/training_metrics.json` — ranking eval on gene
 
 ### 2.3 Latency & throughput (live, real LLM)
 
-Measured 2026-11-14 on the live local stack with **Groq `openai/gpt-oss-20b`** for generation; embeddings and the cross-encoder run on local CPU. Source: `evaluation/reports/smoke_groq_20261114_newcode/` (45 questions, `top_k = 15`).
+Measured 2026-11-14 with **Groq `openai/gpt-oss-20b`** (client paced at 6,000 tokens/min); embeddings and the cross-encoder run on local CPU. Source: `evaluation/reports/smoke_groq_20261114_reviewed/` (45 questions, 15 candidates, 6,000-char context).
 
 | Stage | Mean | p95 |
 |---|---|---|
-| Planner | < 0.001 s | < 0.001 s |
-| Retrieval (dense + graph, live Qdrant/Neo4j) | 0.20 s | 0.51 s |
-| Reranker + context (local CPU, 15 candidates) | 5.61 s | 10.59 s |
-| Generation (Groq, rate-limiter paced) | 16.01 s | 21.51 s |
-| **Total end-to-end** | **21.82 s** | **24.64 s** |
+| Retrieval (dense + graph, live Qdrant/Neo4j) | 0.15 s | 0.26 s |
+| Reranker + context (local CPU, 15 candidates) | 4.54 s | 6.51 s |
+| Generation (Groq, rate-limiter paced) | 22.82 s | 27.53 s |
+| **Total end-to-end** | **27.51 s** | **31.20 s** |
 
-> Generation is Groq network time and varies by day; the CPU reranker varied by ~0.4 s between same-day runs of identical code, so latency differences across runs are not code effects. The reranker scales linearly with candidate count, so `top_k` is the main latency lever. Load: a small recorded load test (`evaluation/reports/load_test_report.csv`) shows 0 errors at 1–2 concurrent users and **2/4 errors at 4 concurrent users (p95 47.7 s)** — no high-concurrency capacity is claimed.
+> Generation time is dominated by the 6,000 tokens/min client pacing and Groq network time; the larger 6,000-char context raised it from 16.0 s (4,000-char context, same day). The CPU reranker varied by ~0.4 s between same-day runs of identical code. Load: the recorded load test (`evaluation/reports/load_test_report.csv`) shows 0 errors at 1–2 concurrent users and **2/4 errors at 4 concurrent users (p95 47.7 s)** — no high-concurrency capacity is claimed.
 
-### 2.4 End-to-end QA accuracy (45-question three-lecture smoke set)
+### 2.4 End-to-end QA accuracy (45-question three-lecture smoke set, reviewed labels)
 
-Source: `evaluation/reports/smoke_groq_20261114_newcode/evaluation_report_20261114_154651.*` — **45/45 questions, 0 failures**, Groq `openai/gpt-oss-20b`, real `QueryWorkflow`. Dataset: `evaluation/datasets/multilecture_smoke_45.json` (15 questions per lecture: CS162, MIT 6.S191, Self-Attention; 17 factual / 12 conceptual / 10 visual / 1 definition / 3 graph / 2 unanswerable). **Provisional:** 40 questions were LLM-drafted from one chunk each and are not human-reviewed.
+Source: `evaluation/reports/smoke_groq_20261114_reviewed/` — **45/45 questions, 0 failures**, Groq `openai/gpt-oss-20b`, real `QueryWorkflow`. Dataset: `evaluation/datasets/multilecture_smoke_45_reviewed.json` (15 per lecture; 17 factual / 12 conceptual / 10 visual / 1 definition / 3 graph / 2 unanswerable). 40 questions were LLM-drafted from one chunk each and then given an **AI-assisted label review** (3 reference answers corrected, 25 missing supporting chunks added, 3 graph-fact questions flagged); **not human-reviewed**.
 
-| Metric | Mean | p95 | n |
+| Metric | Mean | 95% CI | n |
 |---|---:|---:|---:|
-| Routing accuracy | 0.933 | 1.000 | 45 |
-| Visual routing accuracy (`need_visual`) | 0.911 | 1.000 | 45 |
-| **Post-rerank Hit@5** (cross-encoder order) | **0.884** | 1.000 | 43 |
-| **Post-rerank MRR@5** | **0.759** | 1.000 | 43 |
-| Post-rerank Recall@5 | 0.872 | 1.000 | 43 |
-| Post-rerank nDCG@5 | 0.785 | 1.000 | 43 |
-| **Context recall** (gold chunk placed in the LLM prompt) | **0.767** | 1.000 | 43 |
-| Pre-rerank Hit@5 / MRR@5 (RRF order) | 0.860 / 0.733 | 1.000 | 43 |
-| Answer token F1 | 0.253 | 0.500 | 45 |
-| Keyword recall | 0.773 | 1.000 | 45 |
+| **Post-rerank Hit@5** | **0.907** | 0.814 – 0.977 | 43 |
+| **Post-rerank MRR@5** | **0.801** | 0.691 – 0.903 | 43 |
+| Post-rerank Recall@5 / nDCG@5 | 0.880 / 0.813 | — | 43 |
+| **Context recall** | **0.843** | 0.736 – 0.936 | 43 |
+| Pre-rerank Hit@5 / MRR@5 (RRF order) | 0.884 / 0.804 | — | 43 |
+| Routing accuracy / visual routing accuracy | 0.933 / 0.911 | — | 45 |
+| Answer token F1 (lexical) | 0.256 | 0.201 – 0.313 | 45 |
+| Keyword recall | 0.786 | 0.682 – 0.878 | 45 |
 | Correct refusals (unanswerable) | 2/2 | — | 2 |
-| Answerable questions refused | 2/43 | — | 43 |
-| Mean end-to-end latency | 21.8 s | 24.6 s | 45 |
+| Answerable questions refused | 4/43 | — | 43 |
+| Mean / p95 total latency | 27.5 s / 31.2 s | — | 45 |
 
-**By question type (post-rerank):**
+**By question type (post-rerank):** factual (17) Hit@5 0.94 / MRR@5 0.83 / context recall 0.90 · conceptual (12) 0.92 / 0.86 / 0.92 · visual (10) 0.90 / 0.85 / 0.84 · definition (1) 1.00 / 1.00 / 1.00 · graph (3) 0.67 / 0.18 / 0.17.
 
-| Type | n | Hit@5 | MRR@5 | Context recall | Answer F1 |
-|---|---:|---:|---:|---:|---:|
-| factual | 17 | 0.88 | 0.80 | 0.82 | 0.21 |
-| conceptual | 12 | 0.92 | 0.82 | 0.92 | 0.27 |
-| visual | 10 | 0.90 | 0.78 | 0.70 | 0.24 |
-| definition | 1 | 1.00 | 1.00 | 1.00 | 0.43 |
-| graph | 3 | 0.67 | 0.18 | 0.00 | 0.50 |
+**Component ablation** (`evaluation/reports/ablation_20261114_reviewed/`, no LLM):
+
+| Configuration | Hit@1 | Hit@5 | MRR@5 | Context recall |
+|---|---:|---:|---:|---:|
+| Dense only | 0.674 | 0.814 | 0.734 | 0.793 |
+| + BM25 (RRF) | 0.744 | 0.884 | 0.804 | 0.824 |
+| + cross-encoder | 0.744 | 0.907 | 0.801 | 0.874 |
+| + graph context (production) | 0.744 | 0.907 | 0.801 | 0.843 |
+| Production, previous 4,000-char / 50%-graph budget | 0.744 | 0.907 | 0.801 | 0.783 |
+
+**Error analysis** (43 answerable): 36 answered with the evidence in the prompt · 2 refused with the evidence in the prompt (visual questions not flagged `need_visual`) · 4 evidence retrieved but not placed in the prompt · 1 retrieval miss.
 
 **What the numbers say:**
-- The cross-encoder adds roughly one question over the RRF order (+0.023 Hit@5, +0.026 MRR@5).
-- The gold chunk is in the 15-candidate pool for 93% of questions but reaches the prompt for 77%: the main loss is between reranking and context selection.
-- Graph (n=3) and unanswerable (n=2) slices are too small to support claims about GraphRAG or refusal quality.
-- Answer F1 is lexical and penalises the long answers (850 characters on average vs. 1–2 sentence references); no judge-based faithfulness or correctness metric has been run.
+- BM25 is the largest single gain; the cross-encoder adds +0.023 Hit@5 and +0.05 context recall, with no MRR gain on this set.
+- The graph layer does not change chunk ranking and costs prompt space (graph-routed context recall 0.750 → 0.528); its benefit for relational answers is not yet demonstrated.
+- The 6,000-char / 25%-graph budget was chosen on this same set (no dev split), so its gain is optimistic; it raised Groq-paced latency from 21.8 s to 27.5 s.
+- n = 43 gives ±0.1 confidence intervals; graph (3) and unanswerable (2) slices are too small for claims. No judge-based faithfulness metric has been run.
 
 **Effect of the 2026-11 correctness fixes** (`evaluation/reports/retrieval_comparison_20261114/`, no LLM calls, same data and models; old-code run reproduces the 2026-10-10 report exactly):
 
@@ -148,6 +149,8 @@ Source: `evaluation/knowledge_graph/audit_package.py` — audits regenerated 202
 > **Applicability warning:** the reference labels in `evaluation/knowledge_graph/*_gold.json` are **LLM-assisted labels pending human verification**, and they were annotated for the **6.5-minute Transformer lecture only**. Gold-reference metrics are therefore computed **only** where the gold lecture matches the audited package (`gold_applies` flag in `outputs/*/metrics.json`); for all other lectures they are reported as `null` — never as 0.0 and never replaced by optimistic fallbacks.
 
 #### Gold-reference scores (Transformer lecture only — the sole annotated lecture)
+
+> These were measured while the extraction prompts and prerequisite rules contained this lecture's entities (removed 2026-11-14), so they are not an independent measurement.
 
 | Metric | Precision | Recall | F1 | Basis |
 |---|---|---|---|---|
@@ -231,17 +234,17 @@ Empirical extraction yield across three complete production lecture packages in 
 | Multimodal capture (audio + slide + OCR) | Yes — audio 100% + keyframe slides/OCR | No — text-only | Partial — transcript only | No — cannot ingest |
 | Timestamped, chunk-level grounding | Yes — every chunk carries timestamp | No | No | No |
 | Knowledge-graph reasoning (entities/relations/traversal) | Yes — 6 relation types; CS162 benchmark package 138 entities / 189 relations; 1–3-hop traversal in both edge directions (rendered as `[Graph]` lines, not reranked) | No | No | No |
-| Hybrid retrieval (dense + BM25/RRF + graph + cross-encoder rerank) | Yes — smoke-set post-rerank Hit@5 0.884 / MRR@5 0.759 (provisional labels) | Partial — top-k only, no rerank | No | No |
+| Hybrid retrieval (dense + BM25/RRF + graph + cross-encoder rerank) | Yes — BM25 +0.07 Hit@5 over dense; cross-encoder +0.023 Hit@5 (ablation, §2.4) | Partial — top-k only, no rerank | No | No |
 | Lecture-wide synthesis (summary/notes/quiz) | Yes — 8-bucket temporal sampling; summary context spans 87% of the lecture on average | No — single-pass top-k | Partial — chapter list only | No |
 | Hallucination control (evidence-gated, source-only) | Yes — live-verified refusal | No — invents freely | No | No |
 | Cross-lecture data isolation | Yes — hard guards, tested | Partial | n/a | n/a |
 | Domain-adaptive reranker training | Yes — dedicated training pipeline and automated triplet dataset generator | No | No | No |
 | Private / offline (no API dependence) | Yes — local Ollama + Neo4j + Qdrant | Yes | Yes | No — requires API |
-| Benchmark infra (QA harness, KG audit suite, no-LLM code comparison; scaffolded RAGAS/load-test) | Yes — live 45-question smoke run (post-rerank Hit@5 0.884, MRR@5 0.759, context recall 0.767, routing 0.933) | No | No | No |
+| Benchmark infra (QA harness, KG audit suite, no-LLM code comparison; scaffolded RAGAS/load-test) | Yes — live 45-question smoke run (post-rerank Hit@5 0.907, MRR@5 0.801, context recall 0.843, routing 0.933; 95% CIs) + component ablation | No | No | No |
 | Measured eval numbers to show | Yes — retrieval/rerank + live QA + latency + graph/visual types | Partial | No | No |
 | Source-video footprint | 83-min 720p lecture → **436 KB knowledge package** (~2,800× smaller); corpus ≈ 85 MB for 725 lectures | Stores raw video | Stores raw video | n/a |
 
-**The one-line pitch this matrix supports:** *LectureMIND is a full-stack, private, multimodal lecture-QA system — hybrid dense + BM25 retrieval with cross-encoder reranking, a knowledge-graph layer, timestamped grounding and lecture-wide synthesis — with a reproducible evaluation harness (post-rerank Hit@5 0.884 on a provisional 45-question smoke set). Human-reviewed labels, judge-based faithfulness and a GraphRAG ablation are still open.*
+**The one-line pitch this matrix supports:** *LectureMIND is a full-stack, private, multimodal lecture-QA system — hybrid dense + BM25 retrieval with cross-encoder reranking, a knowledge-graph layer, timestamped grounding and lecture-wide synthesis — with a reproducible evaluation harness (post-rerank Hit@5 0.907, 95% CI 0.81–0.98, on a 45-question smoke set with AI-reviewed labels). Human-reviewed labels, judge-based faithfulness and a GraphRAG ablation are still open.*
 
 ---
 

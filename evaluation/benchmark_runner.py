@@ -27,7 +27,7 @@ from .reports.report_generator import ReportGenerator
 from .metrics import planner_metrics, retrieval_metrics, reranker_metrics, answer_metrics, citation_metrics, latency_metrics
 
 # Import the Workflow directly
-from agent.langgraph.workflow import QueryWorkflow
+from agent.pipeline.workflow import QueryWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class BenchmarkRunner:
         self.workflow = self._build_workflow()
         # Planner used to capture need_visual / route metadata for the record.
         # Stateless and deterministic; identical to the workflow's internal planner.
-        from agent.dspy.planner import QueryPlanner
+        from agent.planner.planner import QueryPlanner
         self._planner = QueryPlanner()
 
     # ------------------------------------------------------------------

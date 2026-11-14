@@ -75,13 +75,8 @@ def _build_term_regex(term: str) -> str:
     """
     Build a flexible regex that matches singular/plural and inflectional
     variations of each word in a term (e.g. 'Page Table' -> 'page(s)? table(s|es)?'),
-    with support for hyphens, connectors ('and'), optional classification head nouns,
-    and standard technical acronyms (e.g. 'AC', 'DC', 'EMF').
+    with support for hyphens, connectors ('and') and optional classification head nouns.
     """
-    # Distinguish generic 'Current' from compound terms ('Alternating Current', 'AC Current', 'Eddy Current', 'Direct Current', 'DC Current')
-    if term.strip().lower() in {"current", "currents"}:
-        return r"(?<!alternating\s)(?<!alternating\-)(?<!ac\s)(?<!ac\-)(?<!eddy\s)(?<!eddy\-)(?<!direct\s)(?<!direct\-)(?<!dc\s)(?<!dc\-)current(?:s|es)?"
-
     tokens = [t for t in re.findall(r"[a-zA-Z0-9]+", term.lower()) if t]
     if not tokens:
         return re.escape(term)
@@ -106,15 +101,6 @@ def _build_term_regex(term: str) -> str:
         term_pattern = f"(?:{prefix}(?:{prefix_sep}{suffix})?)"
     else:
         term_pattern = prefix_sep.join(parts)
-
-    # Technical acronym and abbreviation aliases
-    words = term.split()
-    if len(words) >= 2:
-        acronym = "".join([w[0].lower() for w in words if w[0].isalnum()])
-        if len(acronym) >= 2 and acronym in {"ac", "dc"}:
-            term_pattern = f"(?:{term_pattern}|{re.escape(acronym)})"
-        elif "electromotive" in term.lower():
-            term_pattern = f"(?:{term_pattern}|emf)"
 
     return term_pattern
 
@@ -219,11 +205,6 @@ class DiscourseCueDetector:
                 r"\b{B}\b[^.]{1,60}\b(?:is\s+induced|is\s+generated|arises\s+from|occurs\s+due\s+to)\s+(?:due\s+to|because\s+of|from\s+the\s+(?:changing|fluctuating|varying))\s+\b{A}\b",
                 0.85,
                 "passive_generation",
-            ),
-            (
-                r"\bto\s+(?:increase|decrease|step)\s+(?:the\s+voltage\s+in\s+)?(?:a\s+)?\b{B}\b[^.]{1,60}\b(?:turns\s+(?:to|on|in)\s+(?:the\s+)?)\b{A}\b",
-                0.85,
-                "turns_stepping_enablement",
             ),
             # 6. Structural Reliance cues (Confidence: 0.85 - 0.90)
             (

@@ -11,7 +11,7 @@ Example (old vs current code):
     python scripts/compare_retrieval_run.py . evaluation/datasets/multilecture_smoke_45.json new.jsonl
     python scripts/compare_retrieval_analyze.py old.jsonl new.jsonl comparison.json
 
-Mirrors agent/langgraph/workflow.py steps 1-3 exactly (planner -> graph
+Mirrors agent/pipeline/workflow.py steps 1-3 exactly (planner -> graph
 retrieval for graph routes -> vector retrieval for every route -> reranker
 node incl. BM25/RRF + cross-encoder + ContextBuilder), against the live local
 Qdrant/Neo4j. Answer generation (step 4) is skipped, so no provider quota.
@@ -38,10 +38,16 @@ from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 
-from agent.dspy.planner import QueryPlanner
-from agent.langgraph.nodes.graph_retriever import graph_retriever_node
-from agent.langgraph.nodes.reranker import reranker_node
-from agent.langgraph.nodes.vector_retriever import vector_retriever_node
+try:
+    from agent.planner.planner import QueryPlanner
+    from agent.pipeline.nodes.graph_retriever import graph_retriever_node
+    from agent.pipeline.nodes.reranker import reranker_node
+    from agent.pipeline.nodes.vector_retriever import vector_retriever_node
+except ModuleNotFoundError:  # code trees before the 2026-11 package rename
+    from agent.dspy.planner import QueryPlanner
+    from agent.langgraph.nodes.graph_retriever import graph_retriever_node
+    from agent.langgraph.nodes.reranker import reranker_node
+    from agent.langgraph.nodes.vector_retriever import vector_retriever_node
 from local.loaders.reranker_loader import _load_cross_encoder
 from local.services.reranker_service import RerankerService
 from schemas.enums import RetrievalRoute

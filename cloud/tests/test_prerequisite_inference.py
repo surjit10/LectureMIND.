@@ -506,37 +506,26 @@ def test_compound_term_regex_matching():
     import re
 
     re_ac = _build_term_regex("Alternating Current")
-    assert re.search(r"\b" + re_ac + r"\b", "works with AC power", re.IGNORECASE)
     assert re.search(r"\b" + re_ac + r"\b", "uses alternating current", re.IGNORECASE)
+    assert re.search(r"\b" + re_ac + r"\b", "uses alternating-currents", re.IGNORECASE)
 
     re_delta_y = _build_term_regex("Delta Y Connection")
     assert re.search(r"\b" + re_delta_y + r"\b", "known as delta y", re.IGNORECASE)
     assert re.search(r"\b" + re_delta_y + r"\b", "wired in delta-y connection", re.IGNORECASE)
 
 
-def test_generic_current_negative_lookbehind():
-    """Error 2 regression: verify generic 'Current' does not match compound terms."""
+def test_term_regex_has_no_domain_specific_special_cases():
+    """The term regex is purely morphological: no hand-written domain aliases
+    (the removed AC/DC/EMF aliases and 'current' look-behinds were written for
+    the gold-labelled Transformer lecture, i.e. tuned on the evaluation set)."""
     from cloud.extraction.prerequisite_inference import _build_term_regex
     import re
 
-    re_current = _build_term_regex("Current")
-    current_pattern = re.compile(r"\b" + re_current + r"\b", re.IGNORECASE)
-
-    # Standalone 'current' must match
-    assert current_pattern.search("current flows through the coil")
-    assert current_pattern.search("the electric current is measured in amperes")
-    assert current_pattern.search("induced currents create opposing fields")
-
-    # Compound terms must NOT match generic Current
-    assert not current_pattern.search("alternating current flows through the coil")
-    assert not current_pattern.search("alternating-current supply is connected")
-    assert not current_pattern.search("AC current flows through the coil")
-    assert not current_pattern.search("AC-current flows...")
-    assert not current_pattern.search("eddy current losses are significant")
-    assert not current_pattern.search("eddy currents are produced in the iron core")
-    assert not current_pattern.search("eddy-current heating occurs")
-    assert not current_pattern.search("direct current is provided by a battery")
-    assert not current_pattern.search("DC current flows...")
+    current = re.compile(r"\b" + _build_term_regex("Current") + r"\b", re.IGNORECASE)
+    assert current.search("current flows through the coil")
+    assert current.search("induced currents create opposing fields")
+    ac = re.compile(r"\b" + _build_term_regex("Alternating Current") + r"\b", re.IGNORECASE)
+    assert not ac.search("works with AC power")
 
 
 def test_a9_relation_prompt_and_schema():
@@ -553,11 +542,25 @@ def test_a9_relation_prompt_and_schema():
     assert "foundational concept" in RELATION_EXTRACTION_PROMPT
     assert "A -> B" in RELATION_EXTRACTION_PROMPT
     assert "Strict Exclusion" in RELATION_EXTRACTION_PROMPT
-    assert "Iron Core" in RELATION_EXTRACTION_PROMPT
-    assert "Eddy Currents" in RELATION_EXTRACTION_PROMPT
-    assert "Voltage" in RELATION_EXTRACTION_PROMPT
-    assert "Current" in RELATION_EXTRACTION_PROMPT
-    assert "Sinusoidal Waveform" in RELATION_EXTRACTION_PROMPT
+    assert "Negative Examples" in RELATION_EXTRACTION_PROMPT
+
+    # The few-shot examples must not come from any evaluated lecture: the
+    # Transformer lecture is the only gold-labelled KG lecture, so its entities
+    # in the prompt would leak the test set into extraction.
+    import json
+    from pathlib import Path
+    gold = json.loads((Path(__file__).resolve().parents[2] / "evaluation/knowledge_graph/entity_gold.json").read_text())
+    for ent in gold["entities"]:
+        for name in [ent["canonical_name"], *ent.get("aliases", [])]:
+            assert f"'{name}'" not in RELATION_EXTRACTION_PROMPT, f"gold entity {name!r} in prompt"
+
+    import re
+    from cloud.extraction.entity_extractor import ENTITY_EXTRACTION_PROMPT
+    examples = {e.strip().lower() for group in re.findall(r"\(e\.g\. ([^)]*)\)", ENTITY_EXTRACTION_PROMPT)
+                for e in group.split(",")}
+    for ent in gold["entities"]:
+        for name in [ent["canonical_name"], *ent.get("aliases", [])]:
+            assert name.lower() not in examples, f"gold entity {name!r} in entity prompt examples"
 
 
 def test_discourse_causal_statements_not_overinferred():

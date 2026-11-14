@@ -4,7 +4,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-from agent.langgraph.nodes.answer_generator import (
+from agent.pipeline.nodes.answer_generator import (
     answer_generator_node, _build_sources, _build_graph_path, _format_timestamp,
 )
 

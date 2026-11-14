@@ -62,7 +62,7 @@ User Question (text string)
 
 ## 2. Query Planning (Routing)
 
-**Where:** `agent/langgraph/nodes/query_planner.py`  
+**Where:** `agent/pipeline/nodes/query_planner.py`  
 **Why it exists:** Not every question requires both search modalities. Using only the relevant retrieval path reduces latency and noise.
 
 ### Routing Algorithm
@@ -130,7 +130,7 @@ Step 4: Result Formatting
     → Written to state["vector_results"]
 ```
 
-> **Candidate pool size:** `NORMAL_TOP_K = 15` (`agent/dspy/planner.py`) for standard questions;
+> **Candidate pool size:** `NORMAL_TOP_K = 15` (`agent/planner/planner.py`) for standard questions;
 > lecture-wide summary queries use `LECTURE_WIDE_TOP_K = 15` over temporal buckets. The wide
 > pool exists so relevant chunks ranked just outside the top-k (the diagnostic found correct
 > chunks at cosine ranks 6–46) still reach the reranker; hybrid BM25 fusion widens it further for
@@ -207,7 +207,7 @@ This enables the Socratic Back-Tracker to return complete prerequisite dependenc
 
 ## 5. Hybrid Fusion and Deduplication
 
-**Where:** `retrieval/reranker/rerank_service.py::_extract_passages` (invoked by `agent/langgraph/nodes/reranker.py`)  
+**Where:** `retrieval/reranker/rerank_service.py::_extract_passages` (invoked by `agent/pipeline/nodes/reranker.py`)  
 **Why it exists:** Two problems are solved before reranking: (1) dense embeddings miss exact
 lexical evidence (entity names, numeric facts) that BM25 catches, so hybrid fusion widens the
 candidate pool; (2) both retrievers may return the same chunk, so duplicates must be removed to
@@ -244,7 +244,7 @@ Step 4: Output merged pool
 
 ## 6. Reranking (Cross-Encoder)
 
-**Where:** `agent/langgraph/nodes/reranker.py`  
+**Where:** `agent/pipeline/nodes/reranker.py`  
 **Model:** `BAAI/bge-reranker-base` (loaded eagerly at startup as a global singleton)
 
 ### Why Cross-Encoder vs. Bi-Encoder
@@ -298,7 +298,7 @@ The `reranker_node` receives `reranker_service` as a constructor argument, injec
 
 ## 7. Context Assembly
 
-**Where:** `agent/langgraph/nodes/answer_generator.py`  
+**Where:** `agent/pipeline/nodes/answer_generator.py`  
 **Why it exists:** The LLM has a finite context window. Context must be assembled carefully to maximize information density while staying within limits.
 
 ### Algorithm
@@ -323,7 +323,7 @@ Step 3: Store in state
 
 ## 8. Prompt Construction
 
-**Where:** `agent/langgraph/nodes/answer_generator.py`
+**Where:** `agent/pipeline/nodes/answer_generator.py`
 
 The prompt is structured as a standard `messages` list (compatible with all provider APIs):
 

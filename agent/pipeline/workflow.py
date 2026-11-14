@@ -1,5 +1,5 @@
-# agent/langgraph/workflow.py
-# E2 — LangGraph Single-Pass Workflow.
+# agent/pipeline/workflow.py
+# E2 — Single-pass query workflow (plain Python; LangGraph is not a dependency).
 #
 # Orchestrates: Planner → Conditional Routing → Retrieval → Reranker → Answer
 #
@@ -11,7 +11,7 @@ import time
 from typing import Any, Dict, Optional
 
 from schemas.enums import RetrievalRoute
-from agent.dspy.planner import QueryPlanner
+from agent.planner.planner import QueryPlanner
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ class QueryWorkflow:
         3. Reranker fuses and reranks
         4. Answer Generator produces grounded answer
 
-    In production, this would be a LangGraph StateGraph.
-    The node functions are structured to be drop-in compatible
-    with langgraph.graph.StateGraph when the dependency is available.
+    LangGraph is not used. Each node is a plain function
+    (state -> partial state update), so the flow could be ported to
+    langgraph.graph.StateGraph without changing the nodes.
     """
 
     def __init__(
@@ -89,7 +89,7 @@ class QueryWorkflow:
         # Step 2: Conditional retrieval.
         t_ret_start = time.perf_counter()
         if route in (RetrievalRoute.graph_only, RetrievalRoute.graph_and_vector):
-            from agent.langgraph.nodes.graph_retriever import graph_retriever_node
+            from agent.pipeline.nodes.graph_retriever import graph_retriever_node
             graph_update = graph_retriever_node(state, driver=self._neo4j_driver)
             state.update(graph_update)
 
@@ -100,7 +100,7 @@ class QueryWorkflow:
         # vectors supply the transcript/OCR/visual text the answer must be
         # grounded in. Never answer from the graph alone.
         if route in (RetrievalRoute.vector_only, RetrievalRoute.graph_and_vector, RetrievalRoute.graph_only):
-            from agent.langgraph.nodes.vector_retriever import vector_retriever_node
+            from agent.pipeline.nodes.vector_retriever import vector_retriever_node
             try:
                 vector_update = vector_retriever_node(
                     state,
@@ -120,7 +120,7 @@ class QueryWorkflow:
 
         # Step 3: Rerank.
         t_rerank_start = time.perf_counter()
-        from agent.langgraph.nodes.reranker import reranker_node
+        from agent.pipeline.nodes.reranker import reranker_node
         rerank_update = reranker_node(
             state, reranker_service=self._reranker_service,
         )
@@ -129,7 +129,7 @@ class QueryWorkflow:
 
         # Step 4: Generate answer.
         t_gen_start = time.perf_counter()
-        from agent.langgraph.nodes.answer_generator import answer_generator_node
+        from agent.pipeline.nodes.answer_generator import answer_generator_node
         answer_update = answer_generator_node(
             state, ollama_client=self._ollama_client,
         )

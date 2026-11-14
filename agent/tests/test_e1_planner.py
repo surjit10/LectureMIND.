@@ -3,7 +3,7 @@
 
 import pytest
 from schemas.enums import RetrievalRoute
-from agent.dspy.planner import QueryPlanner
+from agent.planner.planner import QueryPlanner, NORMAL_CONTEXT_BUDGET, LECTURE_WIDE_CONTEXT_BUDGET
 
 
 class TestQueryPlanner:
@@ -106,7 +106,7 @@ class TestQueryPlanner:
             plan = planner.plan_full(q)
             assert plan.is_lecture_wide is True, f"Failed for query: {q}"
             assert plan.top_k == 15, f"Failed for query: {q}"
-            assert plan.context_budget == 6000, f"Failed for query: {q}"
+            assert plan.context_budget == LECTURE_WIDE_CONTEXT_BUDGET, f"Failed for query: {q}"
 
     def test_factual_qa_queries(self):
         """Factual queries do not trigger is_lecture_wide."""
@@ -123,7 +123,7 @@ class TestQueryPlanner:
             plan = planner.plan_full(q)
             assert plan.is_lecture_wide is False, f"Failed for query: {q}"
             assert plan.top_k == 15, f"Failed for query: {q}"
-            assert plan.context_budget == 4000, f"Failed for query: {q}"
+            assert plan.context_budget == NORMAL_CONTEXT_BUDGET, f"Failed for query: {q}"
 
     def test_specific_course_facts_are_not_lecture_wide(self):
         """Grading/syllabus questions are point facts: semantic retrieval, not timeline sampling."""
@@ -147,7 +147,7 @@ class TestQueryPlanner:
             plan = planner.plan_full(q)
             assert plan.intent == intent, q
             assert plan.is_lecture_wide is False, q
-            assert plan.context_budget == 4000, q
+            assert plan.context_budget == NORMAL_CONTEXT_BUDGET, q
 
     def test_scope_only_requests_stay_lecture_wide(self):
         planner = QueryPlanner()

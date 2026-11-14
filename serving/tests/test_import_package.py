@@ -121,7 +121,7 @@ def client(tmp_path):
         patch("local.loaders.qdrant_loader.load_qdrant"),
         patch("local.loaders.neo4j_loader.load_neo4j"),
         patch("local.loaders.package_loader.load_package", return_value=MagicMock()),
-        patch("agent.langgraph.workflow.QueryWorkflow", return_value=MagicMock()),
+        patch("agent.pipeline.workflow.QueryWorkflow", return_value=MagicMock()),
         patch("serving.fastapi.routes.query.set_active_package"),
         patch("serving.fastapi.routes.query.clear_workflow"),
         patch("serving.fastapi.routes.query.set_workflow"),

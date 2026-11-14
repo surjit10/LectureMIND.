@@ -1,5 +1,5 @@
-# agent/langgraph/nodes/graph_retriever.py
-# LangGraph node — wraps the Neo4j retriever.
+# agent/pipeline/nodes/graph_retriever.py
+# Pipeline node — wraps the Neo4j retriever.
 
 from typing import Any, Dict, Optional
 
@@ -11,7 +11,7 @@ def graph_retriever_node(
     driver: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
-    LangGraph node: populate state.graph_results from Neo4j.
+    Pipeline node: populate state.graph_results from Neo4j.
 
     Only modifies graph_results. Does not touch other fields.
     """

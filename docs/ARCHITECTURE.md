@@ -34,7 +34,7 @@ combining:
 - **Knowledge graph traversal** (Neo4j) for reasoning over entity relationships extracted from lectures.
 
 These two retrieval modes are unified through a single-pass orchestration pipeline
-(`agent/langgraph/workflow.py`) that generates grounded, citation-backed answers to student
+(`agent/pipeline/workflow.py`) that generates grounded, citation-backed answers to student
 questions, running entirely on a laptop.
 
 ---
@@ -177,11 +177,11 @@ Lightweight FastAPI application. Responsibilities:
 
 ### 4.3 Agent / Query Orchestration (`agent/`)
 The core reasoning engine. `QueryWorkflow` is a **single-pass** orchestrator
-(`agent/langgraph/workflow.py`) — no memory, no tool calls, no autonomous loops.
+(`agent/pipeline/workflow.py`) — no memory, no tool calls, no autonomous loops.
 
 | Component | Responsibility |
 |---|---|
-| `QueryPlanner` (`agent/dspy/planner.py`) | Classifies query → route (`vector_only` / `graph_only` / `graph_and_vector`) + `plan_full()` intent, lecture-wide flag, `need_visual`, budgets |
+| `QueryPlanner` (`agent/planner/planner.py`) | Classifies query → route (`vector_only` / `graph_only` / `graph_and_vector`) + `plan_full()` intent, lecture-wide flag, `need_visual`, budgets |
 | `vector_retriever_node` | Qdrant ANN (lecture-scoped; raises without `lecture_id`) |
 | `graph_retriever_node` | Neo4j bounded 1–3-hop traversal (lecture-scoped) |
 | `reranker_node` | Cross-encoder rerank + ContextBuilder assembly |
@@ -237,7 +237,7 @@ Next.js 14 + React 18 + TypeScript web UI. Communicates with the FastAPI server 
 | Folder | Role |
 |---|---|
 | `cloud/` | Cloud-side ingestion pipeline (orchestration, extraction, fusion, packaging, reranker training) |
-| `agent/` | Query orchestration: `dspy/planner.py`, `langgraph/workflow.py`, `langgraph/nodes/` |
+| `agent/` | Query orchestration: `planner/planner.py`, `pipeline/workflow.py`, `pipeline/nodes/` |
 | `retrieval/` | Vector / graph / course retrievers, reranker service, context builder |
 | `local/` | LLM backends + provider registry, loaders (`prerequisite_enricher.py`), storage registries, docker compose |
 | `serving/` | FastAPI app, routes (`query.py`, `prerequisites.py`, `lectures.py`), learning service |

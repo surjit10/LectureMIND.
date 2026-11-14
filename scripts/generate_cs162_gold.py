@@ -127,7 +127,7 @@ def _get_provider():
     """Resolve an LLM provider or return None (gates the script)."""
     try:
         from local.llm.provider_registry import get_provider_registry
-        from agent.langgraph.nodes.answer_generator import build_llm_backend  # type: ignore
+        from agent.pipeline.nodes.answer_generator import build_llm_backend  # type: ignore
     except Exception:
         return None
     try:

@@ -29,8 +29,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from agent.dspy.planner import QueryPlanner
-from agent.langgraph.nodes.answer_generator import _generate_answer
+from agent.planner.planner import QueryPlanner
+from agent.pipeline.nodes.answer_generator import _generate_answer
 from evaluation.knowledge_graph.graphrag_evaluator import (
     SimpleBM25,
     SimpleGraphRetriever,

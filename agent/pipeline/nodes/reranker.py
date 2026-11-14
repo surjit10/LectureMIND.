@@ -1,5 +1,5 @@
-# agent/langgraph/nodes/reranker.py
-# LangGraph node — wraps the rerank service.
+# agent/pipeline/nodes/reranker.py
+# Pipeline node — wraps the rerank service.
 
 import logging
 from typing import Any, Dict, Optional
@@ -17,7 +17,7 @@ def _get_planner():
     """Lazy-load planner singleton (avoids circular imports at module load)."""
     global _planner
     if _planner is None:
-        from agent.dspy.planner import QueryPlanner
+        from agent.planner.planner import QueryPlanner
         _planner = QueryPlanner()
     return _planner
 
@@ -28,7 +28,7 @@ def reranker_node(
     reranker_model: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
-    LangGraph node: rerank combined results.
+    Pipeline node: rerank combined results.
 
     Populates state.reranked_results and state.final_context only.
 

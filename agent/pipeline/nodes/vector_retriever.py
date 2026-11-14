@@ -1,5 +1,5 @@
-# agent/langgraph/nodes/vector_retriever.py
-# LangGraph node — wraps the Qdrant retriever.
+# agent/pipeline/nodes/vector_retriever.py
+# Pipeline node — wraps the Qdrant retriever.
 
 import logging
 from typing import Any, Dict, Optional
@@ -15,7 +15,7 @@ def _get_planner():
     """Lazy-load planner singleton."""
     global _planner
     if _planner is None:
-        from agent.dspy.planner import QueryPlanner
+        from agent.planner.planner import QueryPlanner
         _planner = QueryPlanner()
     return _planner
 
@@ -26,7 +26,7 @@ def vector_retriever_node(
     embedding_model: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
-    LangGraph node: populate state.vector_results from Qdrant.
+    Pipeline node: populate state.vector_results from Qdrant.
 
     Only modifies vector_results. Does not touch other fields.
 
@@ -51,7 +51,7 @@ def vector_retriever_node(
         top_k = getattr(plan, "top_k", 15)
         is_lecture_wide = getattr(plan, "is_lecture_wide", False)
     else:
-        from agent.dspy.planner import NORMAL_TOP_K
+        from agent.planner.planner import NORMAL_TOP_K
         top_k = NORMAL_TOP_K
         is_lecture_wide = False
 

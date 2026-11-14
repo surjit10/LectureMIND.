@@ -234,57 +234,55 @@ second-worst value — read it with that caveat in mind).
 
 ## 6. Measured Results (Conversational RAG)
 
-### 6.1 Current run — 45-question three-lecture smoke set (2026-11-14)
+### 6.1 Current run — 45-question smoke set, reviewed labels (2026-11-14)
 
-Source: `evaluation/reports/smoke_groq_20261114_newcode/evaluation_report_20261114_154651.*`
-— 45/45 questions, 0 failures, Groq `openai/gpt-oss-20b`, real `QueryWorkflow` (Qdrant →
-Neo4j → BM25 + RRF → `bge-reranker-base` → `ContextBuilder` → LLM).
-Dataset: `evaluation/datasets/multilecture_smoke_45.json` (15 questions per lecture; 17 factual /
-12 conceptual / 10 visual / 1 definition / 3 graph / 2 unanswerable). 40 questions were
-LLM-drafted from one chunk each; **labels are not human-reviewed**.
+Source: `evaluation/reports/smoke_groq_20261114_reviewed/evaluation_report_20261114_171933.*`
+(+ `analysis.md`: bootstrap CIs and error analysis from `scripts/analyze_benchmark.py`) —
+45/45 questions, 0 failures, Groq `openai/gpt-oss-20b`, real `QueryWorkflow`.
+Dataset: `evaluation/datasets/multilecture_smoke_45_reviewed.json` — the smoke set after an
+**AI-assisted label review** (each question's gold chunk read against its reference answer):
+3 reference answers corrected (ASR-misspelled instructor name, an answer that did not answer the
+question, a layout description instead of a meaning), 25 missing supporting chunks added (45 → 70
+gold chunks), 3 graph-fact questions flagged as weak chunk-level evidence. Every item records a
+`review_note`. **Not human-reviewed**: `validate_benchmark --profile release` rejects it.
 
-| Metric | Mean | p95 | n |
+| Metric | Mean | 95% CI | n |
 |---|---:|---:|---:|
-| Routing accuracy | 0.9333 | 1.000 | 45 |
-| Visual routing accuracy | 0.9111 | 1.000 | 45 |
-| **Post-rerank Hit@5** | **0.8837** | 1.000 | 43 |
-| **Post-rerank MRR@5** | **0.7593** | 1.000 | 43 |
-| Post-rerank Recall@5 | 0.8721 | 1.000 | 43 |
-| Post-rerank nDCG@5 | 0.7854 | 1.000 | 43 |
-| **Context recall** | **0.7674** | 1.000 | 43 |
-| Pre-rerank Hit@5 (RRF order) | 0.8605 | 1.000 | 43 |
-| Pre-rerank MRR@5 (RRF order) | 0.7333 | 1.000 | 43 |
-| Answer token F1 | 0.2530 | 0.500 | 45 |
-| Keyword recall | 0.7733 | 1.000 | 45 |
+| **Post-rerank Hit@5** | **0.907** | 0.814 – 0.977 | 43 |
+| **Post-rerank MRR@5** | **0.801** | 0.691 – 0.903 | 43 |
+| Post-rerank Recall@5 / nDCG@5 | 0.880 / 0.813 | — | 43 |
+| **Context recall** | **0.843** | 0.736 – 0.936 | 43 |
+| Pre-rerank Hit@5 / MRR@5 (RRF order) | 0.884 / 0.804 | — | 43 |
+| Routing accuracy / visual routing accuracy | 0.933 / 0.911 | — | 45 |
+| Answer token F1 (lexical) | 0.256 | 0.201 – 0.313 | 45 |
+| Keyword recall | 0.786 | 0.682 – 0.878 | 45 |
 | Correct refusals (unanswerable) | 2/2 | — | 2 |
-| Answerable questions refused | 2/43 | — | 43 |
-| Mean answer length (chars) | 850 | 3199 | 45 |
-| Retrieval latency | 0.20 s | 0.51 s | 45 |
-| Reranker + context latency (CPU) | 5.61 s | 10.59 s | 45 |
-| Generation latency (Groq) | 16.01 s | 21.51 s | 45 |
-| Total latency | 21.82 s | 24.64 s | 45 |
+| Answerable questions refused | 4/43 | — | 43 |
+| Mean / p95 total latency | 27.5 s / 31.2 s | — | 45 |
 
-By question type (post-rerank Hit@5 / MRR@5 / context recall / answer F1):
+**By question type (post-rerank):** factual (17) Hit@5 0.94 / MRR@5 0.83 / context recall 0.90 · conceptual (12) 0.92 / 0.86 / 0.92 · visual (10) 0.90 / 0.85 / 0.84 · definition (1) 1.00 / 1.00 / 1.00 · graph (3) 0.67 / 0.18 / 0.17.
 
-| Type | n | Hit@5 | MRR@5 | Context recall | Answer F1 |
-|---|---:|---:|---:|---:|---:|
-| factual | 17 | 0.88 | 0.80 | 0.82 | 0.21 |
-| conceptual | 12 | 0.92 | 0.82 | 0.92 | 0.27 |
-| visual | 10 | 0.90 | 0.78 | 0.70 | 0.24 |
-| definition | 1 | 1.00 | 1.00 | 1.00 | 0.43 |
-| graph | 3 | 0.67 | 0.18 | 0.00 | 0.50 |
-| unanswerable | 2 | — | — | — | 0.10 |
+**Component ablation** (`evaluation/reports/ablation_20261114_reviewed/`, no LLM):
 
-Interpretation:
-- The cross-encoder adds about one question over the RRF order (+0.023 Hit@5, +0.026 MRR@5).
-- The gold chunk is in the 15-candidate pool for 93% of questions but reaches the prompt for
-  77%: most evidence loss happens in reranking/context selection, not first-stage retrieval.
-- Graph (n=3) and unanswerable (n=2) slices are too small for conclusions.
-- Answer F1 is depressed by length mismatch (850-character answers vs. 1–2 sentence
-  references); it is lexical, not a correctness judgment. No faithfulness/judge metric has
-  been run yet.
-- Latency is not comparable across days: generation is Groq network time, and the CPU
-  reranker varied by ~0.4 s between same-day runs of identical code.
+| Configuration | Hit@1 | Hit@5 | MRR@5 | Context recall |
+|---|---:|---:|---:|---:|
+| Dense only | 0.674 | 0.814 | 0.734 | 0.793 |
+| + BM25 (RRF) | 0.744 | 0.884 | 0.804 | 0.824 |
+| + cross-encoder | 0.744 | 0.907 | 0.801 | 0.874 |
+| + graph context (production) | 0.744 | 0.907 | 0.801 | 0.843 |
+| Production, previous 4,000-char / 50%-graph budget | 0.744 | 0.907 | 0.801 | 0.783 |
+
+**Error analysis** (43 answerable): 36 answered with the evidence in the prompt · 2 refused with the evidence in the prompt (visual questions not flagged `need_visual`) · 4 evidence retrieved but not placed in the prompt · 1 retrieval miss.
+
+**What the numbers say:**
+- BM25 is the largest single gain; the cross-encoder adds +0.023 Hit@5 and +0.05 context recall, with no MRR gain on this set.
+- The graph layer does not change chunk ranking and costs prompt space (graph-routed context recall 0.750 → 0.528); its benefit for relational answers is not yet demonstrated.
+- The 6,000-char / 25%-graph budget was chosen on this same set (no dev split), so its gain is optimistic; it raised Groq-paced latency from 21.8 s to 27.5 s.
+- n = 43 gives ±0.1 confidence intervals; graph (3) and unanswerable (2) slices are too small for claims. No judge-based faithfulness metric has been run.
+
+Earlier runs on the unreviewed labels (`smoke_groq_20261010_fixed/` with the old code,
+`smoke_groq_20261114_newcode/` with the fixes but the 4,000-char budget) remain for traceability:
+post-rerank Hit@5 0.884, MRR@5 0.759, context recall 0.767 on those labels.
 
 ### 6.2 Effect of the 2026-11 correctness fixes (no-LLM comparison)
 
@@ -327,6 +325,13 @@ on this set, so it is not a held-out measurement.
 Audited via `evaluation/knowledge_graph/audit_package.py`. Reference labels (`evaluation/knowledge_graph/*_gold.json`) are **LLM-assisted labels pending human verification**, annotated for the 6.5-minute **Transformer lecture only** — the auditor computes gold metrics **only when the audited package matches that lecture** (`gold_applies` flag); for every other package gold metrics are reported as `null`, and the composite score counts only measurable components.
 
 Regenerated audits (2026-09-15, honest one-to-one matching, no fallback substitution, computed from the **latest `0-output/` packages**):
+
+> **Independence caveat:** these audits were produced while the entity/relation extraction prompts
+> and the prerequisite rules contained the Transformer lecture's own entities and terms. Those were
+> removed on 2026-11-14 (prompts now use neutral examples; a test asserts no gold entity appears
+> in them). The Transformer gold scores are therefore not an independent measurement; re-extraction
+> is required for one. Removing the rules left the prerequisite output of the three benchmark
+> lectures unchanged (27 / 15 / 14 edges, identical).
 
 | Package | Entity F1 | Relation F1 | Prereq F1 | DAG / cycles | Prereq edges | Composite |
 |---|---|---|---|---|---|---|
@@ -431,4 +436,17 @@ git worktree add --detach /tmp/old_tree <commit> && cp .env /tmp/old_tree/
 ./.venv_clean/bin/python scripts/compare_retrieval_run.py /tmp/old_tree evaluation/datasets/multilecture_smoke_45.json old.jsonl
 ./.venv_clean/bin/python scripts/compare_retrieval_run.py . evaluation/datasets/multilecture_smoke_45.json new.jsonl
 ./.venv_clean/bin/python scripts/compare_retrieval_analyze.py old.jsonl new.jsonl comparison.json
+```
+
+### 8.4 Ablation, confidence intervals and error analysis (no LLM calls)
+```bash
+# Component ablation + context-budget variants (dense / +BM25 / +reranker / +graph):
+./.venv_clean/bin/python scripts/run_ablation.py \
+  --dataset evaluation/datasets/multilecture_smoke_45_reviewed.json --out-dir evaluation/reports/ablation_<date>
+
+# Bootstrap 95% CIs + per-question error analysis for a benchmark report:
+./.venv_clean/bin/python scripts/analyze_benchmark.py \
+  --report evaluation/reports/<run>/evaluation_report_<ts>.json \
+  --ablation evaluation/reports/ablation_<date>/per_question.jsonl \
+  --out evaluation/reports/<run>/analysis.md
 ```

@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.getcwd())
 
-from agent.langgraph.workflow import QueryWorkflow
+from agent.pipeline.workflow import QueryWorkflow
 from qdrant_client import QdrantClient
 from config import local_settings
 from local.storage.registry_provider import get_registry
@@ -33,7 +33,7 @@ state = workflow.run(query, lecture_id=lecture_id)
 
 print("\n--- EXECUTION TRACE ---")
 print("1. Planner")
-from agent.dspy.planner import QueryPlanner
+from agent.planner.planner import QueryPlanner
 plan = QueryPlanner().plan_full(query)
 print(f"route: {plan.retrieval_route}")
 print(f"top_k: {plan.top_k}")
@@ -95,7 +95,7 @@ print("\n6. Answer Generator")
 print(f"Answer length: {len(state.get('answer', ''))}")
 print(f"Answer preview: {state.get('answer', '')[:200]}")
 
-from agent.langgraph.nodes.answer_generator import _resolve_backend, SYSTEM_PROMPT
+from agent.pipeline.nodes.answer_generator import _resolve_backend, SYSTEM_PROMPT
 backend = _resolve_backend(None, None, local_settings)
 print(f"\nBackend: {type(backend)}")
 try:

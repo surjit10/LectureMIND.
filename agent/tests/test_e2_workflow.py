@@ -7,8 +7,8 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from schemas.enums import RetrievalRoute
-from agent.dspy.planner import QueryPlanner
-from agent.langgraph.workflow import QueryWorkflow
+from agent.planner.planner import QueryPlanner
+from agent.pipeline.workflow import QueryWorkflow
 from local.services.reranker_service import RerankerService
 
 

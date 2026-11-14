@@ -1,4 +1,4 @@
-# agent/langgraph/nodes/answer_generator.py
+# agent/pipeline/nodes/answer_generator.py
 # E4 — Answer Generator.
 #
 # Generates a grounded answer using final_context.
@@ -102,7 +102,7 @@ def answer_generator_node(
     local_settings: LocalSettings | None = None,
 ) -> Dict[str, Any]:
     """
-    LangGraph node: generate grounded answer.
+    Pipeline node: generate grounded answer.
 
     Populates ONLY: answer, sources, graph_path.
 
@@ -128,7 +128,7 @@ def answer_generator_node(
         answer_style = getattr(plan, "answer_style", "concise")
     else:
         try:
-            from agent.dspy.planner import QueryPlanner
+            from agent.planner.planner import QueryPlanner
             plan = QueryPlanner().plan_full(query)
             answer_style = plan.answer_style
         except Exception:

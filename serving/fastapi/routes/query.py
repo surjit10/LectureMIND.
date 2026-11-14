@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException
 
 from schemas.query import QueryRequest, QueryResponse
-from agent.langgraph.workflow import QueryWorkflow
+from agent.pipeline.workflow import QueryWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def _get_planner():
     """Lazy-load the stateless planner singleton."""
     global _planner
     if _planner is None:
-        from agent.dspy.planner import QueryPlanner
+        from agent.planner.planner import QueryPlanner
         _planner = QueryPlanner()
     return _planner
 

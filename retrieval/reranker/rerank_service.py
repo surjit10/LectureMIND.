@@ -30,7 +30,15 @@ from retrieval.hybrid.bm25_retriever import bm25_search, rrf_fuse
 
 logger = logging.getLogger(__name__)
 
-MAX_CONTEXT_CHARS = 4000
+# Fallback budget for callers that pass no char_budget (course queries); the
+# chat workflow passes the planner's context_budget.
+MAX_CONTEXT_CHARS = 6000
+# Graph relation lines are prepended to the context and take budget away from
+# lecture text. Cap: min(MAX_GRAPH_CONTEXT_CHARS, budget * GRAPH_CONTEXT_SHARE).
+# Was 50% / 2000 chars: on graph-routed questions ~45 relation lines left room
+# for a single transcript chunk (context recall 0.33 on those questions).
+GRAPH_CONTEXT_SHARE = 0.25
+MAX_GRAPH_CONTEXT_CHARS = 1500
 _GLOBAL_RERANKER_SERVICE = None
 _RERANKER_LOCK = threading.Lock()
 _CONTEXT_BUILDER = ContextBuilder(char_budget=MAX_CONTEXT_CHARS)
@@ -177,9 +185,9 @@ def rerank(
     # rerank pool — there is no passage text to score. They are, however,
     # the core evidence for relationship questions, so they are appended to
     # final_context directly (budget reserved below).
-    # Cap the graph section at half the budget so a broad graph hit can
-    # never starve the transcript evidence.
-    graph_budget = min(2000, max(0, effective_budget // 2))
+    # Cap the graph section so a broad graph hit can never starve the
+    # transcript evidence (see GRAPH_CONTEXT_SHARE / MAX_GRAPH_CONTEXT_CHARS).
+    graph_budget = min(MAX_GRAPH_CONTEXT_CHARS, max(0, int(effective_budget * GRAPH_CONTEXT_SHARE)))
     graph_context = _build_graph_context(graph_results, char_budget=graph_budget)
 
     if not combined:

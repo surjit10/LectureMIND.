@@ -23,8 +23,8 @@ from evaluation.dashboard.dashboard_generator import generate_dashboard
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate, optionally run, and report a LectureMind smoke benchmark")
-    parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/multilecture_smoke_45.json"))
-    parser.add_argument("--output-dir", type=Path, default=Path("evaluation/reports/smoke_groq_20261114_newcode"))
+    parser.add_argument("--dataset", type=Path, default=Path("evaluation/datasets/multilecture_smoke_45_reviewed.json"))
+    parser.add_argument("--output-dir", type=Path, default=Path("evaluation/reports/smoke_groq_20261114_reviewed"))
     parser.add_argument("--reports-dir", type=Path, default=Path("evaluation/reports"),
                         help="Directory containing shared RAGAS/load-test artifacts")
     parser.add_argument("--dashboard", type=Path, default=Path("evaluation/dashboard/index.html"))

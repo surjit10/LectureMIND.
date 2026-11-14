@@ -1,11 +1,12 @@
-# agent/dspy/planner.py
-# E1 — DSPy Route Planner.
+# agent/planner/planner.py
+# E1 — Heuristic route planner (regex keyword rules).
 #
 # ONLY classifies the query into a retrieval route.
-# DSPy is NOT an agent. NOT answer generation. NOT retrieval.
+# The planner only routes and plans: it does not retrieve or generate.
 #
 # Allowed routes: graph_only, vector_only, graph+vector
-# Uses heuristic keyword matching with optional DSPy ChainOfThought upgrade.
+# Uses heuristic keyword matching. An optional classifier (e.g. a DSPy module —
+# DSPy is not a dependency) can be injected via set_dspy_module().
 #
 # V7 additions (backward compatible):
 #   - Richer intent taxonomy (factual QA, conceptual, comparison, etc.)
@@ -19,7 +20,7 @@ import re
 from typing import Any, Optional
 
 from schemas.enums import RetrievalRoute
-from agent.dspy.query_plan import QueryPlan
+from agent.planner.query_plan import QueryPlan
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 NORMAL_TOP_K = 15
 LECTURE_WIDE_TOP_K = 15
+
+# LLM context character budgets (passed to ContextBuilder via QueryPlan).
+# NORMAL was 4000: only ~3 chunks fit, so gold chunks ranked 4-5 (and, on
+# graph-routed questions, often rank 2-3) never reached the prompt. 6000 with a
+# 25% graph share raised context recall 0.767 -> 0.826 on the 45-question smoke
+# set (evaluation/reports/ablation_20261114/), at ~570 extra prompt tokens.
+NORMAL_CONTEXT_BUDGET = 6000
+LECTURE_WIDE_CONTEXT_BUDGET = 6000
 
 # ---------------------------------------------------------------------------
 # Keyword patterns — compiled for efficiency
@@ -353,7 +362,7 @@ class QueryPlanner:
 
         # --- top_k and context_budget by scope ---
         top_k = LECTURE_WIDE_TOP_K if is_lecture_wide else NORMAL_TOP_K
-        context_budget = 6000 if is_lecture_wide else 4000
+        context_budget = LECTURE_WIDE_CONTEXT_BUDGET if is_lecture_wide else NORMAL_CONTEXT_BUDGET
 
         # --- need_visual ---
         need_visual = _matches(q, [r"\bdiagram\b", r"\bfigure\b", r"\bimage\b", r"\bslide\b", r"\bvisual\b"])

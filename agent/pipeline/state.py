@@ -1,7 +1,7 @@
-# agent/langgraph/state.py
-# LangGraph state definition — uses the FROZEN QueryPipelineState.
+# agent/pipeline/state.py
+# Pipeline state definition — uses the FROZEN QueryPipelineState.
 #
-# This module re-exports the Chunk 1 schema as a TypedDict for LangGraph compatibility.
+# This module re-exports the Chunk 1 schema as a TypedDict (dict-based, LangGraph-style).
 # No fields added. No fields removed.
 
 from typing import Any, Dict, List, Optional, TypedDict

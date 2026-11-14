@@ -107,7 +107,7 @@ Use a fast **bi-encoder** (bge-large-en-v1.5) for broad candidate retrieval, fol
 ## 4. LangGraph-Style Orchestration (Custom QueryWorkflow)
 
 ### Decision
-Structure the query pipeline as a **typed, node-based orchestrator** rather than a monolithic function. `agent/langgraph/workflow.py` exposes a `QueryWorkflow` class whose node functions (`planner_node`, `vector_retriever_node`, `graph_retriever_node`, `reranker_node`, `answer_generator_node`) operate on a shared `QueryState` TypedDict — but the orchestrator is a **plain Python single-pass class**, with no `langgraph` dependency installed.
+Structure the query pipeline as a **typed, node-based orchestrator** rather than a monolithic function. `agent/pipeline/workflow.py` exposes a `QueryWorkflow` class whose node functions (`planner_node`, `vector_retriever_node`, `graph_retriever_node`, `reranker_node`, `answer_generator_node`) operate on a shared `QueryState` TypedDict — but the orchestrator is a **plain Python single-pass class**, with no `langgraph` dependency installed.
 
 ### Rationale
 - A **typed, inspectable state machine**: each node reads from and writes to a shared `QueryState` TypedDict, making data flow explicit and debuggable.
@@ -130,7 +130,7 @@ Structure the query pipeline as a **typed, node-based orchestrator** rather than
 Abstract all LLM interactions behind `LLMBackend` (ABC), with `OllamaBackend` and `OnlineBackend` as concrete implementations, selected by `ProviderRegistry` (factory).
 
 ### Rationale
-- LangGraph nodes (`answer_generator_node`, `learning_service`) depend on `LLMBackend` — they are completely unaware of whether generation happens locally or in the cloud.
+- Pipeline nodes (`answer_generator_node`, `learning_service`) depend on `LLMBackend` — they are completely unaware of whether generation happens locally or in the cloud.
 - Switching providers (Ollama → Gemini → Claude) requires only updating `data/llm_config.json`. No code change is needed anywhere in the pipeline.
 - `ProviderRegistry` produces **ephemeral** (non-cached) instances on each call. This ensures that provider switches take effect on the very next request without any state invalidation.
 
@@ -312,7 +312,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | Strength | Description |
 |---|---|
 | **Clean separation of concerns** | Cloud and local runtimes are completely decoupled via the Knowledge Package interface |
-| **Dependency inversion throughout** | LangGraph nodes, `LearningService`, and evaluation all depend on the `LLMBackend` abstraction — never on concrete implementations |
+| **Dependency inversion throughout** | Pipeline nodes, `LearningService`, and evaluation all depend on the `LLMBackend` abstraction — never on concrete implementations |
 | **Zero-restart provider switching** | LLM provider can switch from local to cloud mid-session via a single API call |
 | **Offline-first capability** | The entire local server runs without any cloud connectivity once packages are imported |
 | **Inspectable pipeline state** | `QueryState` makes every intermediate result available — critical for evaluation and debugging |

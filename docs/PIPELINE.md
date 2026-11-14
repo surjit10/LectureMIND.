@@ -405,7 +405,7 @@ POST /query
 
 ### 5.2 QueryWorkflow Execution
 
-The `QueryWorkflow` (`agent/langgraph/workflow.py`) is a **single-pass** orchestrator — a plain
+The `QueryWorkflow` (`agent/pipeline/workflow.py`) is a **single-pass** orchestrator — a plain
 Python class, no `langgraph` dependency (node functions are structured to be drop-in
 LangGraph-compatible). Execution flows through stages in sequence:
 
@@ -425,7 +425,7 @@ State initialized:
 }
 ```
 
-**Stage 1: `QueryPlanner`** (`agent/dspy/planner.py`)
+**Stage 1: `QueryPlanner`** (`agent/planner/planner.py`)
 ```
 Input:  query
 Action: Heuristic keyword classification (no LLM call, no I/O):
@@ -469,7 +469,7 @@ Action:
 Telemetry: records t_retrieve_start, t_retrieve_end
 ```
 
-**Stage 3: `reranker_node`** (`agent/langgraph/nodes/reranker.py`)
+**Stage 3: `reranker_node`** (`agent/pipeline/nodes/reranker.py`)
 ```
 Input:  state["query"], state["graph_results"], state["vector_results"]
 Action:
@@ -488,7 +488,7 @@ Output: state["reranked_results"], state["final_context"]
 Telemetry: records t_rerank_start, t_rerank_end
 ```
 
-**Stage 4: `answer_generator_node`** (`agent/langgraph/nodes/answer_generator.py`)
+**Stage 4: `answer_generator_node`** (`agent/pipeline/nodes/answer_generator.py`)
 ```
 Input:  state["query"], state["final_context"]
 Action:
