@@ -18,8 +18,16 @@ Run the live smoke benchmark only when provider quota and local Qdrant/Neo4j are
 available:
 
 ```bash
-./.venv_clean/bin/python scripts/run_mlops_smoke.py --run
+./.venv_clean/bin/python scripts/run_mlops_smoke.py --run \
+  --output-dir evaluation/reports/smoke_<provider>_<YYYYMMDD>
 ```
+
+Use a new `--output-dir` per run so reports from different code versions are never mixed
+in one folder. The current reference run is `evaluation/reports/smoke_groq_20261114_newcode/`
+(the default dashboard source).
+
+To compare two code versions without any LLM calls, see `scripts/compare_retrieval_run.py`
+and `scripts/compare_retrieval_analyze.py` (example in `docs/EVALUATION.md` §8.3).
 
 This is an MLOps foundation, not a complete production platform. It intentionally
 does not claim automated model promotion, drift detection, alerting, or rollback.

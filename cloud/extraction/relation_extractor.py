@@ -834,7 +834,8 @@ def extract_relations(
     if not raw_relations:
         raise ValueError("A9: Relation extraction produced zero relations.")
 
-    # Build validated Relation objects.
+    # Build validated Relation objects. The verified evidence quote is kept:
+    # it is the only link from a graph edge back to the lecture text.
     relations: List[Relation] = []
     for idx, rel in enumerate(raw_relations, start=1):
         relation = Relation(
@@ -842,6 +843,7 @@ def extract_relations(
             source_entity_id=rel["source_entity_id"],
             relation=RelationType(rel["relation"]),
             target_entity_id=rel["target_entity_id"],
+            evidence=(str(rel.get("evidence") or "").strip() or None),
         )
         relations.append(relation)
 

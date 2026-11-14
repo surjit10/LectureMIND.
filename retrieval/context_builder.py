@@ -66,6 +66,22 @@ def _sanitize_ocr(text: str) -> str:
 # Separator used between context chunks.
 _CHUNK_SEPARATOR = "\n\n---\n\n"
 
+# Lecture-wide mode splits the budget evenly across sampled timeline blocks;
+# a block is never cut below this size (very small budgets then fall back to
+# the normal budget check, which drops trailing blocks).
+_MIN_LECTURE_WIDE_BLOCK_CHARS = 300
+
+
+def _truncate_at_sentence(text: str, limit: int) -> str:
+    """Cut ``text`` to at most ``limit`` chars, preferring a sentence boundary."""
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    boundary = cut.rfind(". ")
+    if boundary > limit // 2:
+        return cut[: boundary + 1]
+    return cut
+
 
 def _is_ocr_noise(text: str) -> bool:
     """
@@ -133,8 +149,16 @@ def _build_graph_context(
     Renders as:
         [Graph] Operating System Diagram -DERIVED_FROM-> Network Diagram
 
+    When a result carries per-hop ``edges`` ({source, relation, target}, as
+    returned by the Neo4j retriever), every hop is rendered as its own triple
+    in its true stored direction, so incoming relations (e.g. the
+    prerequisites of the queried concept) are never shown reversed and
+    multi-hop paths keep their intermediate entities. Results without
+    ``edges`` fall back to one start→related line (reversed for
+    ``direction == "in"``).
+
     Isolated start nodes (no related_name) render as a plain entity line.
-    Duplicate paths are dropped; short (fewer-hop) paths are preferred;
+    Duplicate lines are dropped; short (fewer-hop) paths are preferred;
     output is capped at char_budget so a broad graph hit (e.g. entity
     substring match) can never blow the final context budget.
     Empty results return "".
@@ -154,24 +178,44 @@ def _build_graph_context(
     lines: List[str] = []
     seen: set = set()
     total_chars = 0
+    budget_exhausted = False
     for gr in ordered:
         start = (gr.get("start_name") or "").strip()
         related = (gr.get("related_name") or "").strip()
         if not start:
             continue
-        if related:
-            rels = gr.get("rel_types") or []
-            rel_str = ",".join(rels) if rels else "RELATED"
-            line = f"[Graph] {start} -{rel_str}-> {related}"
-        else:
-            line = f"[Graph] {start}"
-        if line in seen:
-            continue
-        if total_chars + len(line) + 1 > char_budget:
+
+        candidate_lines: List[str] = []
+        edges = gr.get("edges") or []
+        if related and edges:
+            for edge in edges:
+                src = (edge.get("source") or "").strip()
+                dst = (edge.get("target") or "").strip()
+                rel = (edge.get("relation") or "").strip() or "RELATED"
+                if src and dst:
+                    candidate_lines.append(f"[Graph] {src} -{rel}-> {dst}")
+        if not candidate_lines:
+            if related:
+                rels = gr.get("rel_types") or []
+                rel_str = ",".join(rels) if rels else "RELATED"
+                if gr.get("direction") == "in":
+                    candidate_lines.append(f"[Graph] {related} -{rel_str}-> {start}")
+                else:
+                    candidate_lines.append(f"[Graph] {start} -{rel_str}-> {related}")
+            else:
+                candidate_lines.append(f"[Graph] {start}")
+
+        for line in candidate_lines:
+            if line in seen:
+                continue
+            if total_chars + len(line) + 1 > char_budget:
+                budget_exhausted = True
+                break
+            seen.add(line)
+            lines.append(line)
+            total_chars += len(line) + 1
+        if budget_exhausted:
             break
-        seen.add(line)
-        lines.append(line)
-        total_chars += len(line) + 1
 
     return "\n".join(lines)
 
@@ -423,6 +467,16 @@ class ContextBuilder:
         else:
             order = sorted(merged, key=_block_score, reverse=True)
 
+        # Lecture-wide: give every sampled timeline block an equal share of
+        # the budget. Filling the budget chronologically with whole blocks
+        # dropped the END of the lecture whenever the sampled blocks were
+        # larger than the budget (measured on CS162: 4 of 8 sampled blocks
+        # fit in 6000 chars, so a "summary" covered only the first half).
+        per_block_cap: Optional[int] = None
+        if is_lecture_wide and len(order) > 1:
+            separators = len(_CHUNK_SEPARATOR) * (len(order) - 1)
+            per_block_cap = max(_MIN_LECTURE_WIDE_BLOCK_CHARS, (budget - separators) // len(order))
+
         # 6. Build text for each chunk, filter by OCR noise.
         selected: List[Any] = []  # (entry, text) pairs in selection order
         seen_texts: set = set()
@@ -436,6 +490,8 @@ class ContextBuilder:
             if text in seen_texts:
                 continue
             seen_texts.add(text)
+            if per_block_cap is not None:
+                text = _truncate_at_sentence(text, per_block_cap)
             # Enforce budget without breaking a passage mid-sentence.
             if total_chars + len(text) + len(_CHUNK_SEPARATOR) > budget:
                 # First-chunk guarantee: if nothing has been added yet, this

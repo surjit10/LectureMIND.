@@ -124,3 +124,56 @@ class TestQueryPlanner:
             assert plan.is_lecture_wide is False, f"Failed for query: {q}"
             assert plan.top_k == 15, f"Failed for query: {q}"
             assert plan.context_budget == 4000, f"Failed for query: {q}"
+
+    def test_specific_course_facts_are_not_lecture_wide(self):
+        """Grading/syllabus questions are point facts: semantic retrieval, not timeline sampling."""
+        planner = QueryPlanner()
+        for q in [
+            "What is the grading breakdown for CS162?",
+            "What is the syllabus of CS162 according to the lecture?",
+            "What did the professor say about the course grading policy?",
+        ]:
+            assert planner.plan_full(q).is_lecture_wide is False, q
+
+    def test_topic_scoped_summaries_use_semantic_retrieval(self):
+        """A summary/notes/quiz request naming a topic keeps its intent but is not lecture-wide."""
+        planner = QueryPlanner()
+        for q, intent in [
+            ("Give an overview of virtual memory", "summary"),
+            ("Summarize the section on paging", "summary"),
+            ("Quiz me on paging", "quiz"),
+            ("Generate notes on deadlock", "notes"),
+        ]:
+            plan = planner.plan_full(q)
+            assert plan.intent == intent, q
+            assert plan.is_lecture_wide is False, q
+            assert plan.context_budget == 4000, q
+
+    def test_scope_only_requests_stay_lecture_wide(self):
+        planner = QueryPlanner()
+        for q in ["Summarize lecture 3", "Quiz me", "Generate study notes",
+                  "Give me a quick recap of everything we covered so far"]:
+            assert planner.plan_full(q).is_lecture_wide is True, q
+
+    def test_ordinary_words_do_not_trigger_quiz_or_notes(self):
+        planner = QueryPlanner()
+        for q in ["I have a question about deadlock", "What is the best practice for locking?"]:
+            plan = planner.plan_full(q)
+            assert plan.intent not in ("quiz", "notes"), q
+            assert plan.is_lecture_wide is False, q
+
+    def test_relate_and_connects_route_to_graph(self):
+        planner = QueryPlanner()
+        for q in ["How does paging relate to virtual memory?",
+                  "Explain how the kernel connects to hardware",
+                  "What are the prerequisites of Process Abstraction?",
+                  "What relations exist between threads and processes?",
+                  "What are the relationships between kernel and memory?"]:
+            assert planner.plan(q) in (RetrievalRoute.graph_only, RetrievalRoute.graph_and_vector), q
+
+    def test_fully_connected_layer_is_not_a_graph_query(self):
+        planner = QueryPlanner()
+        for q in ["Why are fully connected layers stacked with nonlinearities?",
+                  "How do PyTorch fully-connected layers work?",
+                  "What is the relational model?"]:
+            assert planner.plan(q) == RetrievalRoute.vector_only, q

@@ -181,7 +181,15 @@ def extract_entities(query: str) -> List[str]:
     entities = set()
     for groups in matches:
         for g in groups:
-            g = g.strip()
+            # Sentence-initial capitalisation makes question words part of a
+            # capitalised match ("What", "Explain Virtual Memory"). Strip
+            # leading/trailing stopwords so the phrase can match a node name.
+            words = g.split()
+            while words and words[0].lower() in _STOPWORDS:
+                words.pop(0)
+            while words and words[-1].lower() in _STOPWORDS:
+                words.pop()
+            g = " ".join(words)
             if g and len(g) >= 2:
                 entities.add(g)
 
@@ -214,6 +222,18 @@ def _build_cypher(
     the loader, so the same cloud entity name may exist in multiple lectures
     without cross-lecture contamination — the retrieval must mirror that.
 
+    Direction: edges are stored source -> target (e.g. a prerequisite points
+    at the concept that needs it: ``(prereq)-[:PREREQUISITE_OF]->(target)``).
+    The query entity can sit at either end, so two directed chains are
+    returned via UNION ALL:
+      * ``direction = 'out'``: (start)-[...]->(related)  — what start leads to
+      * ``direction = 'in'``:  (related)-[...]->(start)  — what leads to start
+    Each chain is direction-consistent; mixed-direction (undirected) paths
+    are deliberately not traversed — on the CS162 graph they expand the
+    3-hop result set ~5x with weakly related "sibling" concepts.
+    ``edges`` carries every hop with its true source/target so callers can
+    render relations faithfully.
+
     Returns:
         (cypher_query, params) tuple.
     """
@@ -231,25 +251,41 @@ def _build_cypher(
         where_clause += "AND start.lecture_id = $lecture_id "
         params["lecture_id"] = lecture_id
 
-    cypher = (
-        "MATCH (start) "
-        + where_clause +
-        "OPTIONAL MATCH path = (start)-[:" + ALL_RELATION_TYPES + "*1.."
-        + str(max_hops)
-        + "]->(related) "
+    match_start = "MATCH (start) " + where_clause
+    rel_pattern = "[:" + ALL_RELATION_TYPES + "*1.." + str(max_hops) + "]"
+    # Never leak another lecture's nodes; drop chains that loop back to start.
+    related_ok = (
+        "related.lecture_id = $lecture_id AND related <> start"
+        if lecture_id else "related <> start"
     )
-    if lecture_id:
-        # OPTIONAL MATCH leaves related NULL when a start node has no
-        # neighbors — keep those rows, but never leak another lecture's nodes.
-        cypher += "WHERE related IS NULL OR related.lecture_id = $lecture_id "
-    cypher += (
+    return_cols = (
         "RETURN start.entity_id AS start_id, start.name AS start_name, "
         "start.type AS start_type, "
         "related.entity_id AS related_id, related.name AS related_name, "
         "related.type AS related_type, "
         "[r IN relationships(path) | type(r)] AS rel_types, "
-        "length(path) AS hops"
+        "[r IN relationships(path) | {source: startNode(r).name, "
+        "relation: type(r), target: endNode(r).name}] AS edges, "
+        "length(path) AS hops, "
     )
+
+    # Outgoing chains. OPTIONAL MATCH keeps a row (related = NULL) for a
+    # start node without outgoing neighbours so isolated entities still show.
+    outgoing = (
+        match_start
+        + "OPTIONAL MATCH path = (start)-" + rel_pattern + "->(related) "
+        + "WHERE related IS NULL OR (" + related_ok + ") "
+        + return_cols + "'out' AS direction"
+    )
+    # Incoming chains. Plain MATCH: the isolated-node row is already emitted
+    # by the outgoing branch, so no NULL row is needed here.
+    incoming = (
+        match_start
+        + "MATCH path = (related)-" + rel_pattern + "->(start) "
+        + "WHERE " + related_ok + " "
+        + return_cols + "'in' AS direction"
+    )
+    cypher = outgoing + " UNION ALL " + incoming
     return cypher, params
 
 
@@ -358,6 +394,11 @@ def _run_traversal(driver: Any, cypher: str, params: Dict[str, Any]) -> List[Dic
                 "related_type": record.get("related_type"),
                 "rel_types": record.get("rel_types", []),
                 "hops": record.get("hops", 0),
+                # Per-hop edges with true direction ({source, relation,
+                # target}); NULL for an isolated start node.
+                "edges": [dict(e) for e in (record.get("edges") or [])],
+                # 'out': start -> related ; 'in': related -> start.
+                "direction": record.get("direction") or "out",
             }
             results.append(result)
     return results

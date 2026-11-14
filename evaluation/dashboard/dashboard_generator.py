@@ -26,16 +26,23 @@ DEFAULT_OUTPUTS_DIR = PROJECT_ROOT / "evaluation" / "outputs"
 DEFAULT_REPORTS_DIR = PROJECT_ROOT / "evaluation" / "reports"
 DEFAULT_OUT_HTML = Path(__file__).resolve().parent / "index.html"
 
-# Metrics worth a headline bar chart.
+# Metrics worth a headline bar chart. Labels are clipped at 24 characters.
+# The legacy hit/recall/mrr/ndcg/precision keys are computed on the
+# PRE-rerank candidate pool; post_rerank_* (present in reports produced after
+# the post-rerank metrics were added) measure the cross-encoder's order.
+# citation_coverage equals context recall: sources are the chunks placed in
+# the LLM context, not citations chosen by the model.
 _KEY_METRICS = [
-    ("mrr_at_5", "MRR@5"),
-    ("mrr", "MRR (unbounded)"),
-    ("recall_at_5", "Recall@5"),
-    ("ndcg_at_5", "NDCG@5"),
-    ("precision_at_5", "Precision@5"),
-    ("hit_at_5", "Hit@5"),
+    ("post_rerank_mrr_at_5", "MRR@5 (reranked)"),
+    ("post_rerank_hit_at_5", "Hit@5 (reranked)"),
+    ("mrr_at_5", "MRR@5 (pre-rerank)"),
+    ("mrr", "MRR (pre-rerank, full)"),
+    ("recall_at_5", "Recall@5 (pre-rerank)"),
+    ("ndcg_at_5", "NDCG@5 (pre-rerank)"),
+    ("precision_at_5", "Precision@5 (pre-rerank)"),
+    ("hit_at_5", "Hit@5 (pre-rerank)"),
     ("routing_accuracy", "Routing accuracy"),
-    ("citation_coverage", "Citation coverage"),
+    ("citation_coverage", "Context recall"),
 ]
 
 _RAGAS_METRICS = [

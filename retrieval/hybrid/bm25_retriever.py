@@ -7,7 +7,9 @@
 # RRF (Reciprocal Rank Fusion) combines vector and BM25 results into a unified
 # candidate pool before cross-encoder reranking.
 #
-# Feature-flagged — off by default (ENABLE_HYBRID_RETRIEVAL in LocalSettings).
+# Feature-flagged via ENABLE_HYBRID_RETRIEVAL in LocalSettings (enabled by
+# default). Fusion is skipped for lecture-wide queries; see
+# retrieval.reranker.rerank_service.should_apply_hybrid.
 
 import logging
 import math

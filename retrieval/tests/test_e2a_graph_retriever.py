@@ -156,3 +156,45 @@ class TestGraphRetriever:
         """Missing lecture_id must fail loudly, never traverse all lectures."""
         with pytest.raises(ValueError, match="lecture_id is required"):
             retrieve_graph("BFS", driver=MagicMock())
+
+
+class TestDirectionalTraversal:
+
+    def test_entity_extraction_strips_sentence_initial_stopwords(self):
+        entities = extract_entities("Explain Virtual Memory")
+        assert "Virtual Memory" in entities
+        assert "Explain Virtual Memory" not in entities
+        assert "What" not in extract_entities("What is BFS?")
+
+    def test_cypher_traverses_both_directions_with_isolation(self):
+        from retrieval.graph_retriever.neo4j_retriever import _build_cypher
+        cypher, params = _build_cypher(["process"], max_hops=3, lecture_id="lec_001")
+        assert " UNION ALL " in cypher
+        assert "(start)-[:" in cypher and "]->(related)" in cypher   # outgoing chains
+        assert "(related)-[:" in cypher and "]->(start)" in cypher   # incoming chains
+        assert "'out' AS direction" in cypher and "'in' AS direction" in cypher
+        assert cypher.count("related.lecture_id = $lecture_id") == 2  # both branches isolated
+        assert cypher.count("start.lecture_id = $lecture_id") == 2
+        assert "startNode(r).name" in cypher and "endNode(r).name" in cypher
+        assert params == {"entity_names": ["process"], "lecture_id": "lec_001"}
+
+    def test_traversal_normalises_edges_and_direction(self):
+        from retrieval.graph_retriever.neo4j_retriever import _run_traversal
+        rec_in = {
+            "start_id": "e1", "start_name": "Process Abstraction", "start_type": "Concept",
+            "related_id": "e2", "related_name": "Kernel", "related_type": "Concept",
+            "rel_types": ["PREREQUISITE_OF"], "hops": 1, "direction": "in",
+            "edges": [{"source": "Kernel", "relation": "PREREQUISITE_OF", "target": "Process Abstraction"}],
+        }
+        rec_isolated = {"start_id": "e3", "start_name": "Lonely", "related_id": None,
+                        "related_name": None, "rel_types": None, "hops": None,
+                        "edges": None, "direction": "out"}
+        session = MagicMock()
+        session.run.return_value = [rec_in, rec_isolated]
+        driver = MagicMock()
+        driver.session.return_value.__enter__ = MagicMock(return_value=session)
+        driver.session.return_value.__exit__ = MagicMock(return_value=False)
+        out = _run_traversal(driver, "CYPHER", {})
+        assert out[0]["direction"] == "in"
+        assert out[0]["edges"] == rec_in["edges"]
+        assert out[1]["edges"] == [] and out[1]["direction"] == "out"

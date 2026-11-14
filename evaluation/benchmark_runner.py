@@ -171,10 +171,16 @@ class BenchmarkRunner:
             # With hybrid retrieval enabled (BM25 + RRF), the reranker's pool
             # is the fused list, not the raw dense results — measure recall
             # against the pool that actually feeds the reranker.  When hybrid
-            # is off, this reduces exactly to the dense-only pool.
+            # is off (or skipped, e.g. lecture-wide queries), this reduces
+            # exactly to the dense-only pool.  The decision is delegated to
+            # the runtime helper so the benchmark can never drift from it.
             try:
-                from config import LocalSettings
-                if LocalSettings().ENABLE_HYBRID_RETRIEVAL and sample.lecture_id:
+                from retrieval.reranker.rerank_service import should_apply_hybrid
+                state_plan = state.get("query_plan") or plan
+                if should_apply_hybrid(
+                    sample.lecture_id,
+                    bool(getattr(state_plan, "is_lecture_wide", False)),
+                ):
                     from retrieval.hybrid.bm25_retriever import bm25_search, rrf_fuse
                     bm25_retrieved = bm25_search(sample.query, sample.lecture_id, top_k=15)
                     fused = rrf_fuse(state.get("vector_results", []), bm25_retrieved, top_k=15)
@@ -212,6 +218,32 @@ class BenchmarkRunner:
             # expected set into a perfect retrieval score (vacuous truth).
             # ``None`` is intentionally omitted by ReportGenerator, so the
             # aggregate denominator contains answerable samples only.
+            # Post-rerank ranking (what the cross-encoder actually ordered) and
+            # the chunk IDs that entered the LLM prompt.  The legacy keys
+            # below (hit_at_5, recall_at_5, mrr_at_5, ...) are computed on the
+            # PRE-rerank candidate pool and are kept for report continuity.
+            reranked_ids = retrieval_metrics.ranked_chunk_ids(reranked_results)
+            context_ids = [
+                retrieval_metrics.chunk_id_of(r)
+                for r in reranked_results
+                if r.get("in_context") and retrieval_metrics.chunk_id_of(r)
+            ]
+
+            if answerable:
+                metrics["post_rerank_hit_at_5"] = retrieval_metrics.calculate_hit_at_k(expected_ids, reranked_ids, 5)
+                metrics["post_rerank_recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, reranked_ids, 5)
+                metrics["post_rerank_mrr_at_5"] = retrieval_metrics.calculate_mrr(expected_ids, reranked_ids, k=5)
+                metrics["post_rerank_ndcg_at_5"] = retrieval_metrics.calculate_ndcg(expected_ids, reranked_ids, 5)
+                metrics["context_recall"] = retrieval_metrics.calculate_context_recall(expected_ids, context_ids)
+            else:
+                metrics.update({
+                    "post_rerank_hit_at_5": None,
+                    "post_rerank_recall_at_5": None,
+                    "post_rerank_mrr_at_5": None,
+                    "post_rerank_ndcg_at_5": None,
+                    "context_recall": None,
+                })
+
             if answerable:
                 metrics["precision_at_5"] = retrieval_metrics.calculate_precision_at_k(expected_ids, retrieved_ids, 5)
                 metrics["recall_at_5"] = retrieval_metrics.calculate_recall_at_k(expected_ids, retrieved_ids, 5)

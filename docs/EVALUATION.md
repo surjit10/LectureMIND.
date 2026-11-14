@@ -2,7 +2,7 @@
 
 > **Purpose:** How LectureMIND is measured — dataset format, metric implementations, report generation, and the measured results.
 > **Audience:** Engineers running benchmarks; interviewers checking the numbers behind the claims.
-> **Last updated:** 2026-08-11 · reflects the current harness (real keyword recall, real rerank scores, citation verification, per-type/p95 reporting) and the measured run (curated 50-question set).
+> **Last updated:** 2026-11-14 · reflects the current harness (pre- and post-rerank retrieval metrics, context recall, per-type/p95 reporting) and the current measured run (`evaluation/reports/smoke_groq_20261114_newcode/`, 45-question three-lecture smoke set). The earlier 50-question single-lecture run is kept as history in §6.3 and cannot be reproduced on the current packages.
 > **Companion docs:** [METRICS_MATRIX.md](../METRICS_MATRIX.md) (scorecard) · [RETRIEVAL_SYSTEM.md](./RETRIEVAL_SYSTEM.md) (what is being measured)
 
 ---
@@ -41,14 +41,18 @@ LectureMIND includes a dedicated offline evaluation framework for measuring the 
 | `evaluation/metrics/citation_metrics.py` | Citation coverage, completeness, chunk coverage |
 | `evaluation/metrics/latency_metrics.py` | Per-node and total latency |
 | `evaluation/reports/report_generator.py` | Aggregation (mean/p95/min/max/n + per-type/difficulty breakdowns) and output generation |
-| `evaluation/datasets/cs162_lecture1_qa_50.json` | Curated 50-question QA set (CS162 lecture) |
+| `evaluation/datasets/multilecture_smoke_45.json` | Current 45-question smoke set (15 per lecture × 3 lectures; LLM-drafted, not human-reviewed) |
+| `evaluation/datasets/cs162_lecture1_qa_50.json` | Historical 50-question CS162 set (labels no longer align with the loaded packages) |
 | `evaluation/datasets/sample_dataset.json` | Minimal format example |
+| `scripts/run_mlops_smoke.py` | Validate the smoke set; `--run` executes the live benchmark (uses LLM quota) |
+| `scripts/compare_retrieval_run.py` / `scripts/compare_retrieval_analyze.py` | No-LLM retrieval comparison of two code versions on the same data |
 
 ---
 
 ## 2. Benchmark Dataset Format
 
-**Files:** `evaluation/datasets/cs162_lecture1_qa_50.json` (curated 50 questions)  \
+**Files:** `evaluation/datasets/multilecture_smoke_45.json` (current, 45 questions) ·
+`evaluation/datasets/cs162_lecture1_qa_50.json` (historical, 50 questions — example below)  \
 **Schema:** Array of `BenchmarkSample` objects
 
 ```json
@@ -81,10 +85,11 @@ LectureMIND includes a dedicated offline evaluation framework for measuring the 
 | `keywords` | `list[str]` | `answer_metrics.calculate_keyword_recall` — must contain terms the answer should reproduce |
 | `need_visual` | `bool` | `visual_routing_accuracy` — whether the planner must set `need_visual` |
 
-> **Ground-truth integrity:** every `expected_chunk_id` in the CS162 set is verified by a
-> content-containment script (the chunk's transcript/visual/OCR text must contain at least
-> one of the sample's keywords) and confirmed present in Qdrant. Anchors are not hand-picked
-> guesses — they are machine-verified answer chunks.
+> **Ground-truth integrity:** the CS162 50-question set was keyword-verified against the
+> package it was built on, which is no longer loaded; against the two current CS162 packages
+> its gold chunks contain the question keywords for only 21/50 and 17/50 questions, so it is
+> historical only. The current smoke set ties each LLM-drafted question to the chunk it was
+> generated from (`source_evidence`); its labels are not human-reviewed.
 
 ---
 
@@ -154,9 +159,18 @@ BenchmarkRunner._evaluate_sample(sample)
 
 ### 4.2 Retrieval Metrics (`retrieval_metrics.py`)
 
-All retrieval metrics compare `expected_ids` vs `retrieved_ids` (the pre-rerank pool — the
-hybrid-fused dense + BM25 candidates plus graph results, deduped by `chunk_id`). Relevance is
-binary: a chunk is relevant iff its `chunk_id` is in `expected_chunk_ids`.
+Relevance is binary: a chunk is relevant iff its `chunk_id` is in `expected_chunk_ids`.
+Two rankings are measured:
+
+- **Post-rerank (primary):** `post_rerank_hit_at_5`, `post_rerank_recall_at_5`,
+  `post_rerank_mrr_at_5`, `post_rerank_ndcg_at_5` on the cross-encoder order — what the
+  context builder and generator actually receive.
+- **`context_recall` (primary):** fraction of expected chunks that were placed in the LLM
+  prompt after reranking, adjacent-chunk merging and the character budget.
+- **Pre-rerank (legacy keys, below):** computed on the candidate pool before the cross-encoder
+  — the dense results fused with BM25 via RRF (skipped for lecture-wide queries, using the
+  same `should_apply_hybrid` rule as the runtime). Graph results carry no chunk IDs and do not
+  contribute.
 
 - `precision@5` — of the top-5 retrieved, the fraction that are relevant.
 - `recall@5` — of all relevant chunks, the fraction in the top-5.
@@ -184,11 +198,16 @@ binary: a chunk is relevant iff its `chunk_id` is in `expected_chunk_ids`.
 
 ### 4.5 Citation Metrics (`citation_metrics.py`)
 
+`state["sources"]` is built from the chunks placed in the prompt; the LLM does not see
+chunk IDs and does not choose citations. Read these metrics accordingly:
+
 - `citation_count` — unique `chunk_id`s in `state["sources"]`.
-- `citation_coverage` — fraction of expected chunks cited in the answer.
-- **`citation_completeness`** — verifies each cited source is actually present in the
-  reranked retrieved set (i.e. no hallucinated citations). `1.0` means every citation is real.
-- `chunk_coverage` — fraction of reranked chunks cited.
+- `citation_coverage` — fraction of expected chunks among the sources; equal to
+  `context_recall`.
+- `citation_provenance_precision` (alias `citation_completeness`) — fraction of sources that
+  were in the prompt context. It is 1.0 by construction (sanity check, not a quality signal);
+  claim-level faithfulness needs a judge-based evaluation.
+- `chunk_coverage` — fraction of reranked candidates that reached the prompt.
 
 ### 4.6 Latency Metrics (`latency_metrics.py`)
 
@@ -215,46 +234,91 @@ second-worst value — read it with that caveat in mind).
 
 ## 6. Measured Results (Conversational RAG)
 
-Source: `evaluation/outputs/evaluation_report_20260811_105621.*` — **50/50 on a single backend
-(Groq `openai/gpt-oss-120b`), 0 errors**, run through the real `QueryWorkflow` (Qdrant → Neo4j →
-reranker → LLM). The stack combines semantic chunk merging (97 chunks), hybrid BM25+RRF
-retrieval, score-ordered context selection, OCR noise sanitization, and the per-provider rate
-limiter. Dataset: `evaluation/datasets/cs162_lecture1_qa_50.json` (23 factual / 17 conceptual /
-5 visual / 4 definition / 1 summary).
+### 6.1 Current run — 45-question three-lecture smoke set (2026-11-14)
 
-| Metric | Mean | p95 |
-|---|---|---|
-| Routing accuracy | 0.980 (49/50) | 1.000 |
-| Visual routing accuracy | 1.000 | 1.000 |
-| Pre-Rerank Hit@1 | **0.660** (33/50) | 1.000 |
-| Pre-Rerank Hit@3 | **0.880** (44/50) | 1.000 |
-| Hit@5 *(Primary Sufficiency)* | **0.980** (49/50) | 1.000 |
-| Strict MRR@5 *(Strict Capped MRR)* | **0.7853** | 1.000 |
-| Unbounded MRR *(Diagnostic)* | **0.7882** | 1.000 |
-| NDCG@5 | **0.767** | 1.000 |
-| Recall@5 | **0.862** | 1.000 |
-| Precision@5 | 0.280 | 0.400 |
-| Post-Rerank Hit@1 | **0.860** (43/50) | 1.000 |
-| Post-Rerank Hit@3 | **0.960** (48/50) | 1.000 |
-| Ranking quality (post-rerank MRR) | **0.9183** | 1.000 |
-| Answer F1 | **0.4594** | 0.714 |
-| Keyword recall | **0.5453** | 1.000 |
-| Citation completeness | 1.000 | 1.000 |
-| Citation coverage | **0.927** | 1.000 |
-| Chunk coverage | 1.000 | 1.000 |
-| Mean end-to-end latency | 20.5 s | 22.8 s |
+Source: `evaluation/reports/smoke_groq_20261114_newcode/evaluation_report_20261114_154651.*`
+— 45/45 questions, 0 failures, Groq `openai/gpt-oss-20b`, real `QueryWorkflow` (Qdrant →
+Neo4j → BM25 + RRF → `bge-reranker-base` → `ContextBuilder` → LLM).
+Dataset: `evaluation/datasets/multilecture_smoke_45.json` (15 questions per lecture; 17 factual /
+12 conceptual / 10 visual / 1 definition / 3 graph / 2 unanswerable). 40 questions were
+LLM-drafted from one chunk each; **labels are not human-reviewed**.
 
-> **Pipeline Tradeoff Note (Q17 vs Q40):** Cross-encoder reranking produces a clear pipeline shift: Pre-rerank, Q17 (*abstraction necessity*) was at Rank 7 (Hit@5 miss) while Q40 was at Rank 1. Post-rerank, the cross-encoder promoted Q17 to Rank 1 (success) but demoted Q40 (*grading breakdown*) to Rank 6, causing Q40 to trigger evidence-gated refusal. Exactly 1 miss occurs in both stages (98.0% Hit@5), illustrating the reranker/context-window tradeoff.
+| Metric | Mean | p95 | n |
+|---|---:|---:|---:|
+| Routing accuracy | 0.9333 | 1.000 | 45 |
+| Visual routing accuracy | 0.9111 | 1.000 | 45 |
+| **Post-rerank Hit@5** | **0.8837** | 1.000 | 43 |
+| **Post-rerank MRR@5** | **0.7593** | 1.000 | 43 |
+| Post-rerank Recall@5 | 0.8721 | 1.000 | 43 |
+| Post-rerank nDCG@5 | 0.7854 | 1.000 | 43 |
+| **Context recall** | **0.7674** | 1.000 | 43 |
+| Pre-rerank Hit@5 (RRF order) | 0.8605 | 1.000 | 43 |
+| Pre-rerank MRR@5 (RRF order) | 0.7333 | 1.000 | 43 |
+| Answer token F1 | 0.2530 | 0.500 | 45 |
+| Keyword recall | 0.7733 | 1.000 | 45 |
+| Correct refusals (unanswerable) | 2/2 | — | 2 |
+| Answerable questions refused | 2/43 | — | 43 |
+| Mean answer length (chars) | 850 | 3199 | 45 |
+| Retrieval latency | 0.20 s | 0.51 s | 45 |
+| Reranker + context latency (CPU) | 5.61 s | 10.59 s | 45 |
+| Generation latency (Groq) | 16.01 s | 21.51 s | 45 |
+| Total latency | 21.82 s | 24.64 s | 45 |
 
-**How the stack achieves these numbers:**
-- Semantic chunk merging gives answer chunks complete passages instead of fragments.
-- Hybrid BM25 lexical retrieval (RRF fusion, default-on) recovers exact entity names and numeric
-  facts dense-only misses (the "Linux lines of code" evidence sits at BM25 rank 0).
-- Score-ordered context selection prevents a top-ranked chunk late in the timeline from being
-  dropped by the budget.
-- The rate limiter keeps all calls on one backend with retry/backoff — no quota fallback.
+By question type (post-rerank Hit@5 / MRR@5 / context recall / answer F1):
 
-Graph paths are rendered into the LLM context (`[Graph] EntityA -RELATION-> EntityB`), so relationship answers are explicitly grounded in the knowledge graph structure.
+| Type | n | Hit@5 | MRR@5 | Context recall | Answer F1 |
+|---|---:|---:|---:|---:|---:|
+| factual | 17 | 0.88 | 0.80 | 0.82 | 0.21 |
+| conceptual | 12 | 0.92 | 0.82 | 0.92 | 0.27 |
+| visual | 10 | 0.90 | 0.78 | 0.70 | 0.24 |
+| definition | 1 | 1.00 | 1.00 | 1.00 | 0.43 |
+| graph | 3 | 0.67 | 0.18 | 0.00 | 0.50 |
+| unanswerable | 2 | — | — | — | 0.10 |
+
+Interpretation:
+- The cross-encoder adds about one question over the RRF order (+0.023 Hit@5, +0.026 MRR@5).
+- The gold chunk is in the 15-candidate pool for 93% of questions but reaches the prompt for
+  77%: most evidence loss happens in reranking/context selection, not first-stage retrieval.
+- Graph (n=3) and unanswerable (n=2) slices are too small for conclusions.
+- Answer F1 is depressed by length mismatch (850-character answers vs. 1–2 sentence
+  references); it is lexical, not a correctness judgment. No faithfulness/judge metric has
+  been run yet.
+- Latency is not comparable across days: generation is Groq network time, and the CPU
+  reranker varied by ~0.4 s between same-day runs of identical code.
+
+### 6.2 Effect of the 2026-11 correctness fixes (no-LLM comparison)
+
+Source: `evaluation/reports/retrieval_comparison_20261114/` (commit `891648c` vs. current
+code, same data, same models, no LLM calls). The old-code run reproduces the stored
+2026-10-10 report exactly (pre-rerank Hit@5 0.8605, MRR@5 0.7333, context recall 0.7674).
+
+| | Before | After |
+|---|---:|---:|
+| Post-rerank Hit@5 / MRR@5 (43) | 0.8837 / 0.7593 | 0.8837 / 0.7593 |
+| Context recall (43) | 0.7674 | 0.7674 |
+| Routing accuracy (45) | 0.8889 | 0.9333 |
+| Mean `[Graph]` lines in context (graph-routed questions) | 24.6 | 41.8 |
+| Summary prompts: mean timeline span in context (9) | 0.807 | 0.872 |
+| Summary prompts: worst timeline span | 0.464 | 0.863 |
+| Summary prompts: lecture deciles covered (of 10) | 5.3 | 7.7 |
+
+Per-question post-rerank MRR@5 is identical for all 43 answerable questions: the smoke set has
+no lecture-wide, grading/syllabus or plural-"prerequisites" questions, and graph results add
+relation lines rather than chunks. The 2026-11-14 Groq run (§6.1) matches the
+2026-10-10 run on every retrieval metric; answer F1 moved 0.2667 → 0.2530 and keyword recall
+0.7540 → 0.7733, within LLM run-to-run variation.
+
+### 6.3 Historical — 50-question single-lecture run (2026-08-11)
+
+Source: `evaluation/outputs/evaluation_report_20260811_105621.*` (Groq `openai/gpt-oss-120b`,
+dataset `evaluation/datasets/cs162_lecture1_qa_50.json`). Reported then: Hit@5 0.980,
+MRR@5 0.785, routing 0.980, answer F1 0.459, total latency 20.5 s.
+
+This run is kept for traceability only. It **cannot be reproduced on the current packages**:
+its `lecture_id` (`lecture_cs162_v17`) is not loaded, and its gold chunk IDs now point to
+different text in both loaded CS162 packages (question keywords appear in the gold chunks
+for only 21/50 and 17/50 questions). Several CS162-specific tuning decisions were also made
+on this set, so it is not a held-out measurement.
 
 ---
 
@@ -311,6 +375,31 @@ Evaluated via `evaluation/knowledge_graph/graphrag_evaluator.py`:
 
 ---
 
+### Held-Out GraphRAG Evaluation (CS162, 30 questions)
+
+Source: `evaluation/outputs/graph_heldout_evaluation.{json,md}` (run 2026-09-25 on the
+pre-fix code; the Markdown report is now generated from the JSON, with no hard-coded values).
+This evaluator uses `SimpleBM25` + `SimpleGraphRetriever` and a top-3-chunk prompt — it does
+**not** run dense retrieval, the cross-encoder or `ContextBuilder`.
+
+| Metric | Result |
+|---|---:|
+| Structural path recovery (answerable, direction ignored) | 13/25 (52.0%) — 1-hop 4/8, 2-hop 7/10, 3-hop 2/7 |
+| Hybrid (graph + BM25 RRF) chunk Hit@5 | 0.840 — 1-hop 5/8, 2-hop 10/10, 3-hop 6/7 |
+| Hybrid vs. BM25 alone | Hit@5 +20.0 pts, **Hit@1 −24.0 pts, MRR −9.8 pts** |
+| Negative refusals | 5/5 |
+| False-positive path rate (negatives) | 1/5 |
+| Lenient answer match (keyword recall ≥ 0.5 or F1 ≥ 0.25) | 25/30; 9 of 20 answerable matches passed on keyword recall alone |
+
+Rerunning it after the graph-direction fix requires deleting
+`evaluation/outputs/graph_heldout_checkpoint.json` (cached answers) and uses ~30 LLM calls.
+
+> **Package note:** the CS162 knowledge-graph counts in this section (98 chunks, 158 entities,
+> 103 relations) describe package `lecture_05086e79`. The QA and held-out benchmarks use
+> `lecture_092f861b` (93 chunks, 138 entities, 189 relations). "Strict DAG / 0 cycles /
+> 0 dangling relations" are guaranteed by the DFS cycle breaker and loader validation — they
+> confirm the constraints run, not extraction quality.
+
 ## 8. Benchmark Invocation
 
 ### 8.1 Running Knowledge Graph Quality & Prerequisite Audit
@@ -323,21 +412,23 @@ Audit any Knowledge Package ZIP:
 
 ### 8.2 Running Conversational RAG Benchmark
 ```bash
-# From the project root, with .venv activated:
-.venv/bin/python -c "
-from evaluation.benchmark_runner import BenchmarkRunner
-runner = BenchmarkRunner(
-    dataset_path='evaluation/datasets/cs162_lecture1_qa_50.json',
-    output_dir='evaluation/outputs'
-)
-runner.setup()
-runner.run()
-"
+# Validate the smoke set and refresh the dashboard (no LLM calls):
+./.venv_clean/bin/python scripts/run_mlops_smoke.py
+
+# Run the live benchmark (uses LLM provider quota); write to a new folder per run:
+./.venv_clean/bin/python scripts/run_mlops_smoke.py --run \
+  --output-dir evaluation/reports/smoke_<provider>_<YYYYMMDD>
 ```
 
-Output appears in `evaluation/outputs/`. The dashboard renders outputs into HTML:
+Requires Qdrant and Neo4j (`docker compose -f local/docker/docker-compose.yml up -d qdrant neo4j`),
+the `bge-large-en-v1.5` embedding model (downloaded on first use, ~1.3 GB) and the reranker in
+`local_runtime/models/global_reranker/`. The dashboard (`evaluation/dashboard/index.html`) is
+rendered from the selected output folder.
 
+### 8.3 Comparing two code versions without LLM calls
 ```bash
-.venv/bin/python -m evaluation.dashboard.dashboard_generator
-# → evaluation/dashboard/index.html
+git worktree add --detach /tmp/old_tree <commit> && cp .env /tmp/old_tree/
+./.venv_clean/bin/python scripts/compare_retrieval_run.py /tmp/old_tree evaluation/datasets/multilecture_smoke_45.json old.jsonl
+./.venv_clean/bin/python scripts/compare_retrieval_run.py . evaluation/datasets/multilecture_smoke_45.json new.jsonl
+./.venv_clean/bin/python scripts/compare_retrieval_analyze.py old.jsonl new.jsonl comparison.json
 ```

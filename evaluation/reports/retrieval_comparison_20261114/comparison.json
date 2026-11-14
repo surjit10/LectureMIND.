@@ -1,0 +1,73 @@
+{
+  "old": {
+    "n_questions": 45,
+    "n_answerable": 43,
+    "pre_rerank_hit_at_5": 0.8604651162790697,
+    "pre_rerank_mrr_at_5": 0.7333333333333333,
+    "post_rerank_hit_at_1": 0.6976744186046512,
+    "post_rerank_hit_at_5": 0.8837209302325582,
+    "post_rerank_recall_at_5": 0.872093023255814,
+    "post_rerank_mrr_at_5": 0.7593023255813953,
+    "post_rerank_ndcg_at_5": 0.7854143087457702,
+    "candidate_pool_recall": 0.9302325581395349,
+    "context_recall": 0.7674418604651163,
+    "routing_accuracy": 0.8888888888888888,
+    "graph_routed_questions": 10,
+    "mean_graph_lines_when_graph_routed": 24.6,
+    "mean_retrieval_s": 0.16721367891109873,
+    "mean_rerank_s": 4.931409185577781,
+    "p95_retrieval_plus_rerank_s": 7.136820757999885,
+    "summary": {
+      "n_prompts": 9,
+      "lecture_wide_rate": 1,
+      "mean_timeline_span": 0.8069268502672201,
+      "min_timeline_span": 0.4638970837162064,
+      "mean_deciles_covered_of_10": 5.333333333333333,
+      "min_deciles_covered_of_10": 4
+    }
+  },
+  "new": {
+    "n_questions": 45,
+    "n_answerable": 43,
+    "pre_rerank_hit_at_5": 0.8604651162790697,
+    "pre_rerank_mrr_at_5": 0.7333333333333333,
+    "post_rerank_hit_at_1": 0.6976744186046512,
+    "post_rerank_hit_at_5": 0.8837209302325582,
+    "post_rerank_recall_at_5": 0.872093023255814,
+    "post_rerank_mrr_at_5": 0.7593023255813953,
+    "post_rerank_ndcg_at_5": 0.7854143087457702,
+    "candidate_pool_recall": 0.9302325581395349,
+    "context_recall": 0.7674418604651163,
+    "routing_accuracy": 0.9333333333333333,
+    "graph_routed_questions": 8,
+    "mean_graph_lines_when_graph_routed": 41.75,
+    "mean_retrieval_s": 0.1847724276444549,
+    "mean_rerank_s": 5.37094724204447,
+    "p95_retrieval_plus_rerank_s": 7.765633446000265,
+    "summary": {
+      "n_prompts": 9,
+      "lecture_wide_rate": 1,
+      "mean_timeline_span": 0.8717250671520813,
+      "min_timeline_span": 0.8629999516370848,
+      "mean_deciles_covered_of_10": 7.666666666666667,
+      "min_deciles_covered_of_10": 7
+    }
+  },
+  "paired_post_rerank_mrr5": {
+    "better": 0,
+    "worse": 0,
+    "same": 43,
+    "changed_questions": [
+      {
+        "query": "How do TensorFlow and PyTorch allow users to create a fully connected layer without writin",
+        "route": "graph_only -> vector_only",
+        "mrr5": "1.00 -> 1.00"
+      },
+      {
+        "query": "Why are fully connected layers stacked with nonlinearities in a neural network?",
+        "route": "graph_only -> vector_only",
+        "mrr5": "1.00 -> 1.00"
+      }
+    ]
+  }
+}

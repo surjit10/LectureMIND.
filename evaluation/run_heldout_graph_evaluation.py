@@ -21,6 +21,7 @@ import logging
 import re
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -334,6 +335,10 @@ def run_evaluation(
             "false_positive_paths": neg_stats["false_positive_paths"],
             "hallucinated_answers": neg_stats["hallucinated_answers"],
         },
+        "downstream_hit5_by_hop": {
+            f"{h}_hop": {"hits": hop_stats[h]["hit5_hits"], "total": hop_stats[h]["total"]}
+            for h in (1, 2, 3)
+        },
         "downstream_chunk_retrieval": {
             "bm25": m_bm25,
             "graph": m_graph,
@@ -369,93 +374,195 @@ def run_evaluation(
     }
 
     return {
-        "evaluation_timestamp": "2026-09-25T17:05:00+05:30",
+        "evaluation_timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "benchmark_file": str(bench_file),
         "summary": summary,
         "detailed_results": eval_items,
     }
 
 
+def _pct(n: int, d: int) -> str:
+    return f"{n}/{d} ({n / d * 100:.1f}%)" if d else "n/a"
+
+
+def _hit5_by_hop(data: Dict[str, Any]) -> Dict[str, Dict[str, int]]:
+    """Per-hop downstream hybrid Hit@5 counts.
+
+    Taken from the summary when present; recomputed from detailed_results for
+    result files written before the summary carried them.
+    """
+    stored = data.get("summary", {}).get("downstream_hit5_by_hop")
+    if stored:
+        return stored
+    out = {f"{h}_hop": {"hits": 0, "total": 0} for h in (1, 2, 3)}
+    for item in data.get("detailed_results", []):
+        if not item.get("answerable"):
+            continue
+        key = f"{item.get('hop_count')}_hop"
+        if key in out:
+            out[key]["total"] += 1
+            out[key]["hits"] += int(bool(item.get("chunk_retrieval", {}).get("hit_at_5")))
+    return out
+
+
 def generate_markdown_report(data: Dict[str, Any]) -> str:
+    """Render the report. Every number is computed from ``data``; nothing is hard-coded."""
     s = data["summary"]
     sp = s["structural_path_recovery"]
     nr = s["negative_resistance"]
     cr = s["downstream_chunk_retrieval"]
     ac = s["answer_correctness"]
+    hit5 = _hit5_by_hop(data)
+    details = data.get("detailed_results", [])
+    negatives = [d for d in details if not d.get("answerable")]
+    keyword_only = sum(
+        1 for d in details
+        if d.get("answerable")
+        and d.get("generation", {}).get("answer_correct")
+        and d.get("generation", {}).get("answer_f1", 0.0) < 0.25
+    )
+    n_hop = {h: sp[f"{h}_hop"]["total"] for h in (1, 2, 3)}
+    lenient_total = ac["answerable_correct"] + nr["correct_refusals"]
+
+    def delta(metric: str) -> str:
+        return f"{(cr['hybrid'][metric] - cr['bm25'][metric]) * 100:+.1f} pts"
+
+    def hop_row(h: int, label: str) -> str:
+        key = f"{h}_hop"
+        return (
+            f"| {label} | {sp[key]['total']} | {_pct(sp[key]['hits'], sp[key]['total'])} "
+            f"| {_pct(hit5[key]['hits'], hit5[key]['total'])} "
+            f"| {_pct(ac['by_hop'][key]['correct'], ac['by_hop'][key]['total'])} "
+            f"| {ac['by_hop'][key]['mean_f1']:.3f} |"
+        )
+
+    def mode_row(label: str, m: Dict[str, float]) -> str:
+        return (
+            f"| {label} | {m['Hit@1']:.3f} | {m['Hit@3']:.3f} | {m['Hit@5']:.3f} "
+            f"| {m['Recall@5']:.3f} | {m['MRR']:.3f} |"
+        )
 
     md = [
-        "# LectureMIND — Independent Held-Out GraphRAG Evaluation Report",
+        "# LectureMIND — Held-Out GraphRAG Evaluation Report",
         "",
         f"**Dataset:** `{data['benchmark_file']}`  ",
-        f"**Sample Size (N):** {s['total_questions']} questions (8 1-hop, 10 2-hop, 7 3-hop, 5 negative traps)  ",
-        "**Evaluation Methodology:** Blind evaluation decoupled from graph traversal queries. Ground truth authored from lecture source chunks.  ",
+        f"**Run timestamp:** {data.get('evaluation_timestamp', 'unknown')}  ",
+        f"**Sample size:** {s['total_questions']} questions ({n_hop[1]} 1-hop, {n_hop[2]} 2-hop, "
+        f"{n_hop[3]} 3-hop, {nr['total_negative']} negative)  ",
+        "**Question / label provenance:** see `evaluation/outputs/graph_heldout_creation_metadata.json` "
+        "and `evaluation/outputs/graph_heldout_manual_validation.json`.  ",
         "",
         "---",
         "",
-        "## 1. Executive Summary & Headline Results",
+        "## 1. Summary",
         "",
-        "| Metric Dimension | Target | Result | Status |",
-        "|---|---:|---:|---|",
-        f"| **Structural Path Recovery (Answerable)** | 25 | **{sp['hits']}/{sp['total']} ({sp['overall_rate']*100:.1f}%)** | AUTHENTIC MEASUREMENT |",
-        f"| **Downstream Hybrid Hit@5** | 25 | **{cr['hybrid']['Hit@5']*100:.1f}%** | REPRODUCIBLE (+20% over BM25) |",
-        f"| **Negative Refusal Accuracy** | 5 | **{nr['correct_refusals']}/{nr['total_negative']} ({nr['refusal_accuracy']*100:.1f}%)** | RESISTANT TO TRAPS |",
-        f"| **False Positive Path Rate** | 5 | **{nr['false_positive_rate']*100:.1f}%** | 1 ungrounded multi-hop bridge |",
-        f"| **Final Answer Accuracy (Overall)** | 30 | **{ac['overall_accuracy']*100:.1f}%** ({ac['answerable_correct'] + nr['correct_refusals']}/{s['total_questions']}) | END-TO-END VERIFIED |",
+        "| Metric | Result | How it is measured |",
+        "|---|---:|---|",
+        f"| Structural path recovery (answerable) | {_pct(sp['hits'], sp['total'])} "
+        "| Every gold relation of the question appears among the retrieved Neo4j edges "
+        "(entity-name match, direction ignored) |",
+        f"| Hybrid chunk Hit@5 (answerable) | {cr['hybrid']['Hit@5'] * 100:.1f}% "
+        f"| Graph + BM25 fused by RRF. Versus BM25 alone: Hit@5 {delta('Hit@5')}, "
+        f"Hit@1 {delta('Hit@1')}, MRR {delta('MRR')} |",
+        f"| Negative refusals | {_pct(nr['correct_refusals'], nr['total_negative'])} "
+        "| Generated answer contains a refusal phrase |",
+        f"| False-positive path rate (negatives) | {_pct(nr['false_positive_paths'], nr['total_negative'])} "
+        "| Graph returned an edge directly linking two trap entities |",
+        f"| Lenient answer match (overall) | {_pct(lenient_total, s['total_questions'])} "
+        "| Answerable: not a refusal AND (gold-entity keyword recall ≥ 0.5 OR token F1 ≥ 0.25). "
+        f"{keyword_only} of {ac['answerable_correct']} answerable matches passed on keyword recall "
+        "alone (F1 < 0.25). This is a lexical proxy, not a correctness judgment. |",
         "",
         "---",
         "",
-        "## 2. Hop-by-Hop Breakdown (Path Recovery, Chunk Hit@5, Final Answer)",
+        "## 2. Hop-by-Hop Breakdown",
         "",
-        "| Category | N | Path Recovery | Downstream Hit@5 | Final Answer Accuracy | Mean Token F1 |",
+        "| Category | N | Path recovery | Hybrid Hit@5 | Lenient answer match | Mean token F1 |",
         "|---|---:|---:|---:|---:|---:|",
-        f"| **1-Hop Direct** | {sp['1_hop']['total']} | {sp['1_hop']['hits']}/{sp['1_hop']['total']} ({sp['1_hop']['rate']*100:.1f}%) | 7/8 (87.5%) | {ac['by_hop']['1_hop']['correct']}/{ac['by_hop']['1_hop']['total']} ({ac['by_hop']['1_hop']['accuracy']*100:.1f}%) | {ac['by_hop']['1_hop']['mean_f1']:.3f} |",
-        f"| **2-Hop Multi-Hop** | {sp['2_hop']['total']} | {sp['2_hop']['hits']}/{sp['2_hop']['total']} ({sp['2_hop']['rate']*100:.1f}%) | 9/10 (90.0%) | {ac['by_hop']['2_hop']['correct']}/{ac['by_hop']['2_hop']['total']} ({ac['by_hop']['2_hop']['accuracy']*100:.1f}%) | {ac['by_hop']['2_hop']['mean_f1']:.3f} |",
-        f"| **3-Hop Multi-Hop** | {sp['3_hop']['total']} | {sp['3_hop']['hits']}/{sp['3_hop']['total']} ({sp['3_hop']['rate']*100:.1f}%) | 5/7 (71.4%) | {ac['by_hop']['3_hop']['correct']}/{ac['by_hop']['3_hop']['total']} ({ac['by_hop']['3_hop']['accuracy']*100:.1f}%) | {ac['by_hop']['3_hop']['mean_f1']:.3f} |",
-        f"| **Negative / Unanswerable** | {nr['total_negative']} | N/A (0 false edges) | N/A | {nr['correct_refusals']}/{nr['total_negative']} ({nr['refusal_accuracy']*100:.1f}%) | N/A (Refusal) |",
+        hop_row(1, "1-hop"),
+        hop_row(2, "2-hop"),
+        hop_row(3, "3-hop"),
+        f"| Negative | {nr['total_negative']} | {nr['false_positive_paths']} false-positive path(s) "
+        f"| n/a | {_pct(nr['correct_refusals'], nr['total_negative'])} refused | n/a |",
         "",
         "---",
         "",
-        "## 3. Downstream Evidence Chunk Retrieval Comparison",
+        "## 3. Evidence Chunk Retrieval (answerable questions)",
         "",
-        "| Mode | Hit@1 | Hit@3 | Hit@5 | Recall@5 | MRR@5 |",
+        "| Mode | Hit@1 | Hit@3 | Hit@5 | Recall@5 | MRR (full list) |",
         "|---|---:|---:|---:|---:|---:|",
-        f"| **BM25 Lexical** | {cr['bm25']['Hit@1']:.3f} | {cr['bm25']['Hit@3']:.3f} | {cr['bm25']['Hit@5']:.3f} | {cr['bm25']['Recall@5']:.3f} | {cr['bm25']['MRR']:.3f} |",
-        f"| **Graph-Only** | {cr['graph']['Hit@1']:.3f} | {cr['graph']['Hit@3']:.3f} | {cr['graph']['Hit@5']:.3f} | {cr['graph']['Recall@5']:.3f} | {cr['graph']['MRR']:.3f} |",
-        f"| **Hybrid (Graph + BM25 via RRF)** | **{cr['hybrid']['Hit@1']:.3f}** | **{cr['hybrid']['Hit@3']:.3f}** | **{cr['hybrid']['Hit@5']:.3f}** | **{cr['hybrid']['Recall@5']:.3f}** | **{cr['hybrid']['MRR']:.3f}** |",
+        mode_row("BM25 lexical", cr["bm25"]),
+        mode_row("Graph-only", cr["graph"]),
+        mode_row("Hybrid (Graph + BM25, RRF)", cr["hybrid"]),
         "",
         "---",
         "",
-        "## 4. Analysis of Negative Traps & Refusal Behavior",
+        "## 4. Negative Questions",
         "",
-        "- **GQ26 (Global Data Area ↔ TLB):** No path exists in Neo4j (4 ungrounded neighbor edges). LLM correctly refused.",
-        "- **GQ27 (Bell's Law ↔ Semaphore):** No path connects Bell's Law to concurrency primitives. LLM correctly refused.",
-        "- **GQ28 (ARPANET ↔ TLB):** Historical network timeline decoupled from memory virtualization. LLM correctly refused.",
-        "- **GQ29 (ISA ↔ Grep Tooling):** ISA does not explain command-line string utilities. LLM correctly refused.",
-        "- **GQ30 (Git ↔ Interrupt Controller):** A 3-hop traversal path was returned through `cache` and `processor` nodes, representing a false-positive graph path (20% FP rate). However, the prompt instruction prompted refusal regarding Git being a prerequisite.",
+    ]
+    if negatives:
+        for d in negatives:
+            fp = d.get("structural_path", {}).get("false_positive_path")
+            refused = d.get("generation", {}).get("answer_correct")
+            md.append(
+                f"- **{d.get('question_id', '?')}:** {d.get('question', '')[:120]} — "
+                f"graph linked trap entities: {'yes' if fp else 'no'}; "
+                f"answer refused: {'yes' if refused else 'no'}"
+            )
+    else:
+        md.append("_No per-question details in this result file._")
+    md += [
         "",
         "---",
         "",
-        "## 5. Key Scientific Conclusions",
+        "## 5. Scope and Caveats",
         "",
-        "1. **Decoupling Eliminates Artificial 100%:** Evaluating independently generated questions yields **52.0% structural path recovery** (13/25), accurately reflecting KG density limitations rather than circular test design.",
-        "2. **Hybrid Retrieval Synergies:** Even when the structural graph lacks a complete path, combining Graph traversal with lexical BM25 provides **84.0% Hit@5**, lifting evidence recall over single-modality baselines.",
-        "3. **Honest Reporting:** This evaluation replaces the circular 20/20 benchmark with an authentic held-out suite suitable for technical papers and research defenses.",
+        "1. **Not the production pipeline.** Chunk retrieval here uses `SimpleBM25` + "
+        "`SimpleGraphRetriever` fused by RRF, and the prompt context is the top-3 chunks plus "
+        "up to 5 graph edges. Dense retrieval, cross-encoder reranking and `ContextBuilder` are "
+        "not exercised, so these numbers do not measure the deployed query workflow.",
+        f"2. **Small sample.** {n_hop[1]}/{n_hop[2]}/{n_hop[3]} answerable questions per hop "
+        f"and {nr['total_negative']} negatives; one question moves the smallest per-hop rate by "
+        f"{100 / min((v for v in n_hop.values() if v), default=1):.0f} points.",
+        "3. **Lexical answer scoring.** \"Lenient answer match\" is keyword/F1 based; gold entity "
+        "names usually appear in the question itself. Use a calibrated judge or human review "
+        "for answer correctness.",
+        "4. **Cached generations.** Answers are reused from "
+        "`evaluation/outputs/graph_heldout_checkpoint.json` when present; delete it to regenerate "
+        "answers after pipeline changes.",
     ]
     return "\n".join(md)
 
 
-def main():
-    results = run_evaluation()
+def main(argv: Optional[List[str]] = None) -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Held-out GraphRAG evaluation")
+    parser.add_argument(
+        "--from-json",
+        help="Regenerate the Markdown report from an existing result JSON "
+             "(no Neo4j / LLM calls, results unchanged).",
+    )
+    args = parser.parse_args(argv)
+
     out_dir = Path("evaluation/outputs")
     out_dir.mkdir(parents=True, exist_ok=True)
+    md_path = out_dir / "graph_heldout_evaluation.md"
+
+    if args.from_json:
+        with open(args.from_json, "r", encoding="utf-8") as f:
+            results = json.load(f)
+        md_path.write_text(generate_markdown_report(results), encoding="utf-8")
+        print(f"Regenerated {md_path} from {args.from_json}")
+        return
+
+    results = run_evaluation()
 
     json_path = out_dir / "graph_heldout_evaluation.json"
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    md_path = out_dir / "graph_heldout_evaluation.md"
-    with open(md_path, "w", encoding="utf-8") as f:
-        f.write(generate_markdown_report(results))
+    md_path.write_text(generate_markdown_report(results), encoding="utf-8")
 
     print(f"Evaluation complete. Saved JSON to {json_path} and Markdown to {md_path}")
     summary = results["summary"]
@@ -463,7 +570,7 @@ def main():
     print(f"Structural Path Recovery: {summary['structural_path_recovery']['overall_rate']*100:.1f}% ({summary['structural_path_recovery']['hits']}/{summary['structural_path_recovery']['total']})")
     print(f"Hybrid Chunk Hit@5: {summary['downstream_chunk_retrieval']['hybrid']['Hit@5']*100:.1f}%")
     print(f"Negative Refusal Accuracy: {summary['negative_resistance']['refusal_accuracy']*100:.1f}%")
-    print(f"Overall Answer Accuracy: {summary['answer_correctness']['overall_accuracy']*100:.1f}%")
+    print(f"Lenient Answer Match (overall): {summary['answer_correctness']['overall_accuracy']*100:.1f}%")
 
 
 if __name__ == "__main__":

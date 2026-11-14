@@ -42,22 +42,29 @@ LECTURE_WIDE_TOP_K = 15
 
 # Graph routing: relational, structural, dependency questions.
 GRAPH_PATTERNS = [
-    r"\bprerequisite\b",
+    # Plurals matter: "What are the prerequisites of X?" is the most common
+    # graph question and must not fall through to vector_only.
+    r"\bprerequisites?\b",
     r"\brelated\b",
-    r"\brelation\b",
-    r"\bconnect(ed|ion)?\b",
+    r"\brelations?\b",
+    # "relate"/"relates"/"relating" ("how does paging relate to ...").
+    # "relational" (relational model/algebra) is deliberately NOT matched.
+    r"\brelat(e|es|ing)\b",
+    # connect / connects / connected / connecting / connection(s) — except
+    # the neural-network term "fully connected" / "fully-connected".
+    r"(?<!fully\s)(?<!fully-)\bconnect(s|ed|ing|ion|ions)?\b",
     r"\bbefore\b.{0,30}\bafter\b",
     r"\btaught before\b",
     r"\btaught after\b",
     r"\bwhy\b.{0,20}\bbefore\b",
     r"\bdepend(s|ency|encies)?\b",
     r"\brequire[sd]?\b",
-    r"\bpath\b",
-    r"\blink\b",
-    r"\brelationship\b",
+    r"\bpaths?\b",
+    r"\blinks?\b",
+    r"\brelationships?\b",
     r"\bleads?\s+to\b",
     r"\bbuilt\s+on\b",
-    r"\bfound(ation|ational)?\b",
+    r"\bfound(ation|ations|ational)?\b",
     r"\buse[sd]\s+by\b",
 ]
 
@@ -104,20 +111,79 @@ SUMMARY_PATTERNS = [
     r"\bwhat\s+(topics|concepts|ideas)\s+(are\s+)?(covered|discussed|taught|explained)\b",
     r"\bwhat\s+did\s+we\s+learn\b",
     r"\boverview\s+of\s+(the|this|today'?s?)\s+lecture\b",
-    r"\bsyllabus\b",
-    r"\bgrading\b",
-    r"\bgrading\s+breakdown\b",
-    r"\bgrading\s+policy\b",
-    r"\bcourse\s+outline\b",
-    r"\bcurriculum\b",
-    r"\bclass\s+schedule\b",
+    # NOTE: syllabus / grading / course outline / curriculum / class schedule
+    # are NOT lecture-wide: they are specific facts stated in one part of a
+    # lecture, so they must go through semantic retrieval. (Routing them to
+    # lecture-wide timeline sampling skipped semantic search entirely.)
 ]
 
 # Learning content patterns — also lecture-wide.
-NOTES_PATTERNS = [r"\bnotes?\b", r"\bgenerate\s+notes?\b", r"\bstudy\s+notes?\b"]
+# Kept specific: bare "note" / "question" / "practice" are ordinary words in
+# normal questions ("I have a question about paging", "best practice for
+# locking") and must not turn a question into a notes/quiz request.
+NOTES_PATTERNS = [
+    r"\bnotes\b",
+    r"\bstudy\s+notes?\b",
+    r"\b(generate|make|create|write|take|prepare|give\s+me)\b.{0,20}\bnote\b",
+]
 FLASHCARD_PATTERNS = [r"\bflashcards?\b", r"\bstudy\s+cards?\b", r"\bkey\s+terms\b"]
-QUIZ_PATTERNS = [r"\bquiz\b", r"\btest\s+me\b", r"\bquestions?\b", r"\bpractice\b"]
+QUIZ_PATTERNS = [
+    r"\bquiz(zes)?\b",
+    r"\btest\s+me\b",
+    r"\bpractice\s+(questions?|problems?|exercises?|tests?|exams?)\b",
+    r"\b(generate|create|make|write|prepare|give\s+me)\b.{0,30}\b(questions|mcqs?)\b",
+    r"\b(exam|mcq|multiple[\s-]choice)\s+questions?\b",
+]
 LEARNING_PATH_PATTERNS = [r"\blearning\s+path\b", r"\bhow\s+to\s+study\b", r"\bwhat\s+to\s+learn\b"]
+
+# Words that only describe the *kind of request* (summarise, overview, notes,
+# quiz, ...) or the lecture as a whole. A summary/notes/quiz-style query made
+# only of these words is lecture-wide; any other word names a topic ("give an
+# overview of virtual memory", "quiz me on paging"), and such a query must use
+# semantic retrieval instead of timeline sampling (which ignores the query).
+_SCOPE_GENERIC_WORDS = {
+    # request verbs / politeness
+    "give", "gave", "provide", "write", "make", "create", "generate", "prepare",
+    "list", "tell", "show", "please", "can", "could", "would", "will", "you",
+    "explain", "explained", "explaining", "explains", "describe", "go", "over",
+    "through", "walk", "help", "want", "need", "like",
+    # summary / overview vocabulary
+    "summary", "summaries", "summarize", "summarise", "summarizing", "summarising",
+    "summarization", "summarisation", "recap", "overview", "outline", "brief",
+    "briefly", "short", "quick", "quickly", "detailed", "key", "main", "important",
+    "points", "point", "ideas", "idea", "topics", "topic", "concepts", "concept",
+    "takeaways", "takeaway", "highlights", "highlight", "keypoints", "keypoint",
+    "content", "contents", "everything", "things", "stuff",
+    # scope words (the lecture as a whole)
+    "lecture", "lectures", "class", "course", "session", "lesson", "video",
+    "talk", "today", "todays", "whole", "entire", "all", "each", "every",
+    "section", "sections", "part", "parts", "slide", "slides", "far",
+    # coverage verbs
+    "cover", "covers", "covered", "covering", "discuss", "discusses",
+    "discussed", "teach", "teaches", "taught", "learn", "learned", "learnt",
+    "learning", "contain", "contains", "said", "mentioned", "presented",
+    # learning-content vocabulary
+    "notes", "note", "study", "flashcards", "flashcard", "cards", "card",
+    "terms", "term", "quiz", "quizzes", "test", "questions", "question",
+    "practice", "exam", "mcq", "mcqs", "path", "how", "what", "to",
+    # function words
+    "the", "a", "an", "this", "that", "these", "those", "is", "are", "was",
+    "were", "be", "been", "do", "does", "did", "done", "have", "has", "had",
+    "of", "on", "in", "at", "by", "for", "from", "about", "with", "and", "or",
+    "it", "its", "we", "us", "me", "my", "our", "i", "so", "up", "some", "any",
+    "which", "there", "here", "now", "then", "s",
+}
+
+
+def _has_topic_terms(query_lower: str) -> bool:
+    """True when the query names something beyond generic request/scope words.
+
+    Pure numbers ("summarize lecture 3") are scope, not topics.
+    """
+    return any(
+        tok not in _SCOPE_GENERIC_WORDS and not tok.isdigit()
+        for tok in re.findall(r"[a-z0-9]+", query_lower)
+    )
 
 # Comparison patterns.
 COMPARISON_PATTERNS = [
@@ -272,6 +338,13 @@ class QueryPlanner:
             intent = "factual_qa"
             is_lecture_wide = False
             answer_style = "concise"
+
+        # A summary/notes/quiz-style request that names a specific topic
+        # ("overview of virtual memory", "quiz me on paging") is scoped to
+        # that topic: keep the intent and answer style, but use semantic
+        # retrieval. Lecture-wide timeline sampling ignores the query text.
+        if is_lecture_wide and _has_topic_terms(q):
+            is_lecture_wide = False
 
         # --- Weight calculation ---
         total = max(graph_score + vector_score, 1)

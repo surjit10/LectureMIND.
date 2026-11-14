@@ -12,7 +12,8 @@
 
 import logging
 import threading
-from typing import Any, Dict, List, Optional
+from collections import defaultdict, deque
+from typing import Any, Deque, Dict, List, Optional
 
 from config import LocalSettings
 from local.services.reranker_service import RerankerService
@@ -23,7 +24,8 @@ from retrieval.context_builder import (
     _CHUNK_SEPARATOR,
 )
 
-# Hybrid retrieval (BM25 + RRF) — opt-in, off by default.
+# Hybrid retrieval (BM25 + RRF) — controlled by LocalSettings.ENABLE_HYBRID_RETRIEVAL
+# (enabled by default); see should_apply_hybrid() for when it is skipped.
 from retrieval.hybrid.bm25_retriever import bm25_search, rrf_fuse
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,28 @@ _CONTEXT_BUILDER = ContextBuilder(char_budget=MAX_CONTEXT_CHARS)
 # clear_reranker() has been removed.
 # The global singleton is set once at startup and never invalidated.
 # Lecture switching does not affect the reranker.
+
+
+def should_apply_hybrid(
+    lecture_id: Optional[str],
+    is_lecture_wide: bool,
+    enable_hybrid: Optional[bool] = None,
+) -> bool:
+    """Decide whether BM25 + RRF fusion runs for a query.
+
+    Single source of truth shared by rerank() and the offline benchmark, so the
+    evaluated candidate pool is always the pool the runtime actually reranks.
+
+    Fusion is skipped for lecture-wide queries: their vector candidates are a
+    chronological timeline sample (retrieve_lecture_wide), not a relevance
+    ranking. RRF would treat timeline position as rank and truncate the pool
+    to top_k, so a summary would only see the start of the lecture.
+    """
+    if not lecture_id or is_lecture_wide:
+        return False
+    if enable_hybrid is None:
+        enable_hybrid = LocalSettings().ENABLE_HYBRID_RETRIEVAL
+    return bool(enable_hybrid)
 
 def reload_global_reranker(reranker_dir: str) -> None:
     """
@@ -117,7 +141,8 @@ def rerank(
         char_budget: Character budget for context (overrides default).
         lecture_id: Runtime lecture ID for BM25 index scope.
         enable_hybrid: When True, run BM25 + RRF fusion. If None, falls
-            back to LocalSettings.ENABLE_HYBRID_RETRIEVAL (default False).
+            back to LocalSettings.ENABLE_HYBRID_RETRIEVAL (default True).
+            Never applied to lecture-wide queries (see should_apply_hybrid).
 
     Returns:
         (reranked_results, final_context) tuple.
@@ -129,9 +154,7 @@ def rerank(
     # results fused via Reciprocal Rank Fusion. This catches entity names,
     # numeric facts, and exact-phrase matches that dense embeddings may miss.
     fused_vectors = vector_results
-    if enable_hybrid is None:
-        enable_hybrid = LocalSettings().ENABLE_HYBRID_RETRIEVAL
-    if enable_hybrid and lecture_id:
+    if should_apply_hybrid(lecture_id, is_lecture_wide, enable_hybrid):
         try:
             bm25_retrieved = bm25_search(query, lecture_id, top_k=15)
             if bm25_retrieved:
@@ -204,12 +227,19 @@ def rerank(
     if active_service is not None:
         scored = active_service.score_pairs(query, passages)
 
-        # Map scores back to combined results.
-        passage_to_idx = {p: i for i, p in enumerate(passages)}
+        # Map scores back to combined results. Several candidates can render
+        # to the same passage text (e.g. consecutive keyframes of one slide
+        # with identical OCR); a plain {text: index} dict would map all of
+        # them to one index, duplicating that chunk and silently dropping the
+        # others. Queue the indices per text so each candidate is used once.
+        text_to_indices: Dict[str, Deque[int]] = defaultdict(deque)
+        for i, p in enumerate(passages):
+            text_to_indices[p].append(i)
         reranked = []
         for passage_text, score in scored:
-            idx = passage_to_idx.get(passage_text)
-            if idx is not None:
+            indices = text_to_indices.get(passage_text)
+            if indices:
+                idx = indices.popleft()
                 entry = {**combined[idx], "rerank_score": score}
                 reranked.append(entry)
     else:

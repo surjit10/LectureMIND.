@@ -134,3 +134,49 @@ class TestReranker:
         """No graph results -> no graph context."""
         assert _build_graph_context([]) == ""
         assert _build_graph_context([{"start_name": ""}]) == ""
+
+
+class TestRerankIdenticalPassages:
+
+    def test_identical_passage_texts_keep_every_chunk(self):
+        """Regression: chunks rendering to the same text (same slide OCR) were
+        collapsed onto one index — one chunk duplicated, the other dropped."""
+        same = {"ocr_text": "Virtual memory maps pages to frames in physical memory"}
+        vr = [
+            {"chunk_id": "c_a", "score": 0.9, "payload": {"chunk_id": "c_a", **same}},
+            {"chunk_id": "c_b", "score": 0.8, "payload": {"chunk_id": "c_b", **same}},
+            {"chunk_id": "c_c", "score": 0.7, "payload": {"chunk_id": "c_c", "transcript": "Other text"}},
+        ]
+        model = MagicMock()
+        model.predict.return_value = np.array([0.9, 0.9, 0.1])
+        reranked, _ = rerank("virtual memory", [], vr, reranker_service=RerankerService(model))
+        ids = [r["chunk_id"] for r in reranked]
+        assert sorted(ids) == ["c_a", "c_b", "c_c"]
+
+
+class TestGraphContextDirection:
+
+    def test_incoming_edge_rendered_in_stored_direction(self):
+        gr = [{
+            "start_name": "Process Abstraction", "related_name": "Kernel",
+            "rel_types": ["PREREQUISITE_OF"], "hops": 1, "direction": "in",
+            "edges": [{"source": "Kernel", "relation": "PREREQUISITE_OF", "target": "Process Abstraction"}],
+        }]
+        ctx = _build_graph_context(gr)
+        assert "[Graph] Kernel -PREREQUISITE_OF-> Process Abstraction" in ctx
+        assert "[Graph] Process Abstraction -PREREQUISITE_OF-> Kernel" not in ctx
+
+    def test_multi_hop_edges_render_each_hop(self):
+        gr = [{
+            "start_name": "A", "related_name": "C", "rel_types": ["USED_BY", "EXPLAINS"],
+            "hops": 2, "direction": "out",
+            "edges": [{"source": "A", "relation": "USED_BY", "target": "B"},
+                      {"source": "B", "relation": "EXPLAINS", "target": "C"}],
+        }]
+        ctx = _build_graph_context(gr)
+        assert ctx.splitlines() == ["[Graph] A -USED_BY-> B", "[Graph] B -EXPLAINS-> C"]
+
+    def test_fallback_without_edges_respects_direction(self):
+        gr = [{"start_name": "Target", "related_name": "Prereq",
+               "rel_types": ["PREREQUISITE_OF"], "hops": 1, "direction": "in"}]
+        assert _build_graph_context(gr) == "[Graph] Prereq -PREREQUISITE_OF-> Target"

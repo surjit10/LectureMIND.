@@ -1,6 +1,6 @@
 # evaluation/metrics/retrieval_metrics.py
 import logging
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 import math
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,33 @@ def _dedupe_preserve_order(ids: List[str]) -> List[str]:
             seen.add(cid)
             out.append(cid)
     return out
+
+
+def chunk_id_of(result: Dict[str, Any]) -> str:
+    """Chunk ID of a retrieval/rerank result (payload-wrapped or flat)."""
+    payload = result.get("payload", result)
+    return payload.get("chunk_id") or result.get("chunk_id", "") or ""
+
+
+def ranked_chunk_ids(results: List[Dict[str, Any]]) -> List[str]:
+    """Ordered, de-duplicated chunk IDs of a ranked result list."""
+    return _dedupe_preserve_order([chunk_id_of(r) for r in results])
+
+
+def calculate_context_recall(expected_ids: List[str], context_ids: List[str]) -> float:
+    """Fraction of expected chunks that were placed in the LLM prompt context.
+
+    Unlike Recall@k this has no rank cut-off: it measures whether the
+    evidence reached the generator at all (after reranking, merging and the
+    context character budget).
+    """
+    if not expected_ids:
+        return 1.0  # vacuous truth; dataset loader rejects empty expected sets
+    if not context_ids:
+        return 0.0
+    context_set = set(context_ids)
+    expected_unique = set(expected_ids)
+    return sum(1 for cid in expected_unique if cid in context_set) / len(expected_unique)
 
 
 def calculate_precision_at_k(expected_ids: List[str], retrieved_ids: List[str], k: int = 5) -> float:

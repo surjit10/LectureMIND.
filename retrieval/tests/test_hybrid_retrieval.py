@@ -341,3 +341,52 @@ class TestHybridRerank:
             )
             # Should still produce reranked results (dense-only fallback)
             assert len(reranked) > 0
+
+# ── Hybrid gating (lecture-wide must never be RRF-truncated) ──────────
+
+class TestHybridGating:
+
+    def test_should_apply_hybrid_matrix(self):
+        from retrieval.reranker.rerank_service import should_apply_hybrid
+        assert should_apply_hybrid("lec", False, True) is True
+        assert should_apply_hybrid("lec", False, False) is False
+        assert should_apply_hybrid("lec", True, True) is False      # lecture-wide
+        assert should_apply_hybrid(None, False, True) is False      # no lecture scope
+        assert should_apply_hybrid("", False, True) is False
+
+    def test_should_apply_hybrid_defaults_to_settings(self):
+        from retrieval.reranker import rerank_service as rs
+        with patch.object(rs, "LocalSettings") as settings:
+            settings.return_value.ENABLE_HYBRID_RETRIEVAL = True
+            assert rs.should_apply_hybrid("lec", False) is True
+            settings.return_value.ENABLE_HYBRID_RETRIEVAL = False
+            assert rs.should_apply_hybrid("lec", False) is False
+
+    def test_lecture_wide_pool_is_not_truncated_by_rrf(self):
+        """Regression: a lecture-wide timeline sample (56 chunks) used to be fused
+        with BM25 and cut to 15, so summaries only saw the lecture start."""
+        import numpy as np
+        import retrieval.reranker.rerank_service as rs
+        from local.services.reranker_service import RerankerService
+
+        chunks = [
+            {"chunk_id": f"c{i:03d}", "score": 1.0,
+             "payload": {"chunk_id": f"c{i:03d}", "timestamp": i * 50.0,
+                         "segment_id": f"s{i // 10}", "transcript": f"block {i} " + "w " * 40}}
+            for i in range(56)
+        ]
+        model = MagicMock()
+        model.predict.side_effect = lambda pairs: np.array([0.5] * len(pairs))
+        rs._GLOBAL_RERANKER_SERVICE = None
+        bm25_hits = [{"chunk_id": c["chunk_id"], "score": 3.0, "payload": c["payload"]} for c in chunks[:15]]
+        with patch.object(rs, "bm25_search", return_value=bm25_hits) as mock_bm25:
+            reranked, _ = rs.rerank(
+                "Summarize the whole lecture", [], chunks,
+                reranker_service=RerankerService(model),
+                is_lecture_wide=True, char_budget=6000,
+                lecture_id="lec", enable_hybrid=True,
+            )
+        mock_bm25.assert_not_called()
+        assert len(reranked) == 56
+        used_minutes = [r["payload"]["timestamp"] / 60 for r in reranked if r.get("in_context")]
+        assert max(used_minutes) > 30  # coverage reaches beyond the intro

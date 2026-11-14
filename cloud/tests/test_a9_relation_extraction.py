@@ -634,3 +634,17 @@ class TestCompactEntityAliases:
         assert pruned_map["E2"] == "e2"
         # Pruning is observable via stats
         assert stats.rejected >= 2
+
+
+def test_verified_evidence_is_persisted_in_relations_json(cloud_settings, setup_a9_inputs):
+    """Regression: the evidence quote was verified, then dropped when building
+    Relation objects, so relations.json never carried it."""
+    from cloud.extraction.relation_extractor import extract_relations
+
+    relations = extract_relations(
+        "lec_001", cloud_settings=cloud_settings,
+        llm_loader=lambda: _make_mock_llm(),
+    )
+    assert relations and all(r.evidence for r in relations)
+    data = json.loads((setup_a9_inputs / "relations.json").read_text())
+    assert all(item.get("evidence") for item in data)

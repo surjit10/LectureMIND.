@@ -352,3 +352,28 @@ class TestAdjacentMergeBehavior:
         a = _make_chunk("c_001", timestamp=10.0, segment_id="seg_1")
         b = _make_chunk("c_002", timestamp=15.0, segment_id="seg_2")
         assert _are_adjacent(a, b) is False
+
+
+class TestLectureWideBudgetShare:
+
+    def test_every_sampled_block_reaches_context(self):
+        """Regression: blocks larger than budget/8 were filled chronologically,
+        so the end of the lecture never reached a lecture-wide context."""
+        chunks = [
+            _make_chunk(f"c_{i:03d}",
+                        transcript=f"Topic{i} begins here. " + ("Detail sentence. " * 80),
+                        timestamp=float(i * 600), segment_id=f"seg_{i}")
+            for i in range(8)
+        ]
+        builder = ContextBuilder(char_budget=6000)
+        context, used = builder.build_with_metadata(chunks, is_lecture_wide=True, char_budget=6000)
+        assert len(context) <= 6000
+        for i in range(8):
+            assert f"Topic{i} begins here." in context, f"block {i} missing"
+        assert len(used) == 8
+
+    def test_point_queries_are_not_capped_per_block(self):
+        chunk = _make_chunk("c_001", transcript="A full answer passage. " * 60)
+        other = _make_chunk("c_002", transcript="Second passage. " * 5, timestamp=500.0)
+        context = ContextBuilder().build([chunk, other], is_lecture_wide=False, char_budget=4000)
+        assert ("A full answer passage. " * 60).strip() in context
