@@ -2,7 +2,7 @@
 
 > **Purpose:** One document that quantifies what LectureMIND is and why it is stronger than generic RAG / video-summarizer baselines.
 > **Audience:** Engineers, evaluators, and reviewers who need the measured numbers behind the claims.
-> **Last updated:** 2026-11-14 · current QA numbers come from `evaluation/reports/smoke_groq_20261114_newcode/` and `evaluation/reports/retrieval_comparison_20261114/`; older figures are marked historical.
+> **Last updated:** 2026-11-14 · current QA numbers come from `evaluation/reports/smoke_groq_20261114_reviewed/` (reviewed labels), `evaluation/reports/ablation_20261114_reviewed/` and `evaluation/reports/retrieval_comparison_20261114/`; older figures are marked historical.
 > **Legend:** `[Measured]` verified by live benchmark execution and report.
 > **Companion docs:** [EVALUATION.md](./docs/EVALUATION.md) (framework) · [RETRIEVAL_SYSTEM.md](./docs/RETRIEVAL_SYSTEM.md) (retrieval internals)
 
@@ -88,7 +88,7 @@ Source: `evaluation/reports/smoke_groq_20261114_reviewed/` — **45/45 questions
 | Pre-rerank Hit@5 / MRR@5 (RRF order) | 0.884 / 0.804 | — | 43 |
 | Routing accuracy / visual routing accuracy | 0.933 / 0.911 | — | 45 |
 | Answer token F1 (lexical) | 0.256 | 0.201 – 0.313 | 45 |
-| Keyword recall | 0.786 | 0.682 – 0.878 | 45 |
+| Keyword recall | 0.786 | 0.681 – 0.878 | 45 |
 | Correct refusals (unanswerable) | 2/2 | — | 2 |
 | Answerable questions refused | 4/43 | — | 43 |
 | Mean / p95 total latency | 27.5 s / 31.2 s | — | 45 |

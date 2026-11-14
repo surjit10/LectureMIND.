@@ -2,7 +2,7 @@
 
 > **Purpose:** How LectureMIND is measured — dataset format, metric implementations, report generation, and the measured results.
 > **Audience:** Engineers running benchmarks; interviewers checking the numbers behind the claims.
-> **Last updated:** 2026-11-14 · reflects the current harness (pre- and post-rerank retrieval metrics, context recall, per-type/p95 reporting) and the current measured run (`evaluation/reports/smoke_groq_20261114_newcode/`, 45-question three-lecture smoke set). The earlier 50-question single-lecture run is kept as history in §6.3 and cannot be reproduced on the current packages.
+> **Last updated:** 2026-11-14 · reflects the current harness (pre- and post-rerank retrieval metrics, context recall, per-type/p95 reporting) and the current measured run (`evaluation/reports/smoke_groq_20261114_reviewed/`, reviewed labels, 45-question three-lecture smoke set). The earlier 50-question single-lecture run is kept as history in §6.3 and cannot be reproduced on the current packages.
 > **Companion docs:** [METRICS_MATRIX.md](../METRICS_MATRIX.md) (scorecard) · [RETRIEVAL_SYSTEM.md](./RETRIEVAL_SYSTEM.md) (what is being measured)
 
 ---
@@ -255,7 +255,7 @@ gold chunks), 3 graph-fact questions flagged as weak chunk-level evidence. Every
 | Pre-rerank Hit@5 / MRR@5 (RRF order) | 0.884 / 0.804 | — | 43 |
 | Routing accuracy / visual routing accuracy | 0.933 / 0.911 | — | 45 |
 | Answer token F1 (lexical) | 0.256 | 0.201 – 0.313 | 45 |
-| Keyword recall | 0.786 | 0.682 – 0.878 | 45 |
+| Keyword recall | 0.786 | 0.681 – 0.878 | 45 |
 | Correct refusals (unanswerable) | 2/2 | — | 2 |
 | Answerable questions refused | 4/43 | — | 43 |
 | Mean / p95 total latency | 27.5 s / 31.2 s | — | 45 |

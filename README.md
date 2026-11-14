@@ -600,7 +600,7 @@ human-reviewed** — the validator's `release` profile rejects it until it is.
 | Context recall (gold chunks placed in the LLM prompt) | **0.843** | 0.736 – 0.936 | 43 |
 | Routing accuracy | 0.933 | 0.844 – 1.000 | 45 |
 | Answer token F1 (lexical, vs. short reference answers) | 0.256 | 0.201 – 0.313 | 45 |
-| Keyword recall | 0.786 | 0.682 – 0.878 | 45 |
+| Keyword recall | 0.786 | 0.681 – 0.878 | 45 |
 | Correct refusals on unanswerable questions | 2/2 | — | 2 |
 | Answerable questions refused | 4/43 | — | 43 |
 | Mean total latency (Groq paced at 6,000 tokens/min) | 27.5 s | 25.7 – 29.0 s | 45 |

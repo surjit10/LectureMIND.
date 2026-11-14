@@ -23,7 +23,7 @@ available:
 ```
 
 Use a new `--output-dir` per run so reports from different code versions are never mixed
-in one folder. The current reference run is `evaluation/reports/smoke_groq_20261114_newcode/`
+in one folder. The current reference run is `evaluation/reports/smoke_groq_20261114_reviewed/`
 (the default dashboard source).
 
 To compare two code versions without any LLM calls, see `scripts/compare_retrieval_run.py`
