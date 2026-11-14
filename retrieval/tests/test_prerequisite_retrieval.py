@@ -198,3 +198,72 @@ def test_get_prerequisites_for_query():
 
     assert len(items) >= 1
     assert items[0]["concept"] == "Page Tables"
+
+
+# ── Back-Tracker correctness: self-loops, duplicates, plurals ─────────────────
+
+def _driver_returning(records_per_call):
+    mock_session = MagicMock()
+    mock_driver = MagicMock()
+    mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+    mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+    mock_session.run.side_effect = list(records_per_call)
+    return mock_driver, mock_session
+
+
+def _rec(eid, concept, target, path):
+    return {"entity_id": eid, "concept": concept, "type": "Concept",
+            "target_concept": target, "depth": len(path) - 1, "path_nodes": path,
+            "edge_provenance": [], "direct_confidence": 0.8, "chunk_id": "c", "timestamp": 1.0}
+
+
+def test_concept_is_never_its_own_prerequisite():
+    """A9 + inferred edges can form OS -> System -> OS; OS must not be returned for OS."""
+    loop = _rec("e_os", "Operating System", "Operating System",
+                ["Operating System", "System", "Operating System"])
+    ok = _rec("e_isa", "ISA", "Operating System", ["ISA", "Operating System"])
+    driver, session = _driver_returning([[loop, ok]])
+
+    items = get_prerequisites_for_concept("Operating System", "lec_os", driver=driver)
+
+    assert [i["concept"] for i in items] == ["ISA"]
+    cypher = session.run.call_args_list[0].args[0]
+    assert "prereq <> target" in cypher
+    assert "single(m IN nodes(path) WHERE m = n)" in cypher
+
+
+def test_concept_reported_once_at_shortest_depth():
+    """Process Abstraction reachable at depth 2 and 3 -> reported once, at depth 2."""
+    deep = _rec("e_pa", "Process Abstraction", "Process",
+                ["Process Abstraction", "Address Space", "Thread", "Process"])
+    short = _rec("e_pa", "Process Abstraction", "Process",
+                 ["Process Abstraction", "Address Space", "Process"])
+    direct = _rec("e_as", "Address Space", "Process", ["Address Space", "Process"])
+    driver, _ = _driver_returning([[deep, short, direct]])
+
+    items = get_prerequisites_for_concept("Process", "lec_os", driver=driver)
+
+    pa = [i for i in items if i["concept"] == "Process Abstraction"]
+    assert len(pa) == 1 and pa[0]["depth"] == 2
+    assert {i["concept"] for i in items} == {"Process Abstraction", "Address Space"}
+
+
+def test_plural_query_matches_singular_entity():
+    """'Threads' must match the entity 'Thread' in the exact-match query."""
+    rec = _rec("e_as", "Address Space", "Thread", ["Address Space", "Thread"])
+    driver, session = _driver_returning([[rec]])
+
+    items = get_prerequisites_for_concept("Threads", "lec_os", driver=driver)
+
+    assert [i["concept"] for i in items] == ["Address Space"]
+    params = session.run.call_args_list[0].kwargs
+    assert "thread" in params["concept_names"] and "threads" in params["concept_names"]
+
+
+def test_name_variants():
+    from retrieval.graph_retriever.neo4j_retriever import _name_variants
+    assert "Thread" in _name_variants("Threads")
+    assert "Page Table" in _name_variants("Page Tables")
+    assert "Policy" in _name_variants("Policies")
+    assert "Process" in _name_variants("Processes")
+    assert _name_variants("Address") == ["Address"]  # no "Addres"

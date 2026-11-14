@@ -119,6 +119,11 @@ def load_prerequisites_into_neo4j(
                 "MATCH (s {entity_id: $source, lecture_id: $lecture_id}) "
                 "MATCH (t {entity_id: $target, lecture_id: $lecture_id}) "
                 "MERGE (s)-[r:PREREQUISITE_OF]->(t) "
+                # inference_only marks edges that exist ONLY because of
+                # inference (not also extracted by A9).  GraphRAG retrieval
+                # skips them; the Back-Tracker uses them.  An edge A9 already
+                # created keeps inference_only = false (set by the D1 loader).
+                "ON CREATE SET r.inference_only = true "
                 "SET r.lecture_id = $lecture_id, "
                 "    r.confidence = $confidence, "
                 "    r.is_inferred = true, "

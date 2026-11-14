@@ -254,9 +254,16 @@ def _build_cypher(
     match_start = "MATCH (start) " + where_clause
     rel_pattern = "[:" + ALL_RELATION_TYPES + "*1.." + str(max_hops) + "]"
     # Never leak another lecture's nodes; drop chains that loop back to start.
+    # Edges that exist only because of prerequisite inference
+    # (inference_only = true) are not validated as answer context, so GraphRAG
+    # skips them; the Back-Tracker (get_prerequisites_for_concept) uses them.
+    extracted_only = (
+        "all(r IN relationships(path) "
+        "WHERE coalesce(properties(r)['inference_only'], false) = false)"
+    )
     related_ok = (
-        "related.lecture_id = $lecture_id AND related <> start"
-        if lecture_id else "related <> start"
+        "related.lecture_id = $lecture_id AND related <> start AND " + extracted_only
+        if lecture_id else "related <> start AND " + extracted_only
     )
     return_cols = (
         "RETURN start.entity_id AS start_id, start.name AS start_name, "
@@ -404,6 +411,31 @@ def _run_traversal(driver: Any, cypher: str, params: Dict[str, Any]) -> List[Dic
     return results
 
 
+def _name_variants(name: str) -> List[str]:
+    """The name plus naive singular forms of its last word ("Threads" -> "Thread",
+    "Policies" -> "Policy", "Processes" -> "Process")."""
+    variants = [name]
+    head, _, last = name.rpartition(" ")
+    prefix = head + " " if head else ""
+    low = last.lower()
+    candidates = []
+    if low.endswith("ies") and len(low) > 4:
+        candidates.append(last[:-3] + "y")
+    if low.endswith("es") and len(low) > 3:
+        candidates.append(last[:-2])
+    if low.endswith("s") and not low.endswith("ss") and len(low) > 2:
+        candidates.append(last[:-1])
+    for c in candidates:
+        v = prefix + c
+        if v.lower() not in (x.lower() for x in variants):
+            variants.append(v)
+    return variants
+
+
+def _concept_key(rec: Any) -> str:
+    return rec.get("entity_id") or (rec.get("concept") or "").lower()
+
+
 def get_prerequisites_for_concept(
     concept_name: str,
     lecture_id: str,
@@ -442,37 +474,48 @@ def get_prerequisites_for_concept(
         driver = create_neo4j_driver(settings)
         close_driver = True
 
-    cypher = (
-        f"MATCH path = (prereq {{lecture_id: $lecture_id}})"
-        f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
-        f"(target {{lecture_id: $lecture_id}}) "
-        f"WHERE toLower(target.name) = toLower($concept_name) "
-        # Access relationship metadata through properties(rel) rather than
-        # direct unknown-property expressions.  Older graph imports contain
-        # only relation_id/lecture_id; this keeps those graphs queryable
-        # without Neo4j emitting unknown-property warnings.
-        f"  AND all(rel IN relationships(path) WHERE properties(rel)['lecture_id'] = $lecture_id AND (properties(rel)['confidence'] IS NULL OR properties(rel)['confidence'] >= $min_confidence)) "
-        f"RETURN prereq.entity_id AS entity_id, "
-        f"       prereq.name AS concept, "
-        f"       prereq.type AS type, "
-        f"       target.name AS target_concept, "
-        f"       length(path) AS depth, "
-        f"       [node IN nodes(path) | node.name] AS path_nodes, "
-        f"       [rel IN relationships(path) | {{ "
-        f"           source: startNode(rel).name, "
-        f"           target: endNode(rel).name, "
-        f"           confidence: properties(rel)['confidence'], "
-        f"           chunk_id: properties(rel)['evidence_chunk_id'], "
-        f"           timestamp: properties(rel)['evidence_timestamp'] "
-        f"       }}] AS edge_provenance, "
-        f"       properties(relationships(path)[0])['confidence'] AS direct_confidence, "
-        f"       properties(relationships(path)[0])['evidence_chunk_id'] AS chunk_id, "
-        f"       properties(relationships(path)[0])['evidence_timestamp'] AS timestamp "
-        f"ORDER BY depth DESC, timestamp ASC"
-    )
+    def _cypher(target_match: str) -> str:
+        return (
+            f"MATCH path = (prereq {{lecture_id: $lecture_id}})"
+            f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
+            f"(target {{lecture_id: $lecture_id}}) "
+            f"WHERE {target_match} "
+            # A9 and inferred edges share the PREREQUISITE_OF type, so the
+            # union can contain cycles (A -> B -> A) even though each source is
+            # acyclic on its own.  Never return the target as its own
+            # prerequisite and never walk through a node twice.
+            f"  AND prereq <> target "
+            f"  AND all(n IN nodes(path) WHERE single(m IN nodes(path) WHERE m = n)) "
+            # Access relationship metadata through properties(rel) rather than
+            # direct unknown-property expressions.  Older graph imports contain
+            # only relation_id/lecture_id; this keeps those graphs queryable
+            # without Neo4j emitting unknown-property warnings.
+            f"  AND all(rel IN relationships(path) WHERE properties(rel)['lecture_id'] = $lecture_id AND (properties(rel)['confidence'] IS NULL OR properties(rel)['confidence'] >= $min_confidence)) "
+            f"RETURN prereq.entity_id AS entity_id, "
+            f"       prereq.name AS concept, "
+            f"       prereq.type AS type, "
+            f"       target.name AS target_concept, "
+            f"       length(path) AS depth, "
+            f"       [node IN nodes(path) | node.name] AS path_nodes, "
+            f"       [rel IN relationships(path) | {{ "
+            f"           source: startNode(rel).name, "
+            f"           target: endNode(rel).name, "
+            f"           confidence: properties(rel)['confidence'], "
+            f"           chunk_id: properties(rel)['evidence_chunk_id'], "
+            f"           timestamp: properties(rel)['evidence_timestamp'] "
+            f"       }}] AS edge_provenance, "
+            f"       properties(relationships(path)[0])['confidence'] AS direct_confidence, "
+            f"       properties(relationships(path)[0])['evidence_chunk_id'] AS chunk_id, "
+            f"       properties(relationships(path)[0])['evidence_timestamp'] AS timestamp "
+            f"ORDER BY depth DESC, timestamp ASC"
+        )
 
+    concept = concept_name.strip()
     params = {
-        "concept_name": concept_name.strip(),
+        "concept_name": concept,
+        # Exact match on the name and its singular forms, so "Threads"
+        # resolves to the entity "Thread".
+        "concept_names": [n.lower() for n in _name_variants(concept)],
         "lecture_id": lecture_id,
         "min_confidence": min_confidence,
     }
@@ -480,35 +523,22 @@ def get_prerequisites_for_concept(
     try:
         items = []
         with driver.session() as session:
-            records = list(session.run(cypher, **params))
+            records = list(session.run(_cypher("toLower(target.name) IN $concept_names"), **params))
 
             # Fallback to substring matching if exact match yields no rows
             if not records:
-                cypher_partial = (
-                    f"MATCH path = (prereq {{lecture_id: $lecture_id}})"
-                    f"-[r:PREREQUISITE_OF*1..{max_depth}]->"
-                    f"(target {{lecture_id: $lecture_id}}) "
-                    f"WHERE toLower(target.name) CONTAINS toLower($concept_name) "
-                    f"  AND all(rel IN relationships(path) WHERE properties(rel)['lecture_id'] = $lecture_id AND (properties(rel)['confidence'] IS NULL OR properties(rel)['confidence'] >= $min_confidence)) "
-                    f"RETURN prereq.entity_id AS entity_id, "
-                    f"       prereq.name AS concept, "
-                    f"       prereq.type AS type, "
-                    f"       target.name AS target_concept, "
-                    f"       length(path) AS depth, "
-                    f"       [node IN nodes(path) | node.name] AS path_nodes, "
-                    f"       [rel IN relationships(path) | {{ "
-                    f"           source: startNode(rel).name, "
-                    f"           target: endNode(rel).name, "
-                    f"           confidence: properties(rel)['confidence'], "
-                    f"           chunk_id: properties(rel)['evidence_chunk_id'], "
-                    f"           timestamp: properties(rel)['evidence_timestamp'] "
-                    f"       }}] AS edge_provenance, "
-                    f"       properties(relationships(path)[0])['confidence'] AS direct_confidence, "
-                    f"       properties(relationships(path)[0])['evidence_chunk_id'] AS chunk_id, "
-                    f"       properties(relationships(path)[0])['evidence_timestamp'] AS timestamp "
-                    f"ORDER BY depth DESC, timestamp ASC"
-                )
-                records = list(session.run(cypher_partial, **params))
+                records = list(session.run(
+                    _cypher("toLower(target.name) CONTAINS toLower($concept_name)"), **params))
+
+            # A concept reachable at several depths (A -> X and A -> B -> X)
+            # is reported once, at its shortest depth.  Distinct branches at
+            # that depth are kept (DAG branching is preserved).
+            min_depth: Dict[str, int] = {}
+            for rec in records:
+                key = _concept_key(rec)
+                depth = rec.get("depth", 1)
+                if key not in min_depth or depth < min_depth[key]:
+                    min_depth[key] = depth
 
             seen_paths = set()
             for rec in records:
@@ -516,6 +546,11 @@ def get_prerequisites_for_concept(
                 path_key = tuple(path_nodes)
                 if path_key in seen_paths:
                     continue
+                if rec.get("depth", 1) != min_depth[_concept_key(rec)]:
+                    continue
+                target_name = rec.get("target_concept", "")
+                if (rec.get("concept") or "").lower() == (target_name or "").lower():
+                    continue  # a concept is never its own prerequisite
                 seen_paths.add(path_key)
 
                 parent_concept = path_nodes[1] if len(path_nodes) > 1 else rec.get("target_concept", "")

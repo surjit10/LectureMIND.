@@ -394,3 +394,28 @@ class TestImportPackage:
         list_res = client.get("/lectures")
         ids = [lec["lecture_id"] for lec in list_res.json()]
         assert lecture_id not in ids
+
+
+class TestImportPrerequisiteEnrichment:
+    """Import infers prerequisites so the Back-Tracker sees more than the A9 edges."""
+
+    def _upload(self, client):
+        return client.post(
+            "/upload",
+            files={"file": ("knowledge_package.zip", _make_zip(), "application/zip")},
+            data={"display_name": "Operating Systems"},
+        )
+
+    def test_import_runs_prerequisite_inference(self, client):
+        with patch("local.loaders.prerequisite_enricher.enrich_package",
+                   return_value={"prerequisites": []}) as enrich:
+            res = self._upload(client)
+        assert res.status_code == 200, res.text
+        enrich.assert_called_once()
+
+    def test_inference_failure_does_not_fail_import(self, client):
+        with patch("local.loaders.prerequisite_enricher.enrich_package",
+                   side_effect=RuntimeError("boom")):
+            res = self._upload(client)
+        assert res.status_code == 200, res.text
+        assert res.json()["status"] == "READY"

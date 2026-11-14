@@ -342,7 +342,7 @@ Regenerated audits (2026-09-15, honest one-to-one matching, no fallback substitu
 
 All four audits were computed from the current packages in `0-output/` (the CS162 package is verified with 98 chunks, and all routing and QA benchmark anchor chunk IDs verify against that package).
 
-Structural properties measured across all audited packages (gold-independent): strict DAG, 0 cycles, 0 self-loops, 0.0% dangling relations. CS162 additionally has 29/29 pedagogically supported prerequisites.
+Structural properties measured across all audited packages (gold-independent): the inferred prerequisite set is a strict DAG (0 cycles, 0 self-loops), 0.0% dangling relations. This guarantee covers the inferred set only: A9-extracted PREREQUISITE_OF edges share the edge type and their union with it can contain cycles (e.g. Operating System → System → Operating System on CS162), which the Back-Tracker excludes at query time. CS162 additionally has 29/29 pedagogically supported prerequisites.
 
 Historical audit of the (no-longer-preserved) original benchmark package, retained for traceability:
 

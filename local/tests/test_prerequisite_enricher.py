@@ -256,3 +256,18 @@ def test_edge_merging_simulation_preserves_single_semantic_edge():
     assert merged["relation_id"] == "rel_a9_001", "Original A9 relation_id must be preserved"
     assert merged["inferred_relation_id"] == "prereq_000001", "Inferred relation ID must be recorded"
     assert merged["confidence"] == 0.95, "Confidence must be updated"
+
+
+def test_inferred_edges_flagged_inference_only_on_create():
+    """Edges created by inference are flagged so GraphRAG retrieval can skip them;
+    the flag is set ON CREATE only, so an A9 edge the enricher merges onto keeps it unset."""
+    mock_session = MagicMock()
+    mock_driver = MagicMock()
+    mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+    mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+
+    load_prerequisites_into_neo4j(
+        mock_driver, [{"source_id": "e_01", "target_id": "e_02", "confidence": 0.9}], "lec_01")
+
+    cypher = mock_session.run.call_args.args[0]
+    assert "ON CREATE SET r.inference_only = true" in cypher

@@ -284,7 +284,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Dynamic Quantization** | Dynamic `int8` quantization for CrossEncoder reranker with automated FP32 fallback | Reduces memory consumption and accelerates CPU inference on student hardware |
 | **Lecture Isolation Guarantees** | Strict `(entity_id, lecture_id)` scoping in Neo4j and Qdrant queries | Guarantees zero cross-contamination between courses and lectures |
 | **Evidence Gating** | Strict verification against retrieved chunks before generating answers | Prevents hallucinations; ensures 100% citation completeness |
-| **Prerequisite DAG Guarantees** | Deterministic DFS cycle resolution (`cloud/extraction/prerequisite_extractor.py`) | Enforces strictly acyclic prerequisite graphs (0 cycles, 0 self-loops) for valid curriculum sequencing |
+| **Prerequisite DAG Guarantees** | Deterministic DFS cycle resolution (`cloud/extraction/prerequisite_extractor.py`) | Enforces an acyclic inferred prerequisite set (0 cycles, 0 self-loops); cycles introduced by A9 edges are excluded at query time by the Back-Tracker |
 | **Referential Integrity** | Pre-export validation against extracted entity indices (`cloud/packaging/validator.py`) | Enforces 0.0% dangling relations across all processed lectures (262/262 verified relations in `0-output/`) |
 
 ---
@@ -318,7 +318,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | **Inspectable pipeline state** | `QueryState` makes every intermediate result available — critical for evaluation and debugging |
 | **Portable knowledge format** | Knowledge Packages use only open, standard formats (NumPy, JSON, ZIP) — **208–437 KB** replacing 1+ GB video |
 | **Dual retrieval modes** | GraphRAG handles both semantic and relational queries — covering the full student query space |
-| **Strict Graph Topology** | Prerequisite graphs are strictly acyclic DAGs with verified 77.8% precision / 70.0% recall |
+| **Strict Graph Topology** | The inferred prerequisite set is acyclic. Quality is experimental: 77.8% precision / 70.0% recall was a historical audit of a package no longer preserved; current gold-labelled prerequisite F1 is 0.0 (EVALUATION §7) |
 | **Modular evaluation framework** | Independent benchmark and audit suites (`benchmark_runner.py` and `audit_package.py`) |
 
 ---
@@ -332,7 +332,8 @@ Extract prerequisite dependencies between entities using a composite scoring fun
 - Pure LLM prompting for prerequisites is notoriously prone to hallucinated cycles ($A \to B \to A$), temporal reversal, and inclusion of superficial components (e.g., slide titles).
 - Pure chronological order fails when a foundational concept is briefly referenced late in a lecture.
 - Multi-signal scoring grounds the dependency in transcript evidence while enforcing that prerequisite candidates must temporally precede or co-occur in introductory contexts.
-- Deterministic DFS cycle pruning guarantees mathematical acyclicity (strict DAG = True), which is required for topological sorting and pedagogical sequencing in the Socratic Back-Tracker.
+- Deterministic DFS cycle pruning guarantees acyclicity of the inferred set (strict DAG = True), which is required for topological sorting and pedagogical sequencing in the Socratic Back-Tracker. Because A9 also emits PREREQUISITE_OF edges, the Back-Tracker query additionally rejects self-prerequisites and repeated nodes.
+- Inferred-only edges (`inference_only = true`) are used for navigation (Back-Tracker) but excluded from GraphRAG answer context, because their precision on the benchmark lectures has not been validated.
 
 ---
 

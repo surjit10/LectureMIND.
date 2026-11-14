@@ -198,6 +198,21 @@ async def import_knowledge_package(
             package_version=manifest_data.get("package_version", ""),
         )
 
+        # ── Step 8.5: infer prerequisites (Socratic Back-Tracker) ─────────────
+        # Cloud packages do not ship prerequisites.json, so without this step
+        # the Back-Tracker only sees the sparse A9 PREREQUISITE_OF edges.
+        # Runs before hashing so the fingerprint covers the written file, and
+        # before Step 10 so load_neo4j() loads the inferred edges.  Optional:
+        # a failure here never fails the import.
+        if not (extract_dir / "prerequisites.json").exists():
+            try:
+                from local.loaders.prerequisite_enricher import enrich_package
+                enriched = enrich_package(extract_dir)
+                logger.info("[import] Inferred %d prerequisites",
+                            len(enriched.get("prerequisites", [])))
+            except Exception as exc:  # noqa: BLE001 - enrichment is optional
+                logger.warning("[import] Prerequisite inference skipped: %s", exc)
+
         # Record the immutable package-content fingerprint used by registry
         # audits and reproducible evaluation reports.
         from local.storage.lecture_registry import compute_package_hash

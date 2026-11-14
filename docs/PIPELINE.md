@@ -183,7 +183,7 @@ The cloud orchestrator runs the pipeline in the following sequential stages:
    - **Pedagogical Inversion Guard:** Enforces that fundamental foundational concepts are prerequisites to derived mechanisms, reversing inverted co-occurrence artifacts.
 3. **Thresholding ($\ge 0.65$):** Pairs meeting or exceeding the calibrated threshold are retained.
 4. **Deterministic DFS Cycle Resolution:** Evaluates the graph for cycles; any detected mutual cycle ($A \to B \to A$) or multi-hop loop has its lower-scoring edge pruned deterministically.
-5. **Acyclicity Verification:** Guarantees **Strict DAG = True, 0 cycles, 0 self-loops**.
+5. **Acyclicity Verification:** Guarantees **Strict DAG = True, 0 cycles, 0 self-loops** for the inferred set (A9 PREREQUISITE_OF edges are handled at query time by the Back-Tracker).
 
 **Why it exists:** Provides the mathematical backbone for curriculum sequencing and Socratic back-tracking — enabling students who don't understand concept $B$ to traverse backward to its required foundational concepts $A$.
 
@@ -584,7 +584,7 @@ The route returns JSON:
 [Step 4] Bipartite Prerequisite Matching against Gold Labels
          • Normalizes entity names (case-insensitive, lemmatized, punctuation-stripped)
          • Bipartite maximum-weight matching against gold annotations (prerequisite_gold.json)
-         • Computes Strict Precision (77.8%), Strict Recall (70.0%), and Strict F1 (73.7%)
+         • Computes Strict Precision, Recall and F1 (historical package: 77.8% / 70.0% / 73.7%; current gold lecture: 0.0%)
 
 [Step 5] Deterministic Graph Topology Audit
          • Builds directed NetworkX DiGraph from inferred edges

@@ -198,3 +198,12 @@ class TestDirectionalTraversal:
         assert out[0]["direction"] == "in"
         assert out[0]["edges"] == rec_in["edges"]
         assert out[1]["edges"] == [] and out[1]["direction"] == "out"
+
+
+def test_graph_rag_skips_inference_only_edges():
+    """GraphRAG context must not traverse edges that exist only through prerequisite
+    inference (unvalidated); both traversal directions carry the filter."""
+    from retrieval.graph_retriever.neo4j_retriever import _build_cypher
+    for lecture_id in ("lec_01", None):
+        cypher, _ = _build_cypher(["thread"], lecture_id=lecture_id)
+        assert cypher.count("coalesce(properties(r)['inference_only'], false) = false") == 2

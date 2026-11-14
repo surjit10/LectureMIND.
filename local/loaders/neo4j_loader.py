@@ -126,7 +126,10 @@ def _create_relationships(driver: Any, relations: List[Relation], lecture_id: st
                 f"MATCH (t {{entity_id: $target, lecture_id: $lecture_id}}) "
                 f"MERGE (s)-[r:{rel_type}]->(t) "
                 f"SET r.relation_id = coalesce(r.relation_id, $relation_id), "
-                f"    r.lecture_id = $lecture_id"
+                f"    r.lecture_id = $lecture_id, "
+                # Extracted by A9: usable as GraphRAG context even if the
+                # prerequisite enricher also merged onto this edge.
+                f"    r.inference_only = false"
             )
             session.run(
                 query,

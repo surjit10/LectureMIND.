@@ -770,6 +770,10 @@ Measured or verified in this repository; see `docs/EVALUATION.md` for the eviden
   benefit for relational answers has not been shown. On the only gold-labelled lecture, relation
   and prerequisite F1 are 0.0 (and were measured while the extraction prompts still contained
   that lecture's entities — removed in 2026-11).
+- **The prerequisite Back-Tracker is experimental.** Prerequisites are inferred by rules at import
+  time; a manual read of the 27 CS162 edges judged roughly a quarter to a third pedagogically
+  sound (others are course-logistics entities or inverted part-of edges). Not human-validated;
+  inferred-only edges are therefore kept out of GraphRAG answer context.
 - **Routing is regex-based** (93% on the smoke set); missed `need_visual` flags cause refusals
   when the answer is only in a slide description.
 - **Citations are context provenance**, not model-selected citations: the LLM does not see chunk
