@@ -16,7 +16,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "",
-      "package_sha256": "57d2b3011efc878d251aff4c014fd61247766a1c9f3e922525ceda6c8f4c3417"
+      "package_sha256": "b461e37fd3e537b825ebdf58b45740693c8c42c216baf6124d16e1998df4634b"
     },
     "lecture_05086e79": {
       "lecture_id": "lecture_05086e79",
@@ -52,7 +52,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "",
-      "package_sha256": "600abd475b275feaccf1d7a1528cd63cdafe96ff44166a62e2314ba8077fc234"
+      "package_sha256": "ac7205355164bb3a5476925253b140131aa1f5cc8a9861dcb4797cc7e81b6252"
     },
     "lecture_ddf8d2b5": {
       "lecture_id": "lecture_ddf8d2b5",
@@ -70,7 +70,7 @@
       "language": "",
       "pipeline_version": "",
       "package_version": "",
-      "package_sha256": "10f177c923f1ebc2e1eeca93d02b074c6651d1226ee41a1bed79e359c9179284"
+      "package_sha256": "ef891ad1d94f79d76b24808d561e2da4dac3dee5a1fc069b3bf1a687e7b7dee9"
     }
   },
   "last_active_lecture_id": "lecture_092f861b",

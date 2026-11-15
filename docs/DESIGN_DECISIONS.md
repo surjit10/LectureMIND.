@@ -226,7 +226,7 @@ Plain JSON keeps the package human-inspectable, trivially diffable, and directly
 
 ## 10. SSE Streaming for Query Responses
 
-The current API returns **plain JSON responses** (see `serving/fastapi/routes/`); there is no SSE streaming endpoint. Latency is handled by routing generation to fast cloud LLM backends (Groq measured at ~1.3–2.5 s per answer).
+The current API returns **plain JSON responses** (see `serving/fastapi/routes/`); there is no SSE streaming endpoint. Generation is the dominant cost: in the reference smoke run (`evaluation/reports/smoke_groq_20261114_reviewed/`, Groq `openai/gpt-oss-20b` paced at 6,000 tokens/min) mean generation latency is 22.8 s and mean total latency 27.5 s (p95 31.2 s), so users wait for the full answer.
 
 ### Decision (original)
 Stream LLM-generated tokens to the frontend via Server-Sent Events (SSE) rather than returning a complete response after generation finishes.
@@ -296,7 +296,7 @@ The `BenchmarkRunner` instantiates `QueryWorkflow` directly as a Python object r
 | Offload Ollama download to a background thread/task | Event loop blocking (HIGH risk) |
 | Add `asyncio.Lock` or file-level locking to `ProviderRegistry` | Concurrent JSON write corruption |
 | Replace Jaccard `answer_similarity` with a semantic embedding similarity | Metric accuracy |
-| Extend `expected_keywords` coverage in the QA dataset | Broader `keyword_recall` coverage (the field is populated and measured — 0.545 on the QA set) |
+| Extend `expected_keywords` coverage in the QA dataset | Broader `keyword_recall` coverage (the field is populated and measured — 0.786 on the 45-question smoke set, 95% CI 0.681–0.878) |
 | Add API token authentication (e.g., bearer token in `.env`) | Security for network-exposed deployments |
 | Implement conversation history via multi-turn `QueryState` accumulation | Multi-turn chat context |
 | Add `DOWNLOADING` state to `ProviderManager` for Ollama download progress | User experience during model download |

@@ -377,7 +377,7 @@ for event in openai_client.chat.completions.create(
 The `answer_generator` node calls the LLM backend and stores the complete generated text in the workflow result. **Responses are returned as plain JSON** (`{"answer": ...}`) — there is no SSE streaming in the current implementation. The frontend renders the complete answer once generation finishes.
 
 ### Why Not Streaming (current trade-off)
-Generation latency is fully masked by using a fast cloud LLM backend (e.g. Groq `llama-3.3-70b-versatile` measured at ~1.3–2.5 s per answer). Streaming would reduce first-token latency but adds SSE plumbing for marginal UX gain at current response times.
+Generation latency is **not** masked: in the reference smoke run (Groq `openai/gpt-oss-20b`, paced at 6,000 tokens/min) mean generation latency is 22.8 s of a 27.5 s mean total (p95 31.2 s). Streaming would cut time-to-first-token substantially; it was deferred to keep the API and evaluation harness simple (single JSON response per query), not because current response times make it unnecessary.
 
 ---
 
